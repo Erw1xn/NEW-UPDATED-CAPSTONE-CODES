@@ -4,7 +4,7 @@ const DOCTORS_API = "../../api/doctors.php";
 const DOCTORS_STORAGE_KEY = "dentanueva_doctors";
 const START_HOUR = 10;
 const FIRST_BOOKABLE_HOUR = 10;
-const END_HOUR = 17.5;
+const END_HOUR = 23.9833;
 const SLOT_MIN = 30;
 const NO_SHOW_GRACE_PERIOD_MIN = 15;
 const NO_SHOW_TESTING_MODE = false;
@@ -707,9 +707,9 @@ function normalizeAppointment(appt) {
     canceled: APPOINTMENT_STATUS.CANCELLED,
     in_consultation: APPOINTMENT_STATUS.IN_CONSULTATION,
     "in-consultation": APPOINTMENT_STATUS.IN_CONSULTATION,
-    ready_complete: APPOINTMENT_STATUS.READY_COMPLETE,
-    "ready-to-complete": APPOINTMENT_STATUS.READY_COMPLETE,
-    ready_to_complete: APPOINTMENT_STATUS.READY_COMPLETE,
+    ready_complete: APPOINTMENT_STATUS.COMPLETED,
+    "ready-to-complete": APPOINTMENT_STATUS.COMPLETED,
+    ready_to_complete: APPOINTMENT_STATUS.COMPLETED,
     complete: APPOINTMENT_STATUS.COMPLETED,
     completed: APPOINTMENT_STATUS.COMPLETED,
     no_show: APPOINTMENT_STATUS.NO_SHOW,
@@ -773,6 +773,9 @@ function normalizeAppointment(appt) {
       : Array.isArray(appt.reschedule_history)
         ? appt.reschedule_history
         : [],
+    databaseAppointmentId:
+      Number(appt.databaseAppointmentId ?? appt.database_appointment_id ?? 0) ||
+      null,
   };
   if (
     normalized.dentist === "villanueva" &&
@@ -1171,14 +1174,19 @@ function getStatusLabel(status) {
   switch (status) {
     case APPOINTMENT_STATUS.SCHEDULED:
       return "Scheduled";
+
     case APPOINTMENT_STATUS.IN_CONSULTATION:
       return "In Consultation";
-    case APPOINTMENT_STATUS.READY_COMPLETE:
-      return "Complete";
+
     case APPOINTMENT_STATUS.COMPLETED:
       return "Completed";
+
     case APPOINTMENT_STATUS.NO_SHOW:
       return "No Show";
+
+    case APPOINTMENT_STATUS.CANCELLED:
+      return "Cancelled";
+
     default:
       return "Scheduled";
   }
@@ -2448,36 +2456,36 @@ function renderRescheduleRequests() {
     const card = document.createElement("div");
     card.className = "reschedule-request-card";
     card.innerHTML = `
-          <div class="reschedule-request-card-header">
-            <div class="reschedule-request-avatar">${escapeHtml(getInitials(patient))}</div>
-            <div class="reschedule-request-patient">
-              <strong>${escapeHtml(patient)}</strong>
-              <span>${escapeHtml(service)}</span>
+            <div class="reschedule-request-card-header">
+              <div class="reschedule-request-avatar">${escapeHtml(getInitials(patient))}</div>
+              <div class="reschedule-request-patient">
+                <strong>${escapeHtml(patient)}</strong>
+                <span>${escapeHtml(service)}</span>
+              </div>
+              <span class="reschedule-request-status">Pending</span>
             </div>
-            <span class="reschedule-request-status">Pending</span>
-          </div>
-          <div class="reschedule-request-schedule">
-            <div>
-              <span>Current Schedule</span>
-              <strong>${escapeHtml(formatDateLong(currentDate))} · ${escapeHtml(fmtTime(currentTime))}</strong>
+            <div class="reschedule-request-schedule">
+              <div>
+                <span>Current Schedule</span>
+                <strong>${escapeHtml(formatDateLong(currentDate))} · ${escapeHtml(fmtTime(currentTime))}</strong>
+              </div>
+              <i class="fa-solid fa-arrow-right"></i>
+              <div>
+                <span>Requested Schedule</span>
+                <strong>${escapeHtml(formatDateLong(preferredDate))} · ${escapeHtml(fmtTime(preferredTime))}</strong>
+              </div>
             </div>
-            <i class="fa-solid fa-arrow-right"></i>
-            <div>
-              <span>Requested Schedule</span>
-              <strong>${escapeHtml(formatDateLong(preferredDate))} · ${escapeHtml(fmtTime(preferredTime))}</strong>
+            <div class="reschedule-request-meta">
+              <span><strong>Reason:</strong> ${escapeHtml(reason)}</span>
+              <span><strong>Dentist:</strong> ${escapeHtml(dentist)}</span>
+              <span><strong>Approved Reschedules:</strong> ${currentRescheduleCount}/2</span>
             </div>
-          </div>
-          <div class="reschedule-request-meta">
-            <span><strong>Reason:</strong> ${escapeHtml(reason)}</span>
-            <span><strong>Dentist:</strong> ${escapeHtml(dentist)}</span>
-            <span><strong>Approved Reschedules:</strong> ${currentRescheduleCount}/2</span>
-          </div>
-          ${message ? `<div class="reschedule-request-message"><span>Message from Patient</span><p>${escapeHtml(message)}</p></div>` : ""}
-          <div class="reschedule-request-actions">
-            <button type="button" class="reschedule-request-reject"><i class="fa-solid fa-xmark"></i> Reject</button>
-            <button type="button" class="reschedule-request-approve"><i class="fa-solid fa-check"></i> Approve</button>
-          </div>
-        `;
+            ${message ? `<div class="reschedule-request-message"><span>Message from Patient</span><p>${escapeHtml(message)}</p></div>` : ""}
+            <div class="reschedule-request-actions">
+              <button type="button" class="reschedule-request-reject"><i class="fa-solid fa-xmark"></i> Reject</button>
+              <button type="button" class="reschedule-request-approve"><i class="fa-solid fa-check"></i> Approve</button>
+            </div>
+          `;
     const rejectButton = card.querySelector(".reschedule-request-reject");
     const approveButton = card.querySelector(".reschedule-request-approve");
     rejectButton?.addEventListener("click", (event) => {
@@ -2689,6 +2697,45 @@ function startConsultation(id) {
   renderAll();
   showToast(`${appt.patient}'s consultation has started.`);
 }
+function recordPaymentForAppointment(id) {
+  const appt = appointments.find((item) => item.id === id);
+  if (!appt || appt.status !== APPOINTMENT_STATUS.COMPLETED) {
+    return;
+  }
+  const databaseAppointmentId = Number(
+    appt.databaseAppointmentId ?? appt.database_appointment_id ?? 0,
+  );
+  if (!databaseAppointmentId) {
+    showToast("Unable to link this payment to the appointment.");
+    return;
+  }
+  const dentist = getDentistRecord(appt.dentist) || {
+    name: "Unassigned",
+  };
+  const pendingPayment = {
+    source: "appointment",
+    appointmentId: databaseAppointmentId,
+    appointmentUid:
+      appt.appointmentUid || appt.appointment_uid || appt.id || "",
+    patientId: appt.patientId || "",
+    patientName: appt.patient || "",
+    dentistId: appt.dentist || "",
+    dentistName: dentist.name || appt.dentist || "",
+    service: appt.type || "",
+    appointmentDate: appt.date || "",
+    appointmentTime: appt.start || "",
+    duration: Number(appt.duration) || 0,
+    amount: Number(appt.paymentAmount) || 0,
+    paymentStatus: appt.paymentStatus || "unpaid",
+  };
+  const params = new URLSearchParams();
+  Object.entries(pendingPayment).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, String(value));
+    }
+  });
+  window.location.href = `../finance/finance.html?${params.toString()}`;
+}
 function openStatusConfirmation(id, actionType) {
   const appt = appointments.find((item) => item.id === id);
   if (!appt) return;
@@ -2821,6 +2868,7 @@ function confirmStatusAction() {
 function createAppointmentStatusButton(appt) {
   const wrapper = document.createElement("div");
   wrapper.className = "appt-status-area";
+
   if (appt.status === APPOINTMENT_STATUS.SCHEDULED) {
     if (!isToday(appt.date)) {
       const badge = document.createElement("span");
@@ -2829,37 +2877,78 @@ function createAppointmentStatusButton(appt) {
       wrapper.appendChild(badge);
       return wrapper;
     }
+
     const checkInBtn = document.createElement("button");
     checkInBtn.type = "button";
     checkInBtn.className = "appt-status-btn status-checkin";
     checkInBtn.textContent = "Check In";
+
     checkInBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       checkInAppointment(appt.id);
     });
+
     wrapper.appendChild(checkInBtn);
+
+    if (isNoShowEligible(appt)) {
+      const noShowBtn = document.createElement("button");
+      noShowBtn.type = "button";
+      noShowBtn.className = "appt-status-btn status-noshow";
+      noShowBtn.textContent = "Mark No Show";
+
+      noShowBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openStatusConfirmation(appt.id, "markNoShow");
+      });
+
+      wrapper.appendChild(noShowBtn);
+    }
 
     return wrapper;
   }
+
   if (appt.status === APPOINTMENT_STATUS.IN_CONSULTATION) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "appt-status-btn status-consultation";
-    button.textContent = "Finish Consultation";
+    button.textContent = "In Consultation";
+
     button.addEventListener("click", (event) => {
       event.stopPropagation();
       openStatusConfirmation(appt.id, "finishConsultation");
     });
+
     wrapper.appendChild(button);
     return wrapper;
   }
+
   if (appt.status === APPOINTMENT_STATUS.COMPLETED) {
     const badge = document.createElement("span");
     badge.className = "appt-status-badge completed";
     badge.textContent = "Completed";
     wrapper.appendChild(badge);
+
+    const paymentBtn = document.createElement("button");
+    paymentBtn.type = "button";
+    paymentBtn.className = "appt-status-btn status-payment";
+
+    if (String(appt.paymentStatus || "").toLowerCase() === "paid") {
+      paymentBtn.textContent = "Paid";
+      paymentBtn.classList.add("payment-paid");
+      paymentBtn.disabled = true;
+    } else {
+      paymentBtn.textContent = "Record Payment";
+
+      paymentBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        recordPaymentForAppointment(appt.id);
+      });
+    }
+
+    wrapper.appendChild(paymentBtn);
     return wrapper;
   }
+
   if (appt.status === APPOINTMENT_STATUS.NO_SHOW) {
     const badge = document.createElement("span");
     badge.className = "appt-status-badge no-show";
@@ -2867,24 +2956,30 @@ function createAppointmentStatusButton(appt) {
     wrapper.appendChild(badge);
     return wrapper;
   }
+
   if (appt.status === APPOINTMENT_STATUS.CANCELLED) {
     const badge = document.createElement("span");
     badge.className = "appt-status-badge cancelled";
     badge.textContent = "Cancelled";
     wrapper.appendChild(badge);
+
     if (!isPastDate(appt.date)) {
       const openButton = document.createElement("button");
       openButton.type = "button";
       openButton.className = "appt-status-btn status-payment";
       openButton.textContent = "Open Slot";
+
       openButton.addEventListener("click", (event) => {
         event.stopPropagation();
         openNewModal(appt.date, appt.start);
       });
+
       wrapper.appendChild(openButton);
     }
+
     return wrapper;
   }
+
   return wrapper;
 }
 function updateAppointmentSideTitle() {
@@ -3138,10 +3233,10 @@ function renderTimeline() {
     const emptyState = document.createElement("div");
     emptyState.className = "schedule-empty-state";
     emptyState.innerHTML = `
-          <i class="fa-regular fa-calendar"></i>
-          <strong>${selectedIsPast ? "No appointment records" : "No patient appointments"}</strong>
-          <span>${selectedIsPast ? "There are no appointment records for this date." : "No appointments scheduled for this date."}</span>
-        `;
+            <i class="fa-regular fa-calendar"></i>
+            <strong>${selectedIsPast ? "No appointment records" : "No patient appointments"}</strong>
+            <span>${selectedIsPast ? "There are no appointment records for this date." : "No appointments scheduled for this date."}</span>
+          `;
     timeline.appendChild(emptyState);
     return;
   }
@@ -3186,8 +3281,6 @@ function createAppointmentCard(appt) {
   let workflowText = "";
   if (appt.status === APPOINTMENT_STATUS.IN_CONSULTATION) {
     workflowText = " · In Consultation";
-  } else if (appt.status === APPOINTMENT_STATUS.READY_COMPLETE) {
-    workflowText = " · Complete";
   }
   const pendingRescheduleRequest = getPendingRescheduleRequestForAppointment(
     appt.id,

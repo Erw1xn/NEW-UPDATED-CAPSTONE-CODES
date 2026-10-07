@@ -3,18 +3,14 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 require_once __DIR__ . '/../../php/db_connect.php';
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
     jsonResponse(false, 'Authentication required.', [], 401);
 }
-
 $role = strtolower(trim((string)($_SESSION['role'] ?? '')));
 $userId = (int)$_SESSION['user_id'];
-
 function jsonResponse(
     bool $success,
     string $message,
@@ -29,17 +25,14 @@ function jsonResponse(
     ]);
     exit;
 }
-
 function generateTransactionUid(): string
 {
     return 'TXN-' . date('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(4)));
 }
-
 function generatePaymentUid(): string
 {
     return 'PAY-' . date('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(4)));
 }
-
 function getAllowedPaymentMethods(): array
 {
     return [
@@ -48,7 +41,6 @@ function getAllowedPaymentMethods(): array
         'bank_transfer'
     ];
 }
-
 function getTransactionSelectFields(): string
 {
     return '
@@ -77,7 +69,6 @@ function getTransactionSelectFields(): string
         ) AS patient_name
     ';
 }
-
 function getPaymentHistoryByTransactionIds(
     mysqli $conn,
     array $transactionIds
@@ -85,26 +76,19 @@ function getPaymentHistoryByTransactionIds(
     if (!$transactionIds) {
         return [];
     }
-
     $cleanIds = [];
-
     foreach ($transactionIds as $transactionId) {
         $id = (int)$transactionId;
-
         if ($id > 0) {
             $cleanIds[] = $id;
         }
     }
-
     $cleanIds = array_values(array_unique($cleanIds));
-
     if (!$cleanIds) {
         return [];
     }
-
     $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
     $types = str_repeat('i', count($cleanIds));
-
     $sql = "
         SELECT
             payment_id,
@@ -134,9 +118,7 @@ function getPaymentHistoryByTransactionIds(
             COALESCE(paid_at, created_at) DESC,
             payment_id DESC
     ";
-
     $stmt = $conn->prepare($sql);
-
     if (!$stmt) {
         jsonResponse(
             false,
@@ -145,21 +127,16 @@ function getPaymentHistoryByTransactionIds(
             500
         );
     }
-
     $bindParams = [$types];
-
     foreach ($cleanIds as $index => $id) {
         $bindParams[] = &$cleanIds[$index];
     }
-
     call_user_func_array(
         [$stmt, 'bind_param'],
         $bindParams
     );
-
     if (!$stmt->execute()) {
         $stmt->close();
-
         jsonResponse(
             false,
             'Unable to load finance payment history.',
@@ -167,52 +144,37 @@ function getPaymentHistoryByTransactionIds(
             500
         );
     }
-
     $result = $stmt->get_result();
     $paymentsByTransaction = [];
-
     while ($payment = $result->fetch_assoc()) {
         $transactionId = (string)$payment['transaction_id'];
-
         if (!isset($paymentsByTransaction[$transactionId])) {
             $paymentsByTransaction[$transactionId] = [];
         }
-
         $paymentsByTransaction[$transactionId][] = $payment;
     }
-
     $stmt->close();
-
     return $paymentsByTransaction;
 }
-
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
 if ($method === 'GET') {
     $patientId = trim((string)($_GET['patient_id'] ?? ''));
     $transactionUid = trim((string)($_GET['transaction_uid'] ?? ''));
-
     if ($role === 'user') {
         $ownPatientStmt = $conn->prepare(
             'SELECT patient_id FROM tbl_patients WHERE user_id = ? AND status = "active" LIMIT 1'
         );
-
         if (!$ownPatientStmt) {
             jsonResponse(false, 'Unable to verify patient access.', [], 500);
         }
-
         $ownPatientStmt->bind_param('i', $userId);
         $ownPatientStmt->execute();
-
         $ownPatient = $ownPatientStmt->get_result()->fetch_assoc();
         $ownPatientStmt->close();
-
         if (!$ownPatient) {
             jsonResponse(false, 'Patient record not found.', [], 404);
         }
-
         $ownPatientId = (string)$ownPatient['patient_id'];
-
         if ($patientId !== '' && $patientId !== $ownPatientId) {
             jsonResponse(
                 false,
@@ -221,12 +183,9 @@ if ($method === 'GET') {
                 403
             );
         }
-
         $patientId = $ownPatientId;
     }
-
     $selectFields = getTransactionSelectFields();
-
     if ($transactionUid !== '') {
         $stmt = $conn->prepare(
             "
@@ -238,7 +197,6 @@ if ($method === 'GET') {
             LIMIT 1
             "
         );
-
         if (!$stmt) {
             jsonResponse(
                 false,
@@ -247,12 +205,9 @@ if ($method === 'GET') {
                 500
             );
         }
-
         $stmt->bind_param('s', $transactionUid);
-
         if (!$stmt->execute()) {
             $stmt->close();
-
             jsonResponse(
                 false,
                 'Unable to load finance transaction.',
@@ -260,11 +215,9 @@ if ($method === 'GET') {
                 500
             );
         }
-
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
         $stmt->close();
-
         if (!$row) {
             jsonResponse(
                 false,
@@ -273,7 +226,6 @@ if ($method === 'GET') {
                 404
             );
         }
-
         if ($role === 'user' && (string)$row['patient_id'] !== $patientId) {
             jsonResponse(
                 false,
@@ -282,28 +234,22 @@ if ($method === 'GET') {
                 403
             );
         }
-
         $row['patient_name'] = trim(
             (string)($row['patient_name'] ?? '')
         );
-
         $transactionId = (int)$row['transaction_id'];
-
         $paymentHistory = getPaymentHistoryByTransactionIds(
             $conn,
             [$transactionId]
         );
-
         $row['paymentHistory'] =
             $paymentHistory[(string)$transactionId] ?? [];
-
         jsonResponse(
             true,
             'Finance transaction loaded.',
             [$row]
         );
     }
-
     if ($patientId !== '') {
         $stmt = $conn->prepare(
             "
@@ -315,7 +261,6 @@ if ($method === 'GET') {
             ORDER BY ft.created_at DESC
             "
         );
-
         if (!$stmt) {
             jsonResponse(
                 false,
@@ -324,12 +269,9 @@ if ($method === 'GET') {
                 500
             );
         }
-
         $stmt->bind_param('s', $patientId);
-
         if (!$stmt->execute()) {
             $stmt->close();
-
             jsonResponse(
                 false,
                 'Unable to load patient finance transactions.',
@@ -337,7 +279,6 @@ if ($method === 'GET') {
                 500
             );
         }
-
         $result = $stmt->get_result();
     } else {
         $result = $conn->query(
@@ -350,12 +291,10 @@ if ($method === 'GET') {
             "
         );
     }
-
     if (!$result) {
         if (isset($stmt) && $stmt instanceof mysqli_stmt) {
             $stmt->close();
         }
-
         jsonResponse(
             false,
             'Unable to load finance transactions.',
@@ -363,47 +302,36 @@ if ($method === 'GET') {
             500
         );
     }
-
     $records = [];
     $transactionIds = [];
-
     while ($row = $result->fetch_assoc()) {
         $row['patient_name'] = trim(
             (string)($row['patient_name'] ?? '')
         );
-
         $transactionId = (int)$row['transaction_id'];
-
         $transactionIds[] = $transactionId;
         $records[] = $row;
     }
-
     if (isset($stmt) && $stmt instanceof mysqli_stmt) {
         $stmt->close();
     }
-
     $paymentsByTransaction =
         getPaymentHistoryByTransactionIds(
             $conn,
             $transactionIds
         );
-
     foreach ($records as &$record) {
         $transactionId = (string)$record['transaction_id'];
-
         $record['paymentHistory'] =
             $paymentsByTransaction[$transactionId] ?? [];
     }
-
     unset($record);
-
     jsonResponse(
         true,
         'Finance transactions loaded.',
         $records
     );
 }
-
 if ($method === 'POST') {
     if ($role !== 'staff' && $role !== 'doctor') {
         jsonResponse(
@@ -413,14 +341,11 @@ if ($method === 'POST') {
             403
         );
     }
-
     $rawInput = file_get_contents('php://input');
-
     $input = json_decode(
         $rawInput ?: '',
         true
     );
-
     if (!is_array($input)) {
         jsonResponse(
             false,
@@ -429,7 +354,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     if (($input['action'] ?? '') === 'record_payment') {
         if ($role !== 'staff' && $role !== 'doctor') {
             jsonResponse(
@@ -439,37 +363,29 @@ if ($method === 'POST') {
                 403
             );
         }
-
         $transactionUid = trim(
             (string)($input['transactionUid'] ?? '')
         );
-
         $patientId = trim(
             (string)($input['patientId'] ?? '')
         );
-
         $paymentMethod = strtolower(
             trim(
                 (string)($input['paymentMethod'] ?? '')
             )
         );
-
         $amount = (float)(
             $input['amount'] ?? 0
         );
-
         $paymentDate = trim(
             (string)($input['date'] ?? '')
         );
-
         $allowedPaymentMethods =
             getAllowedPaymentMethods();
-
         $parsedDate = DateTime::createFromFormat(
             '!Y-m-d',
             $paymentDate
         );
-
         if (
             $transactionUid === '' ||
             $patientId === '' ||
@@ -489,17 +405,15 @@ if ($method === 'POST') {
                 400
             );
         }
-
         $paymentDateTime =
             $paymentDate . ' ' . date('H:i:s');
-
         $conn->begin_transaction();
-
         try {
             $transactionStmt = $conn->prepare(
                 "
                 SELECT
                     transaction_id,
+                    appointment_id,
                     patient_id,
                     total_amount,
                     discount_amount,
@@ -512,34 +426,26 @@ if ($method === 'POST') {
                 FOR UPDATE
                 "
             );
-
             if (!$transactionStmt) {
                 throw new RuntimeException(
                     'Unable to prepare payment transaction lookup.'
                 );
             }
-
             $transactionStmt->bind_param(
                 's',
                 $transactionUid
             );
-
             if (!$transactionStmt->execute()) {
                 $transactionStmt->close();
-
                 throw new RuntimeException(
                     'Unable to load payment transaction.'
                 );
             }
-
             $transactionResult =
                 $transactionStmt->get_result();
-
             $transaction =
                 $transactionResult->fetch_assoc();
-
             $transactionStmt->close();
-
             if (
                 !$transaction ||
                 (string)$transaction['patient_id'] !==
@@ -550,53 +456,49 @@ if ($method === 'POST') {
                     404
                 );
             }
-
             $transactionId =
                 (int)$transaction['transaction_id'];
-
             $netAmount = max(
                 (float)$transaction['total_amount'] -
                 (float)$transaction['discount_amount'],
                 0
             );
-
             $currentPaid = max(
                 (float)$transaction['paid_amount'],
                 0
             );
-
             $currentBalance = max(
                 $netAmount - $currentPaid,
                 0
             );
-
-            if ($currentBalance <= 0) {
+            if ($currentBalance <= 0.009) {
                 throw new RuntimeException(
                     'This transaction is already fully paid.',
                     400
                 );
             }
-
-            if ($amount > $currentBalance) {
+            if ($amount > $currentBalance + 0.009) {
                 throw new RuntimeException(
                     'Payment amount cannot be greater than the remaining balance.',
                     400
                 );
             }
-
+            if ($amount <= 0) {
+                throw new RuntimeException(
+                    'Payment amount must be greater than zero.',
+                    400
+                );
+            }
+            if ($amount > $currentBalance) {
+                $amount = $currentBalance;
+            }
             $paymentUid = generatePaymentUid();
-
             $createdBy =
                 isset($_SESSION['user_id']) &&
                 is_numeric($_SESSION['user_id'])
                     ? (int)$_SESSION['user_id']
                     : null;
-
-            $paymentSource =
-                $role === 'doctor'
-                    ? 'doctor'
-                    : 'staff';
-
+            $paymentSource = 'staff';
             $paymentStmt = $conn->prepare(
                 "
                 INSERT INTO tbl_finance_payments
@@ -625,13 +527,11 @@ if ($method === 'POST') {
                 )
                 "
             );
-
             if (!$paymentStmt) {
                 throw new RuntimeException(
                     'Unable to prepare payment record.'
                 );
             }
-
             $paymentStmt->bind_param(
                 'sisdsssi',
                 $paymentUid,
@@ -643,34 +543,29 @@ if ($method === 'POST') {
                 $paymentDateTime,
                 $createdBy
             );
-
             if (!$paymentStmt->execute()) {
                 $paymentError = $paymentStmt->error;
                 $paymentStmt->close();
-
                 throw new RuntimeException(
                     'Unable to save payment: ' . $paymentError
                 );
             }
-
             $paymentId =
                 (int)$conn->insert_id;
-
             $paymentStmt->close();
-
             $paidAmount =
                 $currentPaid + $amount;
-
             $balanceAmount = max(
                 $netAmount - $paidAmount,
                 0
             );
-
+            if ($balanceAmount <= 0.009) {
+                $balanceAmount = 0;
+            }
             $status =
-                $balanceAmount <= 0
+                $balanceAmount <= 0.009
                     ? 'paid'
                     : 'partial';
-
             $updateStmt = $conn->prepare(
                 "
                 UPDATE tbl_finance_transactions
@@ -682,13 +577,11 @@ if ($method === 'POST') {
                 WHERE transaction_id = ?
                 "
             );
-
             if (!$updateStmt) {
                 throw new RuntimeException(
                     'Unable to prepare finance transaction update.'
                 );
             }
-
             $updateStmt->bind_param(
                 'ddsi',
                 $paidAmount,
@@ -696,25 +589,58 @@ if ($method === 'POST') {
                 $status,
                 $transactionId
             );
-
             if (!$updateStmt->execute()) {
                 $updateError = $updateStmt->error;
                 $updateStmt->close();
-
                 throw new RuntimeException(
                     'Unable to update finance transaction totals: ' .
                     $updateError
                 );
             }
-
             $updateStmt->close();
-
+            if (!empty($transaction['appointment_id'])) {
+                $appointmentPaymentStatus =
+                    $balanceAmount <= 0.009
+                        ? 'paid'
+                        : 'partial';
+                $appointmentStmt = $conn->prepare(
+                    "
+                    UPDATE tbl_patient_appointments
+                    SET
+                        payment_status = ?,
+                        payment_amount = ?
+                    WHERE appointment_id = ?
+                    LIMIT 1
+                    "
+                );
+                if (!$appointmentStmt) {
+                    throw new RuntimeException(
+                        'Unable to prepare appointment payment update.'
+                    );
+                }
+                $appointmentId =
+                    (int)$transaction['appointment_id'];
+                $appointmentStmt->bind_param(
+                    'sdi',
+                    $appointmentPaymentStatus,
+                    $paidAmount,
+                    $appointmentId
+                );
+                if (!$appointmentStmt->execute()) {
+                    $appointmentError = $appointmentStmt->error;
+                    $appointmentStmt->close();
+                    throw new RuntimeException(
+                        'Unable to update appointment payment status: ' .
+                        $appointmentError
+                    );
+                }
+                $appointmentStmt->close();
+            }
             if (!$conn->commit()) {
                 throw new RuntimeException(
                     'Unable to complete payment transaction.'
                 );
             }
-
             jsonResponse(
                 true,
                 'Payment saved successfully.',
@@ -724,6 +650,7 @@ if ($method === 'POST') {
                     'transaction_id' => $transactionId,
                     'transaction_uid' => $transactionUid,
                     'patient_id' => $patientId,
+                    'appointment_id' => $transaction['appointment_id'] ?? null,
                     'amount' => $amount,
                     'payment_method' => $paymentMethod,
                     'payment_source' => $paymentSource,
@@ -737,13 +664,11 @@ if ($method === 'POST') {
             );
         } catch (Throwable $error) {
             $conn->rollback();
-
             $statusCode =
                 $error->getCode() >= 400 &&
                 $error->getCode() < 600
                     ? $error->getCode()
                     : 500;
-
             jsonResponse(
                 false,
                 $error->getMessage() !== ''
@@ -754,7 +679,6 @@ if ($method === 'POST') {
             );
         }
     }
-
     $patientId = trim(
         (string)(
             $input['patientId'] ??
@@ -762,7 +686,6 @@ if ($method === 'POST') {
             ''
         )
     );
-
     $serviceName = trim(
         (string)(
             $input['service'] ??
@@ -771,37 +694,31 @@ if ($method === 'POST') {
             ''
         )
     );
-
     $totalAmount = (float)(
         $input['total'] ??
         $input['totalAmount'] ??
         $input['total_amount'] ??
         0
     );
-
     $discountAmount = (float)(
         $input['discount'] ??
         $input['discountAmount'] ??
         $input['discount_amount'] ??
         0
     );
-
     $appointmentId =
         isset($input['appointmentId']) &&
         $input['appointmentId'] !== ''
             ? (int)$input['appointmentId']
             : null;
-
     $treatmentId =
         isset($input['treatmentId']) &&
         $input['treatmentId'] !== ''
             ? (int)$input['treatmentId']
             : null;
-
     $notes = trim(
         (string)($input['notes'] ?? '')
     );
-
     if ($patientId === '') {
         jsonResponse(
             false,
@@ -810,7 +727,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     if ($serviceName === '') {
         jsonResponse(
             false,
@@ -819,7 +735,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     if ($totalAmount <= 0) {
         jsonResponse(
             false,
@@ -828,7 +743,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     if ($discountAmount < 0) {
         jsonResponse(
             false,
@@ -837,7 +751,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     if ($discountAmount > $totalAmount) {
         jsonResponse(
             false,
@@ -846,7 +759,6 @@ if ($method === 'POST') {
             400
         );
     }
-
     $patientStmt = $conn->prepare(
         "
         SELECT
@@ -858,7 +770,6 @@ if ($method === 'POST') {
         LIMIT 1
         "
     );
-
     if (!$patientStmt) {
         jsonResponse(
             false,
@@ -867,15 +778,12 @@ if ($method === 'POST') {
             500
         );
     }
-
     $patientStmt->bind_param(
         's',
         $patientId
     );
-
     if (!$patientStmt->execute()) {
         $patientStmt->close();
-
         jsonResponse(
             false,
             'Unable to validate patient.',
@@ -883,15 +791,11 @@ if ($method === 'POST') {
             500
         );
     }
-
     $patientResult =
         $patientStmt->get_result();
-
     $patientExists =
         $patientResult->fetch_assoc();
-
     $patientStmt->close();
-
     if (!$patientExists) {
         jsonResponse(
             false,
@@ -900,7 +804,6 @@ if ($method === 'POST') {
             404
         );
     }
-
     $patientName = trim(
         (string)(
             $patientExists['first_name'] ?? ''
@@ -910,25 +813,23 @@ if ($method === 'POST') {
             $patientExists['last_name'] ?? ''
         )
     );
-
     $netAmount = max(
         $totalAmount - $discountAmount,
         0
     );
-
     $paidAmount = 0;
     $balanceAmount = $netAmount;
-    $status = 'unpaid';
-
+    $status =
+        $balanceAmount <= 0.009
+            ? 'paid'
+            : 'unpaid';
     $transactionUid =
         generateTransactionUid();
-
     $createdBy =
         isset($_SESSION['user_id']) &&
         is_numeric($_SESSION['user_id'])
             ? (int)$_SESSION['user_id']
             : null;
-
     $stmt = $conn->prepare(
         "
         INSERT INTO tbl_finance_transactions
@@ -965,7 +866,6 @@ if ($method === 'POST') {
         )
         "
     );
-
     if (!$stmt) {
         jsonResponse(
             false,
@@ -974,7 +874,6 @@ if ($method === 'POST') {
             500
         );
     }
-
     $stmt->bind_param(
         'ssiisdddddssi',
         $transactionUid,
@@ -991,11 +890,9 @@ if ($method === 'POST') {
         $notes,
         $createdBy
     );
-
     if (!$stmt->execute()) {
         $error = $stmt->error;
         $stmt->close();
-
         jsonResponse(
             false,
             'Unable to create finance transaction.',
@@ -1005,12 +902,9 @@ if ($method === 'POST') {
             500
         );
     }
-
     $transactionId =
         (int)$conn->insert_id;
-
     $stmt->close();
-
     jsonResponse(
         true,
         'Treatment charge created successfully.',
@@ -1034,7 +928,6 @@ if ($method === 'POST') {
         201
     );
 }
-
 jsonResponse(
     false,
     'Unsupported request method.',

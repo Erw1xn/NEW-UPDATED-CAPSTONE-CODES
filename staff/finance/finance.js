@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentPage = 1;
   let selectedPatientId = "";
   let currentTransaction = null;
+  let pendingAppointmentPayment = null;
   const recordPaymentBtn = document.getElementById("recordPaymentBtn");
   const closeModalBtn = document.getElementById("closeModalBtn");
   const cancelPaymentBtn = document.getElementById("cancelPaymentBtn");
@@ -102,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const printReceiptBtn = document.getElementById("printReceiptBtn");
   initialize();
   function initialize() {
+    const fromAppointment = loadAppointmentPaymentFromURL();
     loadTransactions();
     loadPatientsFromLocalStorage();
     setupDate();
@@ -112,6 +114,11 @@ document.addEventListener("DOMContentLoaded", function () {
       lucide.createIcons();
     }
     loadPatientsFromDatabase();
+    if (fromAppointment) {
+      setTimeout(() => {
+        openPaymentModal();
+      }, 150);
+    }
   }
   function loadPatientsFromLocalStorage() {
     try {
@@ -397,7 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const status = String(
       payment?.status || payment?.paymentStatus || "",
     ).toLowerCase();
-
     return status === "paid";
   }
   function getTransactionPaid(transaction) {
@@ -797,12 +803,130 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     return totals;
   }
+  function loadAppointmentPaymentFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("source") !== "appointment") {
+      return false;
+    }
+    const appointmentId = params.get("appointmentId");
+    if (!appointmentId) {
+      return false;
+    }
+    pendingAppointmentPayment = {
+      appointmentId,
+      appointmentUid: params.get("appointmentUid") || "",
+      patientId: params.get("patientId") || "",
+      patientName: params.get("patientName") || "",
+      dentistId: params.get("dentistId") || "",
+      dentistName: params.get("dentistName") || "",
+      service: params.get("service") || "",
+      appointmentDate: params.get("appointmentDate") || "",
+      appointmentTime: params.get("appointmentTime") || "",
+      duration: Number(params.get("duration")) || 0,
+      amount: Number(params.get("amount")) || 0,
+      paymentStatus: params.get("paymentStatus") || "unpaid",
+    };
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return true;
+  }
+  function formatAppointmentDateTime(dateString, timeString, durationMinutes) {
+    if (!dateString || !timeString) {
+      return "-";
+    }
+    const [year, month, day] = dateString.split("-").map(Number);
+    const [hours, minutes] = timeString.split(":").map(Number);
+    if (
+      !year ||
+      !month ||
+      !day ||
+      Number.isNaN(hours) ||
+      Number.isNaN(minutes)
+    ) {
+      return `${dateString} · ${timeString}`;
+    }
+    const startDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+    const endDate = new Date(
+      startDate.getTime() + (Number(durationMinutes) || 0) * 60000,
+    );
+    const dateFormatter = new Intl.DateTimeFormat("en-PH", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+    const timeFormatter = new Intl.DateTimeFormat("en-PH", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    const dateText = dateFormatter.format(startDate);
+    const startTimeText = timeFormatter.format(startDate);
+    const endTimeText = timeFormatter.format(endDate);
+    return `${dateText} · ${startTimeText} – ${endTimeText}`;
+  }
+  function populateAppointmentPaymentInfo() {
+    if (!pendingAppointmentPayment) {
+      return;
+    }
+    const data = pendingAppointmentPayment;
+    const infoPatient = document.getElementById("appointmentInfoPatient");
+    const infoPatientId = document.getElementById("appointmentInfoPatientId");
+    const infoService = document.getElementById("appointmentInfoService");
+    const infoDate = document.getElementById("appointmentInfoDate");
+    const infoDentist = document.getElementById("appointmentInfoDentist");
+    const infoPanel = document.getElementById("appointmentPaymentInfo");
+    if (infoPatient) {
+      infoPatient.textContent = data.patientName || "-";
+    }
+    if (infoPatientId) {
+      infoPatientId.textContent = data.patientId || "-";
+    }
+    if (infoService) {
+      infoService.textContent = data.service || "-";
+    }
+    if (infoDate) {
+      infoDate.textContent = formatAppointmentDateTime(
+        data.appointmentDate,
+        data.appointmentTime,
+        data.duration,
+      );
+    }
+    if (infoDentist) {
+      infoDentist.textContent = data.dentistName || "-";
+    }
+    if (infoPanel) {
+      infoPanel.style.display = "block";
+    }
+  }
+  function applyAppointmentPaymentToForm() {
+    if (!pendingAppointmentPayment) {
+      return;
+    }
+    const data = pendingAppointmentPayment;
+    selectedPatientId = data.patientId || "";
+    patientNameInput.value = data.patientName || "";
+    patientNameInput.dataset.patientId = data.patientId || "";
+    serviceNameInput.value = data.service || "";
+    paymentDateInput.value = data.appointmentDate || getTodayString();
+    if (data.amount > 0) {
+      paymentTotalInput.value = data.amount.toFixed(2);
+    }
+    paymentDiscountInput.value = "0";
+    patientNameInput.disabled = true;
+    serviceNameInput.disabled = true;
+    paymentDateInput.disabled = true;
+    populateAppointmentPaymentInfo();
+    updatePaymentCalculation();
+    renderPaymentProcessSection();
+    updateSaveButton();
+  }
   function openPaymentModal(transaction = null) {
     currentTransaction = transaction;
     paymentModal.classList.add("active");
     resetPaymentForm();
     if (transaction) {
       loadTransactionIntoForm(transaction);
+    } else if (pendingAppointmentPayment) {
+      applyAppointmentPaymentToForm();
     } else {
       paymentDateInput.value = getTodayString();
     }
@@ -813,6 +937,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function closePaymentModal() {
     paymentModal.classList.remove("active");
     currentTransaction = null;
+    pendingAppointmentPayment = null;
     selectedPatientId = "";
     resetPaymentForm();
     closePatientDropdown();
@@ -837,6 +962,12 @@ document.addEventListener("DOMContentLoaded", function () {
     paymentBalanceInput.value = "0.00";
     paymentMethodInput.value = "";
     paymentStatusInput.value = "Unpaid";
+    const appointmentPaymentInfo = document.getElementById(
+      "appointmentPaymentInfo",
+    );
+    if (appointmentPaymentInfo) {
+      appointmentPaymentInfo.style.display = "none";
+    }
     resetPaymentProcess();
     setOnlinePaymentMode(false);
     updatePaymentActionButton();
@@ -1240,6 +1371,7 @@ document.addEventListener("DOMContentLoaded", function () {
           cache: "no-store",
           body: JSON.stringify({
             patientId,
+            appointmentId: pendingAppointmentPayment?.appointmentId || null,
             service,
             totalAmount: total,
             discountAmount: discount,
@@ -1252,10 +1384,14 @@ document.addEventListener("DOMContentLoaded", function () {
               "Unable to create finance transaction.",
           );
         }
-        const createdTransaction =
-          transactionResult.data ||
-          transactionResult.transaction ||
-          transactionResult;
+        const createdTransaction = Array.isArray(transactionResult.data)
+          ? transactionResult.data[0]
+          : transactionResult.data ||
+            transactionResult.transaction ||
+            transactionResult;
+        if (!createdTransaction || typeof createdTransaction !== "object") {
+          throw new Error("Unable to read the created finance transaction.");
+        }
         currentTransaction = normalizeDatabaseTransaction(createdTransaction);
         transactionIdInput.value =
           currentTransaction.transactionUid || currentTransaction.id || "";
@@ -1279,6 +1415,7 @@ document.addEventListener("DOMContentLoaded", function () {
           patientName: getPatientName(patient),
           amount,
           paymentMethod: method,
+          paymentSource: "staff",
           currency: "PHP",
           returnUrl: window.location.href,
         }),
@@ -1504,6 +1641,7 @@ document.addEventListener("DOMContentLoaded", function () {
           cache: "no-store",
           body: JSON.stringify({
             patientId,
+            appointmentId: pendingAppointmentPayment?.appointmentId || null,
             service,
             totalAmount: total,
             discountAmount: discount,
@@ -1518,8 +1656,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const created = Array.isArray(createResult.data)
           ? createResult.data[0]
           : createResult.data || createResult.transaction || createResult;
+        if (!created || typeof created !== "object") {
+          throw new Error("Unable to read the created finance transaction.");
+        }
+        currentTransaction = normalizeDatabaseTransaction(created);
         transactionUid =
-          created.transaction_uid || created.transactionUid || "";
+          currentTransaction.transactionUid || currentTransaction.id || "";
       }
       if (!transactionUid) {
         throw new Error("Finance transaction was not found.");
@@ -1625,6 +1767,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function setupEvents() {
     recordPaymentBtn.addEventListener("click", function () {
+      pendingAppointmentPayment = null;
+      currentTransaction = null;
       openPaymentModal();
     });
     exportCsvBtn?.addEventListener("click", exportTransactionsToCsv);
@@ -2005,12 +2149,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function printReceipt() {
     const transactionId = detailsModal?.dataset.transactionId || "";
     const transaction = getPaymentDetails(transactionId);
-
     if (!transaction) {
       alert("Unable to find the selected transaction.");
       return;
     }
-
     window.openPaymentReceipt(transaction);
   }
   tableBody.addEventListener("click", function (event) {

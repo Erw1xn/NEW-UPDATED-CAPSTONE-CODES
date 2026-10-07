@@ -9,11 +9,16 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Authentication required.']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Authentication required.'
+    ]);
     exit;
 }
 $sessionRole = strtolower(trim((string)($_SESSION['role'] ?? '')));
-$sessionUserId = (int)$_SESSION['user_id'];
+$sessionPatientId = $sessionRole === 'user'
+    ? 'PN-' . str_pad((string)((int)$_SESSION['user_id']), 4, '0', STR_PAD_LEFT)
+    : '';
 if (!defined('XENDIT_SECRET_KEY') || trim((string) XENDIT_SECRET_KEY) === '') {
     http_response_code(500);
     echo json_encode([
@@ -58,24 +63,21 @@ $returnUrl = trim(
 $paymentSource = strtolower(
     trim((string) ($input['paymentSource'] ?? 'patient'))
 );
-if ($sessionRole === 'user') {
-    $patientStmt = $conn->prepare('SELECT patient_id FROM tbl_patients WHERE user_id = ? AND status = "active" LIMIT 1');
-    if (!$patientStmt) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Unable to verify patient access.']);
-        exit;
-    }
-    $patientStmt->bind_param('i', $sessionUserId);
-    $patientStmt->execute();
-    $patientRow = $patientStmt->get_result()->fetch_assoc();
-    $patientStmt->close();
-    if (!$patientRow) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'Patient record not found.']);
-        exit;
-    }
-    $patientId = (string)$patientRow['patient_id'];
+if ($sessionRole === 'staff') {
+    $paymentSource = 'staff';
+} elseif ($sessionRole === 'user') {
+    $patientId = $sessionPatientId;
     $paymentSource = 'patient';
+} elseif ($sessionRole === 'doctor') {
+    $paymentSource = 'staff';
+}
+if (!in_array($sessionRole, ['user', 'doctor', 'staff'], true)) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Authenticated clinic access required.'
+    ]);
+    exit;
 }
 if ($transactionUid === '') {
     http_response_code(400);
@@ -165,14 +167,6 @@ if ((string) $transaction['patient_id'] !== $patientId) {
     echo json_encode([
         'success' => false,
         'message' => 'The payment patient does not match the finance transaction.'
-    ]);
-    exit;
-}
-if ((string) ($transaction['status'] ?? '') === 'cancelled') {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Cancelled finance transactions cannot receive payments.'
     ]);
     exit;
 }
