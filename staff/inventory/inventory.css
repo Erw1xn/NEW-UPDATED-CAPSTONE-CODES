@@ -2514,3 +2514,8 @@ button {
   background: #fff8e5;
   color: #b77916;
 }
+#itemName[readonly] {
+  background: #f5f7f5;
+  color: #59655e;
+  cursor: not-allowed;
+}

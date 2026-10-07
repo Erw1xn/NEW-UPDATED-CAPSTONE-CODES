@@ -1,15 +1,19 @@
 const APPOINTMENTS_API = "../../api/appointments.php";
 const PATIENT_RECORDS_API = "../../api/patient_records.php";
+const FINANCE_API = "../../api/finance/transactions.php";
+const CURRENT_USER_API = "../profile/profile.php";
 const DAILY_GOAL = 5000;
 const STATUS = {
   SCHEDULED: "scheduled",
   IN_CONSULTATION: "in_consultation",
-  READY_COMPLETE: "ready_complete",
   COMPLETED: "completed",
+  NO_SHOW: "no_show",
+  CANCELLED: "cancelled",
 };
 let appointments = [];
 let patients = [];
 let transactions = [];
+let currentUser = null;
 document.addEventListener("DOMContentLoaded", () => {
   updateDateTime();
   setInterval(updateDateTime, 1000);
@@ -49,7 +53,12 @@ function loadDashboardSampleTransactions() {
 }
 async function refreshDashboardData() {
   try {
-    const [appointmentResponse, patientResponse] = await Promise.all([
+    const [
+      appointmentResponse,
+      patientResponse,
+      userResponse,
+      financeResponse,
+    ] = await Promise.all([
       fetch(APPOINTMENTS_API, {
         credentials: "same-origin",
         cache: "no-store",
@@ -58,31 +67,183 @@ async function refreshDashboardData() {
         credentials: "same-origin",
         cache: "no-store",
       }),
+      fetch(CURRENT_USER_API, {
+        credentials: "same-origin",
+        cache: "no-store",
+      }),
+      fetch(FINANCE_API, {
+        credentials: "include",
+        cache: "no-store",
+      }),
     ]);
     const appointmentResult = await appointmentResponse.json();
     const patientResult = await patientResponse.json();
+    const userResult = await userResponse.json();
+    let financeResult = null;
+    try {
+      financeResult = await financeResponse.json();
+    } catch (error) {
+      financeResult = null;
+    }
     if (!appointmentResponse.ok || !appointmentResult.success) {
       throw new Error(appointmentResult.message || "Appointments unavailable.");
     }
     if (!patientResponse.ok || !patientResult.success) {
       throw new Error(patientResult.message || "Patients unavailable.");
     }
-    appointments = Array.isArray(appointmentResult.data)
+    if (!userResponse.ok || !userResult.success || !userResult.user) {
+      throw new Error(userResult.message || "Doctor profile unavailable.");
+    }
+    currentUser = userResult.user;
+    const allAppointments = Array.isArray(appointmentResult.data)
       ? appointmentResult.data
       : [];
+    appointments = allAppointments.filter((appointment) =>
+      appointmentBelongsToCurrentDoctor(appointment),
+    );
     patients = Array.isArray(patientResult.data) ? patientResult.data : [];
-    transactions = appointments
-      .filter((appointment) => Number(appointment.paymentAmount) > 0)
-      .map((appointment) => ({
-        id: appointment.id || appointment.appointmentId,
-        date: appointment.date || appointment.appointment_date,
-        service: appointment.type || appointment.service,
-        paid: Number(appointment.paymentAmount) || 0,
-      }));
+    if (
+      financeResponse.ok &&
+      financeResult &&
+      financeResult.success &&
+      Array.isArray(financeResult.data)
+    ) {
+      transactions = flattenFinancePayments(financeResult.data);
+    } else {
+      transactions = [];
+    }
     renderDashboard();
   } catch (error) {
     console.error("Unable to load dashboard data from database:", error);
   }
+}
+function appointmentBelongsToCurrentDoctor(appointment) {
+  if (!currentUser || !appointment) {
+    return false;
+  }
+  const currentIdentities = [
+    currentUser.user_id,
+    currentUser.userId,
+    currentUser.id,
+    currentUser.doctor_id,
+    currentUser.doctorId,
+    currentUser.dentist_id,
+    currentUser.dentistId,
+  ]
+    .filter(
+      (value) =>
+        value !== undefined && value !== null && String(value).trim() !== "",
+    )
+    .map((value) => String(value).trim().toLowerCase());
+  const appointmentIdentities = [
+    appointment.doctor_id,
+    appointment.doctorId,
+    appointment.dentist_id,
+    appointment.dentistId,
+    appointment.dentist,
+  ]
+    .filter(
+      (value) =>
+        value !== undefined && value !== null && String(value).trim() !== "",
+    )
+    .map((value) => String(value).trim().toLowerCase());
+  if (
+    currentIdentities.some((identity) =>
+      appointmentIdentities.includes(identity),
+    )
+  ) {
+    return true;
+  }
+  const currentDoctorId = String(
+    currentUser.doctor_id ||
+      currentUser.doctorId ||
+      currentUser.dentist_id ||
+      currentUser.dentistId ||
+      "",
+  )
+    .trim()
+    .toLowerCase();
+  if (currentDoctorId) {
+    const numericDoctorMatch = currentDoctorId.match(/^doc-(\d+)$/i);
+    if (numericDoctorMatch) {
+      const numericId = numericDoctorMatch[1];
+      if (appointmentIdentities.includes(numericId)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+function flattenFinancePayments(financeData) {
+  const result = [];
+  financeData.forEach((transaction) => {
+    const paymentHistory = Array.isArray(transaction.paymentHistory)
+      ? transaction.paymentHistory
+      : Array.isArray(transaction.payment_history)
+        ? transaction.payment_history
+        : [];
+    if (paymentHistory.length > 0) {
+      paymentHistory.forEach((payment) => {
+        const paymentStatus = String(
+          payment.status ||
+            payment.payment_status ||
+            payment.paymentStatus ||
+            "",
+        )
+          .trim()
+          .toLowerCase();
+        if (paymentStatus !== "paid") {
+          return;
+        }
+        result.push({
+          id:
+            payment.payment_uid ||
+            payment.payment_id ||
+            payment.id ||
+            transaction.transaction_uid ||
+            transaction.transaction_id ||
+            "",
+          date:
+            payment.paid_at ||
+            payment.created_at ||
+            transaction.created_at ||
+            "",
+          service:
+            transaction.service_name ||
+            transaction.service ||
+            transaction.serviceType ||
+            transaction.type ||
+            "",
+          paid: Number(payment.amount) || 0,
+        });
+      });
+      return;
+    }
+    const paid = Number(
+      transaction.paid_amount ??
+        transaction.paid ??
+        transaction.paymentAmount ??
+        0,
+    );
+    if (paid > 0) {
+      result.push({
+        id:
+          transaction.transaction_uid ||
+          transaction.transaction_id ||
+          transaction.id ||
+          "",
+        date: transaction.created_at || transaction.date || "",
+        service:
+          transaction.service_name ||
+          transaction.service ||
+          transaction.serviceType ||
+          transaction.type ||
+          "",
+        paid,
+      });
+    }
+  });
+  return result;
 }
 function getTodayKey() {
   const today = new Date();
@@ -90,6 +251,23 @@ function getTodayKey() {
   const month = String(today.getMonth() + 1).padStart(2, "0");
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+function getAppointmentDate(appointment) {
+  return (
+    appointment.date ||
+    appointment.appointmentDate ||
+    appointment.appointment_date ||
+    ""
+  );
+}
+function getAppointmentTime(appointment) {
+  return (
+    appointment.start ||
+    appointment.time ||
+    appointment.appointmentTime ||
+    appointment.appointment_time ||
+    "10:00"
+  );
 }
 function timeToMinutes(time) {
   if (!time) {
@@ -103,16 +281,13 @@ function formatTime(time) {
   const text = String(time).trim();
   const match = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
   if (!match) return text;
-
   let hour = Number(match[1]);
   const minute = Number(match[2]);
   const suffix = (match[4] || (hour >= 12 ? "PM" : "AM")).toUpperCase();
-
   if (match[4]) {
     if (suffix === "AM" && hour === 12) hour = 0;
     if (suffix === "PM" && hour < 12) hour += 12;
   }
-
   return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`;
 }
 function getInitials(name) {
@@ -140,14 +315,18 @@ function normalizeStatus(status) {
 function getTodayAppointments() {
   const today = getTodayKey();
   return loadAppointments()
-    .filter((appointment) => appointment.date === today)
+    .filter((appointment) => {
+      const date = getAppointmentDate(appointment);
+      const status = normalizeStatus(appointment.status);
+      return date === today && status !== STATUS.CANCELLED;
+    })
     .sort(
       (a, b) =>
-        timeToMinutes(a.start || a.time) - timeToMinutes(b.start || b.time),
+        timeToMinutes(getAppointmentTime(a)) -
+        timeToMinutes(getAppointmentTime(b)),
     );
 }
 function renderDashboard() {
-  const appointments = loadAppointments();
   const patients = loadPatients();
   const transactions = loadFinanceTransactions();
   const dashboardSampleTransactions = loadDashboardSampleTransactions();
@@ -182,21 +361,22 @@ function updateAppointmentStats(todayAppointments) {
 }
 function updateClinicSummary(appointments) {
   const scheduled = appointments.filter(
-    (a) => normalizeStatus(a.status) === STATUS.SCHEDULED,
-  ).length;
-  const checkedIn = appointments.filter(
-    (a) => normalizeStatus(a.status) === STATUS.IN_CONSULTATION,
+    (appointment) => normalizeStatus(appointment.status) === STATUS.SCHEDULED,
   ).length;
   const consultation = appointments.filter(
-    (a) => normalizeStatus(a.status) === STATUS.IN_CONSULTATION,
+    (appointment) =>
+      normalizeStatus(appointment.status) === STATUS.IN_CONSULTATION,
   ).length;
   const completed = appointments.filter(
-    (a) => normalizeStatus(a.status) === STATUS.COMPLETED,
+    (appointment) => normalizeStatus(appointment.status) === STATUS.COMPLETED,
+  ).length;
+  const noShow = appointments.filter(
+    (appointment) => normalizeStatus(appointment.status) === STATUS.NO_SHOW,
   ).length;
   setText("summaryScheduled", scheduled);
-  setText("summaryCheckedIn", checkedIn);
   setText("summaryConsultation", consultation);
   setText("summaryCompleted", completed);
+  setText("summaryNoShow", noShow);
 }
 function renderTodayAppointments(appointments) {
   const container = document.getElementById("todayAppointmentsList");
@@ -220,8 +400,12 @@ No patient appointments today.
     item.className = "appointment-item";
     const patient =
       appointment.patient || appointment.patientName || "Unknown Patient";
-    const service = appointment.type || appointment.service || "Consultation";
-    const time = appointment.start || appointment.time || "10:00";
+    const service =
+      appointment.type ||
+      appointment.service ||
+      appointment.serviceType ||
+      "Consultation";
+    const time = getAppointmentTime(appointment);
     const status = normalizeStatus(appointment.status);
     item.innerHTML = `
 <div class="patient-info">
@@ -254,10 +438,12 @@ function getStatusLabel(status) {
       return "Scheduled";
     case STATUS.IN_CONSULTATION:
       return "In Consultation";
-    case STATUS.READY_COMPLETE:
-      return "Ready to Complete";
     case STATUS.COMPLETED:
       return "Completed";
+    case STATUS.NO_SHOW:
+      return "No Show";
+    case STATUS.CANCELLED:
+      return "Cancelled";
     default:
       return "Scheduled";
   }
@@ -267,21 +453,23 @@ function getStatusClass(status) {
   switch (normalizedStatus) {
     case STATUS.IN_CONSULTATION:
       return "status-consultation";
-    case STATUS.READY_COMPLETE:
-      return "status-ready";
     case STATUS.COMPLETED:
       return "status-completed";
+    case STATUS.NO_SHOW:
+      return "status-no-show";
+    case STATUS.CANCELLED:
+      return "status-cancelled";
     default:
       return "status-scheduled";
   }
 }
 function getTransactionDate(transaction) {
-  return (
+  const value =
     transaction.date ||
     transaction.paymentDate ||
     transaction.transactionDate ||
-    ""
-  );
+    "";
+  return String(value).slice(0, 10);
 }
 function getTransactionAmount(transaction) {
   const paid = Number(

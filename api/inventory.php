@@ -65,7 +65,7 @@ function loadInventoryData(mysqli $conn): array
     while ($row = $itemsResult ? $itemsResult->fetch_assoc() : null) {
         $items[] = normalizeItemRow($row);
     }
-    $movementsResult = $conn->query("SELECT movement_id, item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at FROM tbl_inventory_movements ORDER BY movement_date DESC, movement_id DESC LIMIT 200");
+    $movementsResult = $conn->query("SELECT movement_id, item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at FROM tbl_inventory_movements ORDER BY movement_date DESC, movement_id DESC");
     $movements = [];
     while ($row = $movementsResult ? $movementsResult->fetch_assoc() : null) {
         $movements[] = normalizeMovementRow($row);
@@ -222,12 +222,64 @@ if ($action === 'save_item') {
         jsonResponse(false, 'Inventory item name is required.', null, 422);
     }
     if ($itemId !== '') {
-        $stmt = $conn->prepare('UPDATE tbl_inventory_items SET item_name = ?, category = ?, unit = ?, stock_quantity = ?, reorder_level = ?, expiry_date = ?, updated_at = NOW() WHERE item_id = ?');
-        $expiryDate = $expiry !== '' ? $expiry : null;
-        $stmt->bind_param('sssddsi', $name, $category, $unit, $stock, $minimum, $expiryDate, (int) $itemId);
-        $stmt->execute();
-        $stmt->close();
-    } else {
+
+    $existingStmt = $conn->prepare(
+        'SELECT item_name
+         FROM tbl_inventory_items
+         WHERE item_id = ?
+         LIMIT 1'
+    );
+
+    $existingStmt->bind_param('i', $itemId);
+    $existingStmt->execute();
+
+    $existingResult = $existingStmt->get_result();
+    $existingItem = $existingResult->fetch_assoc();
+
+    $existingStmt->close();
+
+    if (!$existingItem) {
+        jsonResponse(false, 'Inventory item not found.', null, 404);
+    }
+
+    $existingName = trim((string) $existingItem['item_name']);
+
+    if ($name !== $existingName) {
+        jsonResponse(
+            false,
+            'Item name cannot be changed after the inventory item has been created.',
+            null,
+            422
+        );
+    }
+
+    $stmt = $conn->prepare(
+        'UPDATE tbl_inventory_items
+         SET category = ?,
+             unit = ?,
+             stock_quantity = ?,
+             reorder_level = ?,
+             expiry_date = ?,
+             updated_at = NOW()
+         WHERE item_id = ?'
+    );
+
+    $expiryDate = $expiry !== '' ? $expiry : null;
+
+    $stmt->bind_param(
+        'ssddsi',
+        $category,
+        $unit,
+        $stock,
+        $minimum,
+        $expiryDate,
+        (int) $itemId
+    );
+
+    $stmt->execute();
+    $stmt->close();
+
+} else {
         $stmt = $conn->prepare('INSERT INTO tbl_inventory_items (item_name, category, unit, stock_quantity, reorder_level, expiry_date) VALUES (?, ?, ?, ?, ?, ?)');
         $expiryDate = $expiry !== '' ? $expiry : null;
         $stmt->bind_param('sssdds', $name, $category, $unit, $stock, $minimum, $expiryDate);
@@ -241,29 +293,125 @@ if ($action === 'save_item') {
 }
 if ($action === 'delete_item') {
     $itemId = trim((string) ($input['id'] ?? $input['itemId'] ?? ''));
-    if ($itemId === '' || !ctype_digit($itemId) || (int) $itemId <= 0) {
-        jsonResponse(false, 'Valid inventory item ID is required.', null, 422);
+
+    if ($itemId === '' || !ctype_digit($itemId)) {
+        jsonResponse(false, 'Invalid inventory item ID.', null, 422);
     }
+
     $itemId = (int) $itemId;
-    $checkStmt = $conn->prepare('SELECT item_id, item_name FROM tbl_inventory_items WHERE item_id = ? LIMIT 1');
+
+    $checkStmt = $conn->prepare(
+        'SELECT item_id, item_name
+         FROM tbl_inventory_items
+         WHERE item_id = ?
+         LIMIT 1'
+    );
+
+    if (!$checkStmt) {
+        jsonResponse(false, 'Unable to prepare inventory item lookup.', null, 500);
+    }
+
     $checkStmt->bind_param('i', $itemId);
     $checkStmt->execute();
-    $item = $checkStmt->get_result()->fetch_assoc();
+
+    $itemResult = $checkStmt->get_result();
+    $item = $itemResult ? $itemResult->fetch_assoc() : null;
+
     $checkStmt->close();
+
     if (!$item) {
         jsonResponse(false, 'Inventory item not found.', null, 404);
     }
-    $deleteStmt = $conn->prepare('DELETE FROM tbl_inventory_items WHERE item_id = ?');
+
+    /*
+     * Do not allow deletion once the item already has
+     * inventory or treatment history.
+     */
+
+    $movementStmt = $conn->prepare(
+        'SELECT COUNT(*) AS total
+         FROM tbl_inventory_movements
+         WHERE item_id = ?'
+    );
+
+    if (!$movementStmt) {
+        jsonResponse(false, 'Unable to check inventory history.', null, 500);
+    }
+
+    $movementStmt->bind_param('i', $itemId);
+    $movementStmt->execute();
+
+    $movementResult = $movementStmt->get_result();
+    $movementRow = $movementResult
+        ? $movementResult->fetch_assoc()
+        : ['total' => 0];
+
+    $movementStmt->close();
+
+    $treatmentUsageStmt = $conn->prepare(
+        'SELECT COUNT(*) AS total
+         FROM tbl_inventory_treatment_usage
+         WHERE item_id = ?'
+    );
+
+    if (!$treatmentUsageStmt) {
+        jsonResponse(false, 'Unable to check treatment usage history.', null, 500);
+    }
+
+    $treatmentUsageStmt->bind_param('i', $itemId);
+    $treatmentUsageStmt->execute();
+
+    $treatmentUsageResult = $treatmentUsageStmt->get_result();
+    $treatmentUsageRow = $treatmentUsageResult
+        ? $treatmentUsageResult->fetch_assoc()
+        : ['total' => 0];
+
+    $treatmentUsageStmt->close();
+
+    $movementCount = (int) ($movementRow['total'] ?? 0);
+    $treatmentUsageCount = (int) ($treatmentUsageRow['total'] ?? 0);
+
+    if ($movementCount > 0 || $treatmentUsageCount > 0) {
+        jsonResponse(
+            false,
+            'This inventory item cannot be deleted because it already has inventory or treatment history.',
+            null,
+            409
+        );
+    }
+
+    $deleteStmt = $conn->prepare(
+        'DELETE FROM tbl_inventory_items
+         WHERE item_id = ?'
+    );
+
+    if (!$deleteStmt) {
+        jsonResponse(false, 'Unable to prepare inventory item deletion.', null, 500);
+    }
+
     $deleteStmt->bind_param('i', $itemId);
+
     if (!$deleteStmt->execute()) {
         $deleteStmt->close();
-        jsonResponse(false, 'Unable to delete inventory item.', null, 500);
+
+        jsonResponse(
+            false,
+            'Unable to delete inventory item.',
+            null,
+            500
+        );
     }
+
     $deleteStmt->close();
-    jsonResponse(true, 'Inventory item deleted.', [
-        'id' => (string) $itemId,
-        'name' => (string) $item['item_name'],
-    ]);
+
+    jsonResponse(
+        true,
+        'Inventory item deleted.',
+        [
+            'item_id' => $itemId,
+            'item_name' => $item['item_name']
+        ]
+    );
 }
 if ($action === 'record_movement') {
     $itemIdentifier = (string) ($input['itemId'] ?? $input['item_id'] ?? '');

@@ -133,9 +133,15 @@
             <section class="panel forecast-panel" id="forecastPanel">
               <div class="panel-header">
                 <div class="panel-heading">
-                  <h3>Inventory Demand Forecast</h3>
+                  <h3>
+                    Inventory Demand Forecast
+                    <span class="fc-ai-badge" id="fcAiBadge" data-state="idle">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                      <span id="fcAiBadgeText"></span>
+                    </span>
+                  </h3>
                   <p class="panel-subtitle">
-                    Predicted supply usage based on past treatments
+                    AI-predicted supply usage based on past treatments
                   </p>
                 </div>
                 <div class="fc-select-wrap">
@@ -162,7 +168,7 @@
                       href="../inventory/inventory.html?page=2"
                       class="fc-view-link"
                       id="fcViewFullForecast"
-                      >View Full Forecast</a
+                      >View Forecast</a
                     >
                   </div>
                 </div>
@@ -176,8 +182,12 @@
                       >Next period</span
                     >
                   </div>
-                  <div class="fc-stat">
-                    <span class="fc-stat-label">AI Model Used</span>
+                  <div
+                    class="fc-stat fc-stat-modelcard"
+                    id="fcModelCard"
+                    data-model="none"
+                  >
+                    <span class="fc-stat-label">Selected Model</span>
                     <span class="fc-stat-value fc-stat-model" id="fcModel"
                       >—</span
                     >
@@ -186,11 +196,47 @@
                     >
                   </div>
                   <div class="fc-stat">
-                    <span class="fc-stat-label">Accuracy</span>
-                    <span class="fc-stat-value" id="fcAccuracy">—</span>
-                    <span class="fc-stat-sub" id="fcAccuracySub"
-                      >Model reliability</span
+                    <span class="fc-stat-label">Forecast Status</span>
+                    <span
+                      class="fc-stat-value"
+                      id="fcForecastStatus"
+                      data-tone="muted"
+                      >—</span
                     >
+                    <span class="fc-stat-sub" id="fcForecastStatusSub"
+                      >Model status</span
+                    >
+                  </div>
+                </div>
+                <div class="fc-compare" id="fcCompare">
+                  <div
+                    class="fc-compare-item"
+                    id="fcCmpSma"
+                    data-selected="false"
+                    data-available="false"
+                  >
+                    <span class="fc-compare-dot fc-dot-sma"></span>
+                    <div class="fc-compare-text">
+                      <small>SMA · Baseline</small>
+                      <strong id="fcCmpSmaValue">—</strong>
+                    </div>
+                    <span class="fc-compare-tag" id="fcCmpSmaTag"></span>
+                  </div>
+                  <div
+                    class="fc-compare-item fc-compare-ai"
+                    id="fcCmpRf"
+                    data-selected="false"
+                    data-available="false"
+                  >
+                    <span class="fc-compare-dot fc-dot-rf"></span>
+                    <div class="fc-compare-text">
+                      <small
+                        ><i class="fa-solid fa-wand-magic-sparkles"></i> AI ·
+                        Random Forest</small
+                      >
+                      <strong id="fcCmpRfValue">—</strong>
+                    </div>
+                    <span class="fc-compare-tag" id="fcCmpRfTag"></span>
                   </div>
                 </div>
                 <div class="fc-insight" id="fcInsight" data-tone="info">
@@ -204,6 +250,7 @@
                     <p id="fcEmptyText">No forecast data available yet.</p>
                   </div>
                 </div>
+                <div class="fc-data-note" id="fcDataNote"></div>
                 <div class="fc-how">
                   <div class="fc-how-step">
                     <span class="fc-how-num">1</span>
@@ -239,10 +286,9 @@
                   <h3>Inventory Alerts</h3>
                   <p class="panel-subtitle">Items that need staff attention</p>
                 </div>
-                <a href="../inventory/inventory.html" class="btn-link">
-                  View Inventory
-                  <i class="fa-solid fa-arrow-right"></i>
-                </a>
+                <a href="../inventory/inventory.html" class="btn-link"
+                  >View Inventory <i class="fa-solid fa-arrow-right"></i
+                ></a>
               </div>
               <div class="panel-body" id="inventoryAlerts"></div>
             </section>

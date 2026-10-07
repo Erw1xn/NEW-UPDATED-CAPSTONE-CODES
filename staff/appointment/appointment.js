@@ -8,7 +8,6 @@ const END_HOUR = 17.5;
 const SLOT_MIN = 30;
 const NO_SHOW_GRACE_PERIOD_MIN = 15;
 const NO_SHOW_TESTING_MODE = false;
-const FINANCE_PAGE_URL = "../finance/finance.html";
 const ALL_DENTISTS_FILTER = "all";
 const SERVICE_DURATIONS = {
   Consultation: 30,
@@ -1152,10 +1151,13 @@ function updateAutomaticAppointmentStatuses() {
       const hasEnded =
         appt.date < todayKey ||
         (appt.date === todayKey && currentTime >= appointmentEnd);
+
       if (!hasEnded) return;
-      appt.status = APPOINTMENT_STATUS.READY_COMPLETE;
+
+      appt.status = APPOINTMENT_STATUS.COMPLETED;
       appt.consultationStarted = false;
-      appt.manualReadyComplete = true;
+      appt.manualReadyComplete = false;
+
       syncAppointmentToPatient(appt);
       changed = true;
     }
@@ -2687,32 +2689,6 @@ function startConsultation(id) {
   renderAll();
   showToast(`${appt.patient}'s consultation has started.`);
 }
-function recordPaymentForAppointment(id) {
-  const appt = appointments.find((item) => item.id === id);
-  if (!appt || appt.status !== APPOINTMENT_STATUS.COMPLETED) {
-    return;
-  }
-  const dentist = getDentistRecord(appt.dentist) || {
-    name: "Unassigned",
-  };
-  const pendingPayment = {
-    appointmentId: appt.id,
-    patientId: appt.patientId,
-    patientName: appt.patient,
-    dentistId: appt.dentist,
-    dentistName: dentist.name || appt.dentist,
-    service: appt.type,
-    appointmentDate: appt.date,
-    appointmentTime: appt.start,
-    duration: appt.duration,
-    amount: Number(appt.paymentAmount) || 0,
-    paymentStatus: appt.paymentStatus || "unpaid",
-    source: "appointment",
-    createdAt: new Date().toISOString(),
-  };
-  const params = new URLSearchParams(pendingPayment);
-  window.location.href = `${FINANCE_PAGE_URL}?${params.toString()}`;
-}
 function openStatusConfirmation(id, actionType) {
   const appt = appointments.find((item) => item.id === id);
   if (!appt) return;
@@ -2725,16 +2701,8 @@ function openStatusConfirmation(id, actionType) {
   const icon = document.getElementById("statusConfirmIcon");
   if (actionType === "finishConsultation") {
     title.textContent = "Finish Consultation?";
-    message.textContent = `Are you sure you want to finish ${appt.patient}'s consultation? The appointment will move to Ready to Complete.`;
+    message.textContent = `Are you sure you want to finish ${appt.patient}'s consultation? The appointment will be marked as Completed.`;
     button.textContent = "Yes, Finish";
-    if (icon) {
-      icon.innerHTML = "";
-    }
-  }
-  if (actionType === "completeAppointment") {
-    title.textContent = "Complete Appointment?";
-    message.textContent = `Are you sure you want to mark ${appt.patient}'s appointment as completed?`;
-    button.textContent = "Yes, Complete";
     if (icon) {
       icon.innerHTML = "";
     }
@@ -2820,23 +2788,7 @@ function confirmStatusAction() {
       closeStatusConfirmation();
       return;
     }
-    appt.status = APPOINTMENT_STATUS.READY_COMPLETE;
-    appt.consultationStarted = false;
-    appt.manualReadyComplete = true;
-    saveAppointmentsToDatabase();
-    syncAppointmentToPatient(appt);
-    closeStatusConfirmation();
-    renderAll();
-    showToast(
-      `${appt.patient}'s consultation is finished. Please confirm Complete.`,
-    );
-    return;
-  }
-  if (statusActionType === "completeAppointment") {
-    if (appt.status !== APPOINTMENT_STATUS.READY_COMPLETE) {
-      closeStatusConfirmation();
-      return;
-    }
+
     appt.status = APPOINTMENT_STATUS.COMPLETED;
     appt.checkedIn = true;
     appt.consultationStarted = false;
@@ -2845,9 +2797,7 @@ function confirmStatusAction() {
     syncAppointmentToPatient(appt);
     closeStatusConfirmation();
     renderAll();
-    showToast(
-      `${appt.patient}'s appointment is now Completed. You can record the payment in Finance.`,
-    );
+    showToast(`${appt.patient}'s consultation is now Completed.`);
     return;
   }
   if (statusActionType === "markNoShow") {
@@ -2888,39 +2838,17 @@ function createAppointmentStatusButton(appt) {
       checkInAppointment(appt.id);
     });
     wrapper.appendChild(checkInBtn);
-    if (isNoShowEligible(appt)) {
-      const noShowBtn = document.createElement("button");
-      noShowBtn.type = "button";
-      noShowBtn.className = "appt-status-btn status-noshow";
-      noShowBtn.textContent = "Mark No Show";
-      noShowBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        openStatusConfirmation(appt.id, "markNoShow");
-      });
-      wrapper.appendChild(noShowBtn);
-    }
+
     return wrapper;
   }
   if (appt.status === APPOINTMENT_STATUS.IN_CONSULTATION) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "appt-status-btn status-consultation";
-    button.textContent = "In Consultation";
+    button.textContent = "Finish Consultation";
     button.addEventListener("click", (event) => {
       event.stopPropagation();
       openStatusConfirmation(appt.id, "finishConsultation");
-    });
-    wrapper.appendChild(button);
-    return wrapper;
-  }
-  if (appt.status === APPOINTMENT_STATUS.READY_COMPLETE) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "appt-status-btn status-complete";
-    button.textContent = "Complete";
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      openStatusConfirmation(appt.id, "completeAppointment");
     });
     wrapper.appendChild(button);
     return wrapper;
@@ -2930,21 +2858,6 @@ function createAppointmentStatusButton(appt) {
     badge.className = "appt-status-badge completed";
     badge.textContent = "Completed";
     wrapper.appendChild(badge);
-    const paymentBtn = document.createElement("button");
-    paymentBtn.type = "button";
-    paymentBtn.className = "appt-status-btn status-payment";
-    if (appt.paymentStatus === "paid") {
-      paymentBtn.textContent = "Paid";
-      paymentBtn.classList.add("payment-paid");
-      paymentBtn.disabled = true;
-    } else {
-      paymentBtn.textContent = "Record Payment";
-      paymentBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        recordPaymentForAppointment(appt.id);
-      });
-    }
-    wrapper.appendChild(paymentBtn);
     return wrapper;
   }
   if (appt.status === APPOINTMENT_STATUS.NO_SHOW) {

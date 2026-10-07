@@ -125,7 +125,7 @@
           </div>
           <div
             class="dashboard-card clinic-summary-card"
-            title="Provides a quick overview of today's appointment workflow, including scheduled, checked-in, in-consultation, and completed patients."
+            title="Provides a quick overview of today's appointment workflow, including scheduled, in-consultation, completed, and no-show patients."
           >
             <div class="card-header">
               <div>
@@ -144,18 +144,6 @@
                 <div>
                   <span>Scheduled</span>
                   <strong id="summaryScheduled">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of patients who have arrived and checked in for their appointment."
-              >
-                <div class="summary-icon checked-icon">
-                  <i class="fa-solid fa-user-check"></i>
-                </div>
-                <div>
-                  <span>Checked In</span>
-                  <strong id="summaryCheckedIn">0</strong>
                 </div>
               </div>
               <div
@@ -180,6 +168,18 @@
                 <div>
                   <span>Completed</span>
                   <strong id="summaryCompleted">0</strong>
+                </div>
+              </div>
+              <div
+                class="summary-item"
+                title="Shows the number of appointments automatically marked as no-show today."
+              >
+                <div class="summary-icon no-show-icon">
+                  <i class="fa-solid fa-user-xmark"></i>
+                </div>
+                <div>
+                  <span>No Show</span>
+                  <strong id="summaryNoShow">0</strong>
                 </div>
               </div>
             </div>

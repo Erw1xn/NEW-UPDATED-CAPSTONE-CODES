@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  void loadInventoryNotificationsFromDatabase();
   const NOTIFICATIONS_KEY = "dentanueva_inventory_notifications";
+  const CONFIRMED_NOTIFICATIONS_KEY =
+    "dentanueva_inventory_confirmed_notifications";
+
   const RESET_VERSION = "inventory-reset-2026-08-16-v1";
   const INVENTORY_PAGE_SIZE = 10;
+
+  void loadInventoryNotificationsFromDatabase();
 
   const INVENTORY_CATEGORIES = [
     "Restorative Materials",
@@ -20,6 +24,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const stockMovementBtn = document.getElementById("stockMovementBtn");
   const inventoryNotificationBtn = document.getElementById(
     "inventoryNotificationBtn",
+  );
+  const exportInventoryCsvBtn = document.getElementById(
+    "exportInventoryCsvBtn",
   );
   const inventoryNotificationCount = document.getElementById(
     "inventoryNotificationCount",
@@ -81,15 +88,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     return window.dentanuevaInventoryNotifications || [];
   }
 
+  function getConfirmedInventoryNotificationIds() {
+    try {
+      const stored = localStorage.getItem(CONFIRMED_NOTIFICATIONS_KEY);
+      const parsed = stored ? JSON.parse(stored) : [];
+
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch (error) {
+      console.error("Unable to load confirmed inventory notifications:", error);
+
+      return [];
+    }
+  }
+
+  function saveConfirmedInventoryNotificationIds(ids) {
+    try {
+      const uniqueIds = [...new Set(ids.map(String))];
+
+      localStorage.setItem(
+        CONFIRMED_NOTIFICATIONS_KEY,
+        JSON.stringify(uniqueIds),
+      );
+    } catch (error) {
+      console.error("Unable to save confirmed inventory notifications:", error);
+    }
+  }
+
+  function filterConfirmedInventoryNotifications(notifications) {
+    const confirmedIds = new Set(getConfirmedInventoryNotificationIds());
+
+    return notifications.filter(
+      (notification) => !confirmedIds.has(String(notification.id)),
+    );
+  }
+
   async function loadInventoryNotificationsFromDatabase() {
     try {
       const response = await fetch(
         "../../api/staff_notifications.php?type=inventory",
-        { credentials: "same-origin", cache: "no-store" },
+        {
+          credentials: "same-origin",
+          cache: "no-store",
+        },
       );
+
       const result = await response.json();
+
       if (response.ok && result.success && Array.isArray(result.data)) {
-        window.dentanuevaInventoryNotifications = result.data;
+        window.dentanuevaInventoryNotifications =
+          filterConfirmedInventoryNotifications(result.data);
+
         renderInventoryNotifications();
       }
     } catch (error) {
@@ -97,14 +145,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function saveInventoryNotifications(notifications) {
-    window.dentanuevaInventoryNotifications = notifications;
-    void fetch("../../api/staff_notifications.php?type=inventory", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notifications }),
-    });
+  async function saveInventoryNotifications(notifications) {
+    try {
+      const response = await fetch(
+        "../../api/staff_notifications.php?type=inventory",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ notifications }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.message || "Unable to save notification changes.",
+        );
+      }
+
+      window.dentanuevaInventoryNotifications = notifications;
+      return true;
+    } catch (error) {
+      console.error("Unable to save inventory notifications:", error);
+      showInventoryMessage(
+        error.message || "Unable to save notification changes.",
+        "error",
+      );
+      return false;
+    }
   }
 
   function renderInventoryNotifications() {
@@ -172,14 +244,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   inventoryNotificationList?.addEventListener("click", (event) => {
     const confirmButton = event.target.closest("[data-notification-id]");
-    if (!confirmButton) return;
+
+    if (!confirmButton) {
+      return;
+    }
+
     const notificationId = confirmButton.dataset.notificationId;
-    saveInventoryNotifications(
+
+    if (!notificationId) {
+      return;
+    }
+
+    const currentConfirmedIds = getConfirmedInventoryNotificationIds();
+
+    if (!currentConfirmedIds.includes(String(notificationId))) {
+      currentConfirmedIds.push(String(notificationId));
+
+      saveConfirmedInventoryNotificationIds(currentConfirmedIds);
+    }
+
+    window.dentanuevaInventoryNotifications =
       getInventoryNotifications().filter(
         (notification) => String(notification.id) !== String(notificationId),
-      ),
-    );
+      );
+
     renderInventoryNotifications();
+
+    showInventoryMessage("Notification confirmed.");
   });
 
   renderInventoryNotifications();
@@ -301,7 +392,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       headerRight.appendChild(headerActions);
     }
 
-    [stockMovementBtn, addItemBtn].forEach((button) => {
+    [exportInventoryCsvBtn, stockMovementBtn, addItemBtn].forEach((button) => {
+      if (!button) {
+        return;
+      }
       button.style.minHeight = "36px";
       button.style.height = "36px";
       button.style.padding = "0 12px";
@@ -693,6 +787,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let backendInventoryItems = [];
   let backendInventoryMovements = [];
+  const DEMAND_FORECAST_PAGE_SIZE = 10;
+  let demandForecastCurrentPage = 1;
 
   async function loadInventoryFromBackend() {
     try {
@@ -982,6 +1078,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (emptyState) {
         emptyState.hidden = mergedItems.length > 0;
       }
+      demandForecastCurrentPage = 1;
+      initializeDemandForecastControls();
+      renderDemandForecastPagination();
     } catch (error) {
       console.error("Unable to load demand forecast:", error);
 
@@ -992,7 +1091,175 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   }
+  function renderDemandForecastPagination() {
+    const forecastBody = document.getElementById("demandForecastTableBody");
+    const searchInput = document.getElementById("demandForecastSearch");
+    const pagination = document.getElementById("demandForecastPagination");
+    const summary = document.getElementById("demandForecastPaginationSummary");
+    const pageInfo = document.getElementById(
+      "demandForecastPaginationPageInfo",
+    );
+    const prevButton = document.getElementById("demandForecastPrevPageBtn");
+    const nextButton = document.getElementById("demandForecastNextPageBtn");
+    const emptyState = document.getElementById("demandForecastEmpty");
 
+    if (!forecastBody) {
+      return;
+    }
+
+    const allRows = Array.from(forecastBody.querySelectorAll("tr"));
+
+    const searchValue = String(searchInput?.value || "")
+      .trim()
+      .toLowerCase();
+
+    const filteredRows = allRows.filter((row) => {
+      const itemName = String(row.cells?.[0]?.textContent || "")
+        .trim()
+        .toLowerCase();
+
+      return !searchValue || itemName.includes(searchValue);
+    });
+
+    const totalItems = filteredRows.length;
+    const totalPages = Math.max(
+      Math.ceil(totalItems / DEMAND_FORECAST_PAGE_SIZE),
+      1,
+    );
+
+    if (demandForecastCurrentPage > totalPages) {
+      demandForecastCurrentPage = totalPages;
+    }
+
+    if (demandForecastCurrentPage < 1) {
+      demandForecastCurrentPage = 1;
+    }
+
+    allRows.forEach((row) => {
+      row.style.display = "none";
+    });
+
+    const startIndex =
+      (demandForecastCurrentPage - 1) * DEMAND_FORECAST_PAGE_SIZE;
+
+    const endIndex = Math.min(
+      startIndex + DEMAND_FORECAST_PAGE_SIZE,
+      totalItems,
+    );
+
+    filteredRows.slice(startIndex, endIndex).forEach((row) => {
+      row.style.display = "";
+    });
+
+    if (totalItems > 0) {
+      pagination.style.display = "flex";
+
+      summary.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalItems} items`;
+
+      pageInfo.textContent = `Page ${demandForecastCurrentPage} of ${totalPages}`;
+
+      prevButton.disabled = demandForecastCurrentPage <= 1;
+      nextButton.disabled = demandForecastCurrentPage >= totalPages;
+    } else {
+      pagination.style.display = "none";
+    }
+
+    if (emptyState) {
+      if (allRows.length === 0) {
+        emptyState.hidden = false;
+
+        const heading = emptyState.querySelector("h3");
+        const paragraph = emptyState.querySelector("p");
+
+        if (heading) {
+          heading.textContent = "No historical usage data";
+        }
+
+        if (paragraph) {
+          paragraph.textContent =
+            "Record stock-out movements to build historical usage data for demand forecasting.";
+        }
+      } else if (filteredRows.length === 0 && searchValue) {
+        emptyState.hidden = false;
+
+        const heading = emptyState.querySelector("h3");
+        const paragraph = emptyState.querySelector("p");
+
+        if (heading) {
+          heading.textContent = "No forecast items found";
+        }
+
+        if (paragraph) {
+          paragraph.textContent = `No forecast item matches "${searchValue}".`;
+        }
+      } else {
+        emptyState.hidden = true;
+      }
+    }
+  }
+  function initializeDemandForecastControls() {
+    const searchInput = document.getElementById("demandForecastSearch");
+    const prevButton = document.getElementById("demandForecastPrevPageBtn");
+    const nextButton = document.getElementById("demandForecastNextPageBtn");
+
+    if (searchInput && !searchInput.dataset.initialized) {
+      searchInput.addEventListener("input", () => {
+        demandForecastCurrentPage = 1;
+        renderDemandForecastPagination();
+      });
+
+      searchInput.dataset.initialized = "true";
+    }
+
+    if (prevButton && !prevButton.dataset.initialized) {
+      prevButton.addEventListener("click", () => {
+        if (demandForecastCurrentPage > 1) {
+          demandForecastCurrentPage--;
+          renderDemandForecastPagination();
+        }
+      });
+
+      prevButton.dataset.initialized = "true";
+    }
+
+    if (nextButton && !nextButton.dataset.initialized) {
+      nextButton.addEventListener("click", () => {
+        const forecastBody = document.getElementById("demandForecastTableBody");
+
+        const searchInput = document.getElementById("demandForecastSearch");
+
+        if (!forecastBody) {
+          return;
+        }
+
+        const searchValue = String(searchInput?.value || "")
+          .trim()
+          .toLowerCase();
+
+        const rows = Array.from(forecastBody.querySelectorAll("tr"));
+
+        const filteredRows = rows.filter((row) => {
+          const itemName = String(row.cells?.[0]?.textContent || "")
+            .trim()
+            .toLowerCase();
+
+          return !searchValue || itemName.includes(searchValue);
+        });
+
+        const totalPages = Math.max(
+          Math.ceil(filteredRows.length / DEMAND_FORECAST_PAGE_SIZE),
+          1,
+        );
+
+        if (demandForecastCurrentPage < totalPages) {
+          demandForecastCurrentPage++;
+          renderDemandForecastPagination();
+        }
+      });
+
+      nextButton.dataset.initialized = "true";
+    }
+  }
   window.refreshDemandForecast = loadDemandForecast;
 
   let forecastDemandChart = null;
@@ -1086,7 +1353,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderForecastDemandChart(itemName) {
     const canvas = document.getElementById("forecastDemandChart");
-
     const emptyState = document.getElementById("forecastChartEmpty");
 
     if (!canvas || !emptyState) {
@@ -1128,7 +1394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return String(a.demand_date).localeCompare(String(b.demand_date));
     });
 
-    const labels = sortedRecords.map((record) => record.demand_date);
+    const actualLabels = sortedRecords.map((record) => record.demand_date);
 
     const actualDemand = sortedRecords.map((record) =>
       Number(record.total_used || 0),
@@ -1174,8 +1440,39 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    if (forecastDate) {
-      labels.push(forecastDate);
+    const latestHistoricalDate =
+      actualLabels.length > 0 ? actualLabels[actualLabels.length - 1] : null;
+
+    let chartForecastDate = forecastDate;
+
+    if (latestHistoricalDate) {
+      const latestDate = new Date(`${latestHistoricalDate}T00:00:00`);
+
+      const backendForecastDate = forecastDate
+        ? new Date(`${forecastDate}T00:00:00`)
+        : null;
+
+      if (
+        !backendForecastDate ||
+        Number.isNaN(backendForecastDate.getTime()) ||
+        backendForecastDate <= latestDate
+      ) {
+        const nextDate = new Date(latestDate);
+
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        chartForecastDate = [
+          nextDate.getFullYear(),
+          String(nextDate.getMonth() + 1).padStart(2, "0"),
+          String(nextDate.getDate()).padStart(2, "0"),
+        ].join("-");
+      }
+    }
+
+    const labels = [...actualLabels];
+
+    if (chartForecastDate) {
+      labels.push(chartForecastDate);
     }
 
     const historicalSmaData = [...smaHistorical];
@@ -1184,9 +1481,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const rfForecastData = Array(sortedRecords.length).fill(null);
 
-    if (forecastDate) {
+    if (chartForecastDate) {
       smaForecastData.push(smaForecast);
       rfForecastData.push(rfForecast);
+    }
+
+    const historicalDemandData = [...actualDemand];
+
+    if (chartForecastDate) {
+      historicalDemandData.push(null);
     }
 
     canvas.hidden = false;
@@ -1196,23 +1499,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     forecastDemandChart = new Chart(chartContext, {
       type: "line",
+
       data: {
         labels,
+
         datasets: [
           {
             label: "Historical Demand",
-            data: actualDemand.concat(forecastDate ? [null] : []),
+            data: historicalDemandData,
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 3,
           },
+
           {
             label: "SMA",
-            data: forecastDate ? smaForecastData : historicalSmaData,
+            data: chartForecastDate
+              ? historicalSmaData.concat(smaForecast)
+              : historicalSmaData,
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 2,
           },
+
           {
             label: "Random Forest",
             data: rfForecastData,
@@ -1222,21 +1531,26 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
         ],
       },
+
       options: {
         responsive: true,
         maintainAspectRatio: false,
+
         interaction: {
           mode: "index",
           intersect: false,
         },
+
         plugins: {
           legend: {
             display: true,
           },
+
           tooltip: {
             enabled: true,
           },
         },
+
         scales: {
           x: {
             title: {
@@ -1244,8 +1558,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               text: "Date",
             },
           },
+
           y: {
             beginAtZero: true,
+
             title: {
               display: true,
               text: "Quantity Used",
@@ -1375,6 +1691,117 @@ document.addEventListener("DOMContentLoaded", async () => {
     return Array.isArray(backendInventoryMovements)
       ? backendInventoryMovements
       : [];
+  }
+  function getTodayString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function escapeCsvValue(value) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function exportInventoryToCsv() {
+    const movements = getMovements();
+
+    if (!movements.length) {
+      showInventoryMessage("No inventory movement records available.", "error");
+      return;
+    }
+
+    const headers = [
+      "Movement ID",
+      "Date",
+      "Patient ID",
+      "Appointment ID",
+      "Item ID",
+      "Item",
+      "Movement Type",
+      "Source",
+      "Quantity",
+      "Unit",
+      "Previous Stock",
+      "New Stock",
+    ];
+
+    const sortedMovements = [...movements].sort((a, b) => {
+      const aPatient = String(a.patientId || "").trim();
+      const aAppointment = String(a.appointmentId || "").trim();
+      const aItemId = String(a.itemId || "").trim();
+      const aItemName = String(a.itemName || "").trim();
+      const aQuantity =
+        a.quantity !== null && a.quantity !== undefined && a.quantity !== "";
+
+      const bPatient = String(b.patientId || "").trim();
+      const bAppointment = String(b.appointmentId || "").trim();
+      const bItemId = String(b.itemId || "").trim();
+      const bItemName = String(b.itemName || "").trim();
+      const bQuantity =
+        b.quantity !== null && b.quantity !== undefined && b.quantity !== "";
+
+      // Complete record = all important fields are present
+      const aComplete =
+        aPatient && aAppointment && aItemId && aItemName && aQuantity;
+
+      const bComplete =
+        bPatient && bAppointment && bItemId && bItemName && bQuantity;
+
+      // Complete records first
+      if (aComplete !== bComplete) {
+        return aComplete ? -1 : 1;
+      }
+
+      // Within the same group: newest first
+      const aDate = new Date(a.date || 0).getTime();
+      const bDate = new Date(b.date || 0).getTime();
+
+      return bDate - aDate;
+    });
+
+    const rows = sortedMovements.map((movement) => {
+      return [
+        movement.movementId || movement.id || "",
+        movement.date || "",
+        movement.patientId || "Not Applicable",
+        movement.appointmentId || "Not Applicable",
+        movement.itemId || "",
+        movement.itemName || "",
+        movement.type || "",
+        movement.source || movement.reason || "Not Specified",
+        movement.quantity ?? "",
+        movement.unit || "",
+        movement.previousStock ?? "",
+        movement.newStock ?? "",
+      ]
+        .map(escapeCsvValue)
+        .join(",");
+    });
+
+    const csv = [headers.map(escapeCsvValue).join(","), ...rows].join("\r\n");
+
+    const blob = new Blob(["\ufeff", csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `denta-nueva-inventory-${getTodayString()}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    showInventoryMessage(
+      `${movements.length} inventory movement${movements.length === 1 ? "" : "s"} exported successfully.`,
+    );
   }
 
   function escapeHTML(value) {
@@ -1807,6 +2234,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       itemModalTitle.textContent = "Edit Inventory Item";
       itemId.value = item.id;
       itemName.value = item.name;
+      itemName.readOnly = true;
 
       ensureItemCategoryOption(item.category);
       itemCategory.value = item.category;
@@ -1819,6 +2247,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       itemModalTitle.textContent = "Add Inventory Item";
       itemId.value = "";
+      itemName.value = "";
+      itemName.readOnly = false;
+
       itemStock.value = "0";
       itemStock.readOnly = true;
       itemMinimum.value = "5";
@@ -1830,7 +2261,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     itemModal.setAttribute("aria-hidden", "false");
 
     setTimeout(() => {
-      itemName.focus();
+      if (!itemName.readOnly) {
+        itemName.focus();
+      }
     }, 100);
   }
 
@@ -2494,7 +2927,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectedDeleteItemId = item.id;
 
     if (deleteItemMessage) {
-      deleteItemMessage.textContent = `"${item.name}" and its stock movement history will be permanently removed. This action cannot be undone.`;
+      deleteItemMessage.textContent = `"${item.name}" will be permanently deleted if it has no recorded inventory or treatment history. Items with existing history cannot be deleted.`;
     }
 
     deleteItemModal.classList.add("active");
@@ -2692,6 +3125,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   emptyAddItemBtn.addEventListener("click", () => {
     openItemModal();
   });
+
+  exportInventoryCsvBtn?.addEventListener("click", exportInventoryToCsv);
 
   stockMovementBtn.addEventListener("click", () => {
     openMovementModal();

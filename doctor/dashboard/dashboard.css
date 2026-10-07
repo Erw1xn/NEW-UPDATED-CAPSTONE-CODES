@@ -690,9 +690,13 @@ button:focus-visible {
   color: var(--green-700);
   background: var(--green-100);
 }
-.status-ready {
-  color: var(--purple-500);
-  background: var(--purple-100);
+.status-no-show {
+  color: var(--red-500);
+  background: var(--red-100);
+}
+.status-cancelled {
+  color: var(--ink-500);
+  background: var(--ink-100);
 }
 .no-appointments {
   display: flex;
@@ -765,6 +769,10 @@ button:focus-visible {
 .completed-icon {
   background: var(--purple-100);
   color: var(--purple-500);
+}
+.no-show-icon {
+  background: var(--red-100);
+  color: var(--red-500);
 }
 .summary-item span {
   display: block;
