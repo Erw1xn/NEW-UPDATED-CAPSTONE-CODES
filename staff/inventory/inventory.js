@@ -190,34 +190,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? notifications
           .map(
             (notification) => `
-              <article class="inventory-notification-card">
-                <div class="inventory-notification-card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                <div class="inventory-notification-card-body">
-                  <strong>Stock used for ${escapeHTML(notification.procedure || "Treatment")}</strong>
-                  <p><b>Patient:</b> ${escapeHTML(notification.patientName || "Patient")} ${notification.patientId ? `(${escapeHTML(notification.patientId)})` : ""}</p>
-                  <p><b>Date:</b> ${escapeHTML(notification.treatmentDate || "Not provided")}${notification.toothNumber ? ` · <b>Tooth:</b> ${escapeHTML(notification.toothNumber)}` : ""}</p>
-                  <div class="inventory-notification-items">
-                    ${(notification.items || [])
-                      .map((item) => {
-                        const status = item.status || "stock-out-completed";
-                        const statusLabel =
-                          status === "unregistered"
-                            ? "Not registered in inventory"
-                            : status === "insufficient-stock"
-                              ? `${Number(item.available) || 0} available only`
-                              : "Stock-out completed";
-                        const icon =
-                          status === "stock-out-completed"
-                            ? "fa-circle-check"
-                            : "fa-triangle-exclamation";
-                        return `<span class="inventory-notification-item-${status}"><i class="fa-solid ${icon}"></i>${escapeHTML(item.itemName || "Item")} · ${Number(item.quantity) || 0} ${escapeHTML(item.unit || "unit")} <small>${escapeHTML(statusLabel)}</small></span>`;
-                      })
-                      .join("")}
+                <article class="inventory-notification-card">
+                  <div class="inventory-notification-card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                  <div class="inventory-notification-card-body">
+                    <strong>Stock used for ${escapeHTML(notification.procedure || "Treatment")}</strong>
+                    <p><b>Patient:</b> ${escapeHTML(notification.patientName || "Patient")} ${notification.patientId ? `(${escapeHTML(notification.patientId)})` : ""}</p>
+                    <p><b>Date:</b> ${escapeHTML(notification.treatmentDate || "Not provided")}${notification.toothNumber ? ` · <b>Tooth:</b> ${escapeHTML(notification.toothNumber)}` : ""}</p>
+                    <div class="inventory-notification-items">
+                      ${(notification.items || [])
+                        .map((item) => {
+                          const status = item.status || "stock-out-completed";
+                          const statusLabel =
+                            status === "unregistered"
+                              ? "Not registered in inventory"
+                              : status === "insufficient-stock"
+                                ? `${Number(item.available) || 0} available only`
+                                : "Stock-out completed";
+                          const icon =
+                            status === "stock-out-completed"
+                              ? "fa-circle-check"
+                              : "fa-triangle-exclamation";
+                          return `<span class="inventory-notification-item-${status}"><i class="fa-solid ${icon}"></i>${escapeHTML(item.itemName || "Item")} · ${Number(item.quantity) || 0} ${escapeHTML(item.unit || "unit")} <small>${escapeHTML(statusLabel)}</small></span>`;
+                        })
+                        .join("")}
+                    </div>
+                    <button type="button" class="inventory-notification-confirm" data-notification-id="${escapeHTML(notification.id)}"><i class="fa-solid fa-check"></i> Confirm</button>
                   </div>
-                  <button type="button" class="inventory-notification-confirm" data-notification-id="${escapeHTML(notification.id)}"><i class="fa-solid fa-check"></i> Confirm</button>
-                </div>
-              </article>
-            `,
+                </article>
+              `,
           )
           .join("")
       : `<div class="inventory-notification-empty"><i class="fa-regular fa-bell-slash"></i><strong>No unread notifications</strong><span>Confirmed treatment stock-outs will no longer appear here.</span></div>`;
@@ -429,6 +429,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const itemStock = document.getElementById("itemStock");
   const itemMinimum = document.getElementById("itemMinimum");
   const itemExpiry = document.getElementById("itemExpiry");
+  const itemUnitCost = document.getElementById("itemUnitCost");
 
   const DENTAL_ITEM_CATEGORIES = {
     "Restorative Materials": [
@@ -1020,58 +1021,58 @@ document.addEventListener("DOMContentLoaded", async () => {
             : "—";
 
           return `
-      <tr>
-        <td>
-          ${escapeHTML(item.item_name || "Unknown item")}
-        </td>
+        <tr>
+          <td>
+            ${escapeHTML(item.item_name || "Unknown item")}
+          </td>
 
-        <td>
-          ${forecastDate ? escapeHTML(forecastDate) : "—"}
-        </td>
+          <td>
+            ${forecastDate ? escapeHTML(forecastDate) : "—"}
+          </td>
 
-        <td>
-          ${smaForecast !== null ? smaForecast.toFixed(2) : "—"}
-        </td>
+          <td>
+            ${smaForecast !== null ? smaForecast.toFixed(2) : "—"}
+          </td>
 
-        <td>
-          ${rfForecast !== null ? rfForecast.toFixed(2) : "—"}
-        </td>
+          <td>
+            ${rfForecast !== null ? rfForecast.toFixed(2) : "—"}
+          </td>
 
-        <td>
-          ${
-            mape !== null && item.evaluation_available
-              ? mape.toFixed(2) + "%"
-              : "—"
-          }
-        </td>
+          <td>
+            ${
+              mape !== null && item.evaluation_available
+                ? mape.toFixed(2) + "%"
+                : "—"
+            }
+          </td>
 
-        <td>
-          ${rmse !== null && item.evaluation_available ? rmse.toFixed(2) : "—"}
-        </td>
+          <td>
+            ${rmse !== null && item.evaluation_available ? rmse.toFixed(2) : "—"}
+          </td>
 
-        <td>
-          ${
-            accuracy !== null && item.evaluation_available
-              ? accuracy.toFixed(2) + "%"
-              : "—"
-          }
-        </td>
+          <td>
+            ${
+              accuracy !== null && item.evaluation_available
+                ? accuracy.toFixed(2) + "%"
+                : "—"
+            }
+          </td>
 
-        <td>
-          ${selectedForecast !== null ? selectedForecast.toFixed(2) : "—"}
-        </td>
+          <td>
+            ${selectedForecast !== null ? selectedForecast.toFixed(2) : "—"}
+          </td>
 
-        <td>
-          ${escapeHTML(modelName)}
-        </td>
+          <td>
+            ${escapeHTML(modelName)}
+          </td>
 
-        <td>
-  <span class="forecast-status-badge ${forecastStatus === "no_consumption_data" ? "forecast-status-no-data" : "forecast-status-insufficient"}">
-    ${escapeHTML(statusLabel)}
-  </span>
-</td>
-      </tr>
-    `;
+          <td>
+    <span class="forecast-status-badge ${forecastStatus === "no_consumption_data" ? "forecast-status-no-data" : "forecast-status-insufficient"}">
+      ${escapeHTML(statusLabel)}
+    </span>
+  </td>
+        </tr>
+      `;
         })
         .join("");
 
@@ -1276,8 +1277,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentValue = select.value;
 
     select.innerHTML = `
-    <option value="">Select item</option>
-  `;
+      <option value="">Select item</option>
+    `;
 
     const itemNames = [
       ...new Set(
@@ -1322,8 +1323,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentValue = select.value;
 
     select.innerHTML = `
-    <option value="">Select item</option>
-  `;
+      <option value="">Select item</option>
+    `;
 
     itemNames.forEach((itemName) => {
       const option = document.createElement("option");
@@ -1640,10 +1641,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       forecastChartData = [];
 
       select.innerHTML = `
-      <option value="">
-        Unable to load chart data
-      </option>
-    `;
+        <option value="">
+          Unable to load chart data
+        </option>
+      `;
 
       renderForecastDemandChart("");
     }
@@ -1688,6 +1689,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       stock: Number(item.stock) || 0,
       minimum: Number(item.minimum) || 0,
       expiry: item.expiry || "",
+      unitCost: Number(item.unitCost) || 0,
     };
 
     if (item.databaseId) {
@@ -1749,6 +1751,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       "Source",
       "Quantity",
       "Unit",
+      "Unit Cost",
+      "Total Cost",
       "Previous Stock",
       "New Stock",
     ];
@@ -1768,19 +1772,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       const bQuantity =
         b.quantity !== null && b.quantity !== undefined && b.quantity !== "";
 
-      // Complete record = all important fields are present
       const aComplete =
         aPatient && aAppointment && aItemId && aItemName && aQuantity;
 
       const bComplete =
         bPatient && bAppointment && bItemId && bItemName && bQuantity;
 
-      // Complete records first
       if (aComplete !== bComplete) {
         return aComplete ? -1 : 1;
       }
 
-      // Within the same group: newest first
       const aDate = new Date(a.date || 0).getTime();
       const bDate = new Date(b.date || 0).getTime();
 
@@ -1788,6 +1789,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const rows = sortedMovements.map((movement) => {
+      const quantity = Number(movement.quantity) || 0;
+      const unitCost = Number(movement.unitCost ?? movement.unit_cost) || 0;
+      const totalCost = quantity * unitCost;
+
       return [
         movement.movementId || movement.id || "",
         movement.date || "",
@@ -1799,6 +1804,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         movement.source || movement.reason || "Not Specified",
         movement.quantity ?? "",
         movement.unit || "",
+        unitCost.toFixed(2),
+        totalCost.toFixed(2),
         movement.previousStock ?? "",
         movement.newStock ?? "",
       ]
@@ -2138,64 +2145,69 @@ document.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement("tr");
 
       row.innerHTML = `
-        <td>
-          <div class="item-cell">
-            <div class="item-avatar">
-              <i class="fa-solid fa-box"></i>
+          <td>
+            <div class="item-cell">
+              <div class="item-avatar">
+                <i class="fa-solid fa-box"></i>
+              </div>
+              <div class="item-info">
+                <span
+                  class="item-name"
+                  title="${escapeHTML(item.name)}"
+                >
+                  ${escapeHTML(item.name)}
+                </span>
+                <span class="item-id" style="color: #4f6258;">
+                  Item ID: ${escapeHTML(item.id)}
+                </span>
+              </div>
             </div>
-            <div class="item-info">
-              <span
-                class="item-name"
-                title="${escapeHTML(item.name)}"
-              >
-                ${escapeHTML(item.name)}
-              </span>
-              <span class="item-id" style="color: #4f6258;">
-  Item ID: ${escapeHTML(item.id)}
-</span>
-            </div>
-          </div>
-        </td>
-        <td>
-          <span class="category-badge">
-            ${escapeHTML(item.category)}
-          </span>
-        </td>
-        <td>
-          <span class="stock-value">
-            ${Number(item.stock) || 0}
-          </span>
-          <span class="stock-unit">
+          </td>
+          <td>
+            <span class="category-badge">
+              ${escapeHTML(item.category)}
+            </span>
+          </td>
+          <td>
+            <span class="minimum-value">
+              ${Number(item.minimum) || 0}
+            </span>
+          </td>
+          <td>
+            <span class="stock-value">
+              ${Number(item.stock) || 0}
+            </span>
+          </td>
+          <td>
             ${escapeHTML(item.unit)}
-          </span>
-        </td>
-        <td>
-          <span class="minimum-value">
-            ${Number(item.minimum) || 0}
-          </span>
-        </td>
-        <td>
-          ${escapeHTML(item.unit)}
-        </td>
-        <td>
-          ${formatExpiry(item.expiry)}
-        </td>
-        <td>
-          <span class="status-badge status-${status}">
-            ${getStatusLabel(status)}
-          </span>
-        </td>
-        <td>
-          <button
-            type="button"
-            class="action-button"
-            data-item-id="${escapeHTML(item.id)}"
-            aria-label="Item actions"
-          >
-            <i class="fa-solid fa-ellipsis"></i>
-          </button>
-        </td>
-      `;
+          </td>
+                    <td>
+            ₱${(Number(item.unitCost ?? item.unit_cost) || 0).toFixed(2)}
+          </td>
+          <td>
+            <span class="stock-value">
+              ₱${((Number(item.stock) || 0) * (Number(item.unitCost ?? item.unit_cost) || 0)).toFixed(2)}
+            </span>
+          </td>
+          <td>
+            ${formatExpiry(item.expiry)}
+          </td>
+          <td>
+            <span class="status-badge status-${status}">
+              ${getStatusLabel(status)}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="action-button"
+              data-item-id="${escapeHTML(item.id)}"
+              aria-label="Item actions"
+            >
+              <i class="fa-solid fa-ellipsis"></i>
+            </button>
+          </td>
+        `;
 
       inventoryTableBody.appendChild(row);
     });
@@ -2269,6 +2281,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       itemStock.readOnly = true;
       itemMinimum.value = item.minimum;
       itemExpiry.value = item.expiry || "";
+      itemUnitCost.value = Number(item.unitCost ?? item.unit_cost) || 0;
     } else {
       itemModalTitle.textContent = "Add Inventory Item";
       itemId.value = "";
@@ -2278,6 +2291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       itemStock.value = "0";
       itemStock.readOnly = true;
       itemMinimum.value = "5";
+      itemUnitCost.value = "0.00";
     }
 
     updateExpiryFieldState();
@@ -2313,6 +2327,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const stock = Number(itemStock.value);
     const minimum = Number(itemMinimum.value);
     const expiry = categoryHasExpiry(category) ? itemExpiry.value : "";
+    const unitCost = Number(itemUnitCost.value);
 
     if (!name) {
       showInventoryMessage("Please enter the item name.", "error");
@@ -2339,6 +2354,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    if (Number.isNaN(unitCost) || unitCost < 0) {
+      showInventoryMessage("Unit cost cannot be negative.", "error");
+      return;
+    }
+
     const items = getItems();
     const existingId = itemId.value;
 
@@ -2356,6 +2376,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           stock,
           minimum,
           expiry,
+          unitCost,
           updatedAt: new Date().toISOString(),
         };
       }
@@ -2386,6 +2407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         stock: 0,
         minimum,
         expiry,
+        unitCost,
         createdAt: new Date().toISOString(),
       });
     }
@@ -2407,6 +2429,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         stock,
         minimum,
         expiry,
+        unitCost,
       };
 
       if (existingId) {
@@ -2430,6 +2453,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         stock: Number(savedItem.stock) || 0,
         minimum: Number(savedItem.minimum) || 0,
         expiry: savedItem.expiry || "",
+        unitCost: Number(savedItem.unitCost ?? savedItem.unit_cost) || 0,
       };
 
       backendInventoryItems = items;
@@ -2749,186 +2773,186 @@ document.addEventListener("DOMContentLoaded", async () => {
                 : "Inventory usage");
 
             return `
-              <div class="item-history-entry">
-                <div class="item-history-marker ${typeClass}">
-                  <i class="fa-solid ${
-                    movement.type === "stock-in"
-                      ? "fa-arrow-up"
-                      : "fa-arrow-down"
-                  }"></i>
+                <div class="item-history-entry">
+                  <div class="item-history-marker ${typeClass}">
+                    <i class="fa-solid ${
+                      movement.type === "stock-in"
+                        ? "fa-arrow-up"
+                        : "fa-arrow-down"
+                    }"></i>
+                  </div>
+                  <div class="item-history-content">
+                    <div class="item-history-topline">
+                      <strong>
+                        ${escapeHTML(getMovementLabel(movement.type))}
+                      </strong>
+                      <span>
+                        ${escapeHTML(
+                          formatItemDateTime(
+                            getMovementTimestamp(movement, item),
+                          ),
+                        )}
+                      </span>
+                    </div>
+                    <div class="item-history-quantity ${typeClass}">
+                      ${quantityText}
+                    </div>
+                    <div class="item-history-reason">
+                      ${escapeHTML(reason)}
+                    </div>
+                    <div class="item-history-stock">
+                      Stock:
+                      ${Number(movement.previousStock) || 0}
+                      →
+                      ${Number(movement.newStock) || 0}
+                    </div>
+                  </div>
                 </div>
-                <div class="item-history-content">
-                  <div class="item-history-topline">
-                    <strong>
-                      ${escapeHTML(getMovementLabel(movement.type))}
-                    </strong>
-                    <span>
-                      ${escapeHTML(
-                        formatItemDateTime(
-                          getMovementTimestamp(movement, item),
-                        ),
-                      )}
-                    </span>
-                  </div>
-                  <div class="item-history-quantity ${typeClass}">
-                    ${quantityText}
-                  </div>
-                  <div class="item-history-reason">
-                    ${escapeHTML(reason)}
-                  </div>
-                  <div class="item-history-stock">
-                    Stock:
-                    ${Number(movement.previousStock) || 0}
-                    →
-                    ${Number(movement.newStock) || 0}
-                  </div>
-                </div>
-              </div>
-            `;
+              `;
           })
           .join("")
       : `
-          <div class="item-history-empty">
-            <div class="item-history-empty-icon">
-              <i class="fa-solid fa-clock-rotate-left"></i>
+            <div class="item-history-empty">
+              <div class="item-history-empty-icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+              <strong>
+                No stock movement history
+              </strong>
+              <p>
+                Stock movements for this item will appear here.
+              </p>
             </div>
-            <strong>
-              No stock movement history
-            </strong>
-            <p>
-              Stock movements for this item will appear here.
-            </p>
-          </div>
-        `;
+          `;
 
     viewItemDetails.innerHTML = `
-      <div class="view-item-hero">
-        <div class="view-item-avatar">
-          <i class="fa-solid fa-box"></i>
-        </div>
+        <div class="view-item-hero">
+          <div class="view-item-avatar">
+            <i class="fa-solid fa-box"></i>
+          </div>
 
-        <div class="view-item-hero-content">
-          <span class="view-item-id">
-            ${escapeHTML(item.id)}
-          </span>
-
-          <h4>
-            ${escapeHTML(item.name)}
-          </h4>
-
-          <span class="view-item-category">
-            ${escapeHTML(item.category)}
-          </span>
-        </div>
-
-        <span class="status-badge status-${status}">
-          ${escapeHTML(statusText)}
-        </span>
-      </div>
-
-      <div class="view-item-section">
-        <div class="view-item-section-heading">
-          <div>
-            <span class="modal-eyebrow">
-              CURRENT INFORMATION
+          <div class="view-item-hero-content">
+            <span class="view-item-id">
+              ${escapeHTML(item.id)}
             </span>
 
             <h4>
-              Item Details
+              ${escapeHTML(item.name)}
             </h4>
-          </div>
-        </div>
 
-        <div class="view-item-details-grid">
-          <div class="view-item-detail">
-            <span>
-              Current Stock
+            <span class="view-item-category">
+              ${escapeHTML(item.category)}
             </span>
-
-            <strong>
-              ${Number(item.stock) || 0}
-              ${escapeHTML(item.unit)}
-            </strong>
           </div>
 
-          <div class="view-item-detail">
-            <span>
-              Minimum Stock
-            </span>
-
-            <strong>
-              ${Number(item.minimum) || 0}
-              ${escapeHTML(item.unit)}
-            </strong>
-          </div>
-
-          <div class="view-item-detail">
-            <span>
-              Unit
-            </span>
-
-            <strong>
-              ${escapeHTML(item.unit)}
-            </strong>
-          </div>
-
-          <div class="view-item-detail">
-            <span>
-              Expiry
-            </span>
-
-            <strong>
-              ${escapeHTML(expiryText)}
-            </strong>
-          </div>
-
-          <div class="view-item-detail">
-            <span>
-              Created
-            </span>
-
-            <strong>
-              ${escapeHTML(formatItemDateTime(item.createdAt))}
-            </strong>
-          </div>
-
-          <div class="view-item-detail">
-            <span>
-              Last Updated
-            </span>
-
-            <strong>
-              ${escapeHTML(
-                formatItemDateTime(item.updatedAt || item.createdAt),
-              )}
-            </strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="view-item-section">
-        <div class="view-item-section-heading history-heading">
-          <div>
-            <span class="modal-eyebrow">
-              STOCK MOVEMENTS
-            </span>
-
-            <h4>
-              Movement History
-            </h4>
-          </div>
-
-          <span class="view-item-history-count">
-            ${movements.length}
-            ${movements.length === 1 ? "record" : "records"}
+          <span class="status-badge status-${status}">
+            ${escapeHTML(statusText)}
           </span>
         </div>
 
-        <div class="item-history-list">
-          ${historyHTML}
+        <div class="view-item-section">
+          <div class="view-item-section-heading">
+            <div>
+              <span class="modal-eyebrow">
+                CURRENT INFORMATION
+              </span>
+
+              <h4>
+                Item Details
+              </h4>
+            </div>
+          </div>
+
+          <div class="view-item-details-grid">
+            <div class="view-item-detail">
+              <span>
+                Current Stock
+              </span>
+
+              <strong>
+                ${Number(item.stock) || 0}
+                ${escapeHTML(item.unit)}
+              </strong>
+            </div>
+
+            <div class="view-item-detail">
+              <span>
+                Minimum Stock
+              </span>
+
+              <strong>
+                ${Number(item.minimum) || 0}
+                ${escapeHTML(item.unit)}
+              </strong>
+            </div>
+
+            <div class="view-item-detail">
+              <span>
+                Unit
+              </span>
+
+              <strong>
+                ${escapeHTML(item.unit)}
+              </strong>
+            </div>
+
+            <div class="view-item-detail">
+              <span>
+                Expiry
+              </span>
+
+              <strong>
+                ${escapeHTML(expiryText)}
+              </strong>
+            </div>
+
+            <div class="view-item-detail">
+              <span>
+                Created
+              </span>
+
+              <strong>
+                ${escapeHTML(formatItemDateTime(item.createdAt))}
+              </strong>
+            </div>
+
+            <div class="view-item-detail">
+              <span>
+                Last Updated
+              </span>
+
+              <strong>
+                ${escapeHTML(
+                  formatItemDateTime(item.updatedAt || item.createdAt),
+                )}
+              </strong>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
+
+        <div class="view-item-section">
+          <div class="view-item-section-heading history-heading">
+            <div>
+              <span class="modal-eyebrow">
+                STOCK MOVEMENTS
+              </span>
+
+              <h4>
+                Movement History
+              </h4>
+            </div>
+
+            <span class="view-item-history-count">
+              ${movements.length}
+              ${movements.length === 1 ? "record" : "records"}
+            </span>
+          </div>
+
+          <div class="item-history-list">
+            ${historyHTML}
+          </div>
+        </div>
+      `;
 
     viewItemModal.classList.add("active");
     viewItemModal.setAttribute("aria-hidden", "false");

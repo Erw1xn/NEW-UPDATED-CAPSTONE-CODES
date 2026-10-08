@@ -2518,3 +2518,20 @@ button {
   color: #59655e;
   cursor: not-allowed;
 }
+.currency-input {
+  position: relative;
+  width: 100%;
+}
+.currency-symbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #68756d;
+  font-size: 0.75rem;
+  pointer-events: none;
+  z-index: 1;
+}
+.currency-input input {
+  padding-left: 28px;
+}
