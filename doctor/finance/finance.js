@@ -1,5 +1,6 @@
 "use strict";
 const TRANSACTIONS_API = "../../api/finance/transactions.php";
+const EXPENSES_API = "../../api/finance/expenses.php";
 const PATIENTS_KEY = "dentanueva_patients";
 const PATIENT_API = "../../api/patient_records.php";
 const APPOINTMENTS_API = "../../api/appointments.php?scope=doctor_appointments";
@@ -7,8 +8,12 @@ let transactions = [];
 let patients = [];
 let collectionPeriod = "today";
 let revenueMode = "today";
-let expenseData = [];
+let expenseReport = null;
+let auditEvents = [];
+let expensesModalReport = null;
 let currentDetailsTransaction = null;
+const TRANSACTION_PAGE_SIZE = 10;
+let transactionCurrentPage = 1;
 const sampleProcedureData = [
   { name: "Dental Cleaning", amount: 18500 },
   { name: "Tooth Filling / Pasta", amount: 14200 },
@@ -17,30 +22,65 @@ const sampleProcedureData = [
   { name: "Root Canal", amount: 8200 },
   { name: "Consultation", amount: 5600 },
 ];
-const sampleExpenseCategoryData = [
-  { name: "Dental Supplies", amount: 18500, color: "#16803d" },
-  { name: "Utilities", amount: 9200, color: "#2f80ed" },
-  { name: "Staff Salaries", amount: 28500, color: "#f2994a" },
-  { name: "Equipment Maintenance", amount: 7600, color: "#9b51e0" },
-  { name: "Marketing", amount: 4800, color: "#27ae60" },
-];
+const EXPENSE_COLORS = {
+  inventory: "#16803d",
+  utilities: "#2f80ed",
+  maintenance: "#9b51e0",
+  marketing: "#e84a8a",
+  other: "#8a9690",
+};
 document.addEventListener("DOMContentLoaded", async () => {
   await loadPatients();
   setupEvents();
-  await loadTransactions();
+  await Promise.all([
+    loadTransactions(),
+    loadExpenseReport(),
+    loadAuditTrail(),
+  ]);
+  renderFinance();
   openTreatmentChargeFromQuery();
 });
 function setupEvents() {
   setupPatientSelector();
   document
     .getElementById("transactionSearch")
-    ?.addEventListener("input", renderTransactions);
+    ?.addEventListener("input", () => {
+      transactionCurrentPage = 1;
+      renderTransactions();
+    });
   document
     .getElementById("paymentMethodFilter")
-    ?.addEventListener("change", renderTransactions);
+    ?.addEventListener("change", () => {
+      transactionCurrentPage = 1;
+      renderTransactions();
+    });
   document
     .getElementById("transactionDateFilter")
-    ?.addEventListener("change", renderTransactions);
+    ?.addEventListener("change", () => {
+      transactionCurrentPage = 1;
+      renderTransactions();
+    });
+  document
+    .getElementById("transactionPrevPageBtn")
+    ?.addEventListener("click", () => {
+      if (transactionCurrentPage > 1) {
+        transactionCurrentPage--;
+        renderTransactions();
+      }
+    });
+  document
+    .getElementById("transactionNextPageBtn")
+    ?.addEventListener("click", () => {
+      const filteredTransactions = getFilteredTransactions();
+      const totalPages = Math.max(
+        Math.ceil(filteredTransactions.length / TRANSACTION_PAGE_SIZE),
+        1,
+      );
+      if (transactionCurrentPage < totalPages) {
+        transactionCurrentPage++;
+        renderTransactions();
+      }
+    });
   document
     .getElementById("revenueSwitch")
     ?.addEventListener("click", toggleRevenueMode);
@@ -54,6 +94,44 @@ function setupEvents() {
       renderCollection();
     });
   });
+  document
+    .getElementById("monthlyExpensesButton")
+    ?.addEventListener("click", openExpensesModal);
+  document
+    .getElementById("closeExpensesBtn")
+    ?.addEventListener("click", closeExpensesModal);
+  document
+    .getElementById("expensesCloseButton")
+    ?.addEventListener("click", closeExpensesModal);
+  document
+    .getElementById("expensesModal")
+    ?.addEventListener("click", (event) => {
+      if (event.target === document.getElementById("expensesModal")) {
+        closeExpensesModal();
+      }
+    });
+  document
+    .getElementById("viewAllAuditButton")
+    ?.addEventListener("click", openAuditModal);
+  document
+    .getElementById("closeAuditBtn")
+    ?.addEventListener("click", closeAuditModal);
+  document
+    .getElementById("auditCloseButton")
+    ?.addEventListener("click", closeAuditModal);
+  document.getElementById("auditModal")?.addEventListener("click", (event) => {
+    if (event.target === document.getElementById("auditModal")) {
+      closeAuditModal();
+    }
+  });
+  document
+    .getElementById("expensesMonthSelect")
+    ?.addEventListener("change", (event) => {
+      loadExpensesModal(event.target.value);
+    });
+  document
+    .getElementById("addExpenseButton")
+    ?.addEventListener("click", addManualExpense);
   document
     .getElementById("recordPaymentButton")
     ?.addEventListener("click", openPaymentModal);
@@ -406,7 +484,9 @@ function renderRevenueCard() {
   }
   const monthlyRevenue = document.getElementById("monthlyRevenueAmount");
   if (monthlyRevenue) {
-    monthlyRevenue.textContent = formatMoney(monthRevenue);
+    monthlyRevenue.textContent = formatMoney(
+      monthRevenue - getMonthlyExpenses(),
+    );
   }
 }
 function renderSummaryCards() {
@@ -430,10 +510,7 @@ function renderSummaryCards() {
   if (expensesElement) {
     expensesElement.textContent = formatMoney(expenses);
   }
-  const expenseChange = document.getElementById("expenseChange");
-  if (expenseChange) {
-    expenseChange.textContent = "0% vs last month";
-  }
+  renderExpenseChange();
 }
 function getFilteredTransactions() {
   const search = (document.getElementById("transactionSearch")?.value || "")
@@ -501,17 +578,60 @@ function renderTransactions() {
   if (count) {
     count.textContent = `${filtered.length} transaction${filtered.length === 1 ? "" : "s"}`;
   }
+  const totalTransactions = filtered.length;
+  const totalPages = Math.max(
+    Math.ceil(totalTransactions / TRANSACTION_PAGE_SIZE),
+    1,
+  );
+  if (transactionCurrentPage > totalPages) {
+    transactionCurrentPage = totalPages;
+  }
+  if (transactionCurrentPage < 1) {
+    transactionCurrentPage = 1;
+  }
+  const startIndex = (transactionCurrentPage - 1) * TRANSACTION_PAGE_SIZE;
+  const pageTransactions = filtered.slice(
+    startIndex,
+    startIndex + TRANSACTION_PAGE_SIZE,
+  );
+  renderTransactionPagination(totalTransactions, totalPages);
   if (!filtered.length) {
     body.innerHTML =
       '<tr><td colspan="9" class="empty-table">No transactions found.</td></tr>';
     return;
   }
-  filtered.forEach((transaction) => {
+  pageTransactions.forEach((transaction) => {
     const row = document.createElement("tr");
     const status = getPaymentStatus(transaction);
     row.innerHTML = `<td><div class="patient-cell"><div class="patient-avatar">${getInitials(transaction.patient)}</div><div><span class="patient-name">${escapeHtml(transaction.patient)}</span><span class="invoice-number">${escapeHtml(transaction.id)}</span></div></div></td><td>${escapeHtml(transaction.service)}</td><td><span class="date-main">${formatShortDate(transaction.date)}</span><span class="date-time">${formatTime(transaction.time)}</span></td><td class="money">${formatMoney(transaction.total)}</td><td class="discount-money">${formatMoney(transaction.discount)}</td><td class="money">${formatMoney(transaction.paid)}</td><td class="balance-money">${formatMoney(getBalance(transaction))}</td><td><span class="status-badge ${getStatusClass(status)}">${status}</span></td><td><div class="action-buttons"><button type="button" class="table-action" title="View" onclick="viewTransaction('${escapeJs(transaction.id)}')"><i class="fa-regular fa-eye"></i></button></div></td>`;
     body.appendChild(row);
   });
+}
+function renderTransactionPagination(totalTransactions, totalPages) {
+  const pagination = document.getElementById("transactionPagination");
+  const summary = document.getElementById("transactionPaginationSummary");
+  const pageInfo = document.getElementById("transactionPaginationPageInfo");
+  const prevButton = document.getElementById("transactionPrevPageBtn");
+  const nextButton = document.getElementById("transactionNextPageBtn");
+  if (!pagination || !summary || !pageInfo || !prevButton || !nextButton) {
+    return;
+  }
+  if (totalTransactions <= TRANSACTION_PAGE_SIZE) {
+    pagination.style.display = "none";
+    prevButton.disabled = true;
+    nextButton.disabled = true;
+    return;
+  }
+  pagination.style.display = "flex";
+  const startItem = (transactionCurrentPage - 1) * TRANSACTION_PAGE_SIZE + 1;
+  const endItem = Math.min(
+    transactionCurrentPage * TRANSACTION_PAGE_SIZE,
+    totalTransactions,
+  );
+  summary.textContent = `Showing ${startItem}–${endItem} of ${totalTransactions} transactions`;
+  pageInfo.textContent = `Page ${transactionCurrentPage} of ${totalPages}`;
+  prevButton.disabled = transactionCurrentPage <= 1;
+  nextButton.disabled = transactionCurrentPage >= totalPages;
 }
 function renderProcedureChart() {
   const container = document.getElementById("procedureChart");
@@ -536,17 +656,21 @@ function renderProcedureChart() {
 }
 function renderRevenueExpenseChart() {
   const svg = document.getElementById("revenueExpenseChart");
-  if (!svg) {
+  const wrapper = svg?.closest(".line-chart-wrapper");
+  if (!svg || !wrapper) {
     return;
   }
   svg.innerHTML = "";
+  wrapper.querySelector(".revenue-expense-tooltip")?.remove();
   const months = Array.from({ length: 12 }, (_, index) =>
     new Date(new Date().getFullYear(), index, 1).toLocaleDateString("en-US", {
       month: "short",
     }),
   );
   const revenue = months.map((_, index) => getRevenueForMonth(index));
-  const expenses = months.map(() => 0);
+  const expenses = months.map((_, index) =>
+    Number(expenseReport?.yearly?.[index] || 0),
+  );
   const allValues = [...revenue, ...expenses];
   const maxValue = Math.max(...allValues, 1000);
   const width = 700;
@@ -609,20 +733,62 @@ function renderRevenueExpenseChart() {
   expensePath.setAttribute("d", makePath(expensePoints));
   expensePath.setAttribute("class", "expense-line");
   svg.appendChild(expensePath);
-  revenuePoints.forEach((point) => {
+  const tooltip = document.createElement("div");
+  tooltip.className = "revenue-expense-tooltip";
+  wrapper.appendChild(tooltip);
+  function showTooltip(point, month, type, value, seriesClass) {
+    const pointRect = point.getBoundingClientRect();
+    const wrapperRect = wrapper.getBoundingClientRect();
+    tooltip.innerHTML = `<span class="revenue-expense-tooltip-month">${escapeHtml(month)}</span><span class="revenue-expense-tooltip-type"><span class="revenue-expense-tooltip-dot ${seriesClass}"></span>${escapeHtml(type)}</span><span class="revenue-expense-tooltip-value">${escapeHtml(formatMoney(value))}</span>`;
+    tooltip.classList.add("show");
+    const tooltipWidth = tooltip.offsetWidth;
+    const tooltipHeight = tooltip.offsetHeight;
+    let left =
+      pointRect.left -
+      wrapperRect.left +
+      pointRect.width / 2 -
+      tooltipWidth / 2;
+    let top = pointRect.top - wrapperRect.top - tooltipHeight - 9;
+    const minLeft = 4;
+    const maxLeft = wrapperRect.width - tooltipWidth - 4;
+    left = Math.max(minLeft, Math.min(left, maxLeft));
+    if (top < 4) {
+      top = pointRect.bottom - wrapperRect.top + 9;
+    }
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+  function hideTooltip() {
+    tooltip.classList.remove("show");
+  }
+  revenuePoints.forEach((point, index) => {
     const circle = document.createElementNS(svgNamespace, "circle");
     circle.setAttribute("cx", point.x);
     circle.setAttribute("cy", point.y);
     circle.setAttribute("r", 4);
     circle.setAttribute("class", "revenue-point");
+    circle.addEventListener("mouseenter", () => {
+      showTooltip(circle, months[index], "Revenue", revenue[index], "revenue");
+    });
+    circle.addEventListener("mouseleave", hideTooltip);
     svg.appendChild(circle);
   });
-  expensePoints.forEach((point) => {
+  expensePoints.forEach((point, index) => {
     const circle = document.createElementNS(svgNamespace, "circle");
     circle.setAttribute("cx", point.x);
     circle.setAttribute("cy", point.y);
     circle.setAttribute("r", 4);
     circle.setAttribute("class", "expense-point");
+    circle.addEventListener("mouseenter", () => {
+      showTooltip(
+        circle,
+        months[index],
+        "Expenses",
+        expenses[index],
+        "expense",
+      );
+    });
+    circle.addEventListener("mouseleave", hideTooltip);
     svg.appendChild(circle);
   });
 }
@@ -633,26 +799,36 @@ function renderExpenseChart() {
     return;
   }
   list.innerHTML = "";
-  const total = sampleExpenseCategoryData.reduce(
-    (sum, item) => sum + item.amount,
+  pie.innerHTML = "";
+  const categories = Array.isArray(expenseReport?.categories)
+    ? expenseReport.categories
+    : [];
+  const total = categories.reduce(
+    (sum, item) => sum + Number(item.amount || 0),
     0,
   );
   let currentPercent = 0;
   const gradients = [];
-  if (!sampleExpenseCategoryData.length || total <= 0) {
-    pie.style.background = "none";
-    return;
-  }
-  sampleExpenseCategoryData.forEach((item) => {
-    const percentage = (item.amount / total) * 100;
-    const end = currentPercent + percentage;
-    gradients.push(`${item.color} ${currentPercent}% ${end}%`);
-    currentPercent = end;
+  categories.forEach((item) => {
+    const amount = Number(item.amount || 0);
+    const percentage = total > 0 ? (amount / total) * 100 : 0;
+    const color = EXPENSE_COLORS[item.key] || EXPENSE_COLORS.other;
+    if (amount > 0) {
+      const end = currentPercent + percentage;
+      gradients.push(`${color} ${currentPercent}% ${end}%`);
+      currentPercent = end;
+    }
     const itemElement = document.createElement("div");
     itemElement.className = "expense-category";
-    itemElement.innerHTML = `<span class="expense-color" style="background:${item.color}"></span><span>${escapeHtml(item.name)}: ${formatMoney(item.amount)} (${percentage.toFixed(1)}%)</span>`;
+    itemElement.innerHTML = `<span class="expense-color" style="background:${color}"></span><span>${escapeHtml(item.label)}: ${formatMoney(amount)} (${percentage.toFixed(1)}%)</span>`;
     list.appendChild(itemElement);
   });
+  if (!categories.length || total <= 0) {
+    pie.style.background = "#edf1ef";
+    pie.innerHTML =
+      '<div class="expense-pie-empty">No expenses<br />this month</div>';
+    return;
+  }
   pie.style.background = `conic-gradient(${gradients.join(",")})`;
 }
 function renderCollection() {
@@ -720,19 +896,312 @@ function renderCollection() {
         : "Total Collected This Month";
   }
 }
+function getAuditItemHtml(event) {
+  const icons = {
+    payment: "fa-peso-sign",
+    charge: "fa-file-invoice-dollar",
+    inventory: "fa-boxes-stacked",
+    expense: "fa-receipt",
+  };
+  const stamp = String(event.timestamp || "");
+  const when = `${formatShortDate(stamp.slice(0, 10))} · ${formatTime(stamp.slice(11, 16))}`;
+  const sign =
+    event.type === "expense" || event.type === "inventory" ? "-" : "";
+  return `<div class="audit-item"><div class="audit-item-icon ${escapeHtml(event.type)}"><i class="fa-solid ${icons[event.type] || "fa-circle-info"}"></i></div><div class="audit-item-body"><strong>${escapeHtml(event.title)}</strong><span title="${escapeHtml(event.detail)}">${escapeHtml(event.detail)}</span><span>${escapeHtml(event.reference || "")} · by ${escapeHtml(event.actor || "System")}</span></div><div class="audit-item-meta"><strong>${sign}${formatMoney(event.amount)}</strong><span>${escapeHtml(when)}</span></div></div>`;
+}
 function renderAuditTrail() {
   const container = document.getElementById("auditTrail");
+  const viewAllButton = document.getElementById("viewAllAuditButton");
   if (!container) {
     return;
   }
-  if (!transactions.length) {
+  if (!auditEvents.length) {
     container.innerHTML =
       '<div class="audit-content">No financial activity recorded yet.</div>';
+    if (viewAllButton) {
+      viewAllButton.style.display = "none";
+    }
     return;
   }
-  const latest = transactions[0];
-  const latestPayment = getPaymentHistory(latest)[0];
-  container.innerHTML = `<div class="audit-content"><strong>Latest payment record:</strong><br>Patient: ${escapeHtml(latest.patient)}<br>Invoice: ${escapeHtml(latest.invoice)}<br>Amount: ${formatMoney(latestPayment?.amount || latest.paid)}<br>Date: ${formatLongDate(latestPayment?.date || latest.date)}<br>Payment Method: ${escapeHtml(latestPayment?.paymentMethod || latest.method || "-")}</div>`;
+  if (viewAllButton) {
+    viewAllButton.style.display = "";
+  }
+  container.innerHTML = `<div class="audit-list">${getAuditItemHtml(auditEvents[0])}</div>`;
+  renderAuditModalList();
+}
+function renderAuditModalList() {
+  const list = document.getElementById("auditModalList");
+  if (!list) {
+    return;
+  }
+  list.innerHTML = auditEvents.length
+    ? `<div class="audit-list">${auditEvents.map(getAuditItemHtml).join("")}</div>`
+    : '<div class="audit-content">No financial activity recorded yet.</div>';
+}
+function openAuditModal() {
+  renderAuditModalList();
+  document.getElementById("auditModal")?.classList.add("show");
+}
+function closeAuditModal() {
+  document.getElementById("auditModal")?.classList.remove("show");
+}
+async function loadAuditTrail() {
+  try {
+    const response = await fetch(`${EXPENSES_API}?action=audit&limit=100`, {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to load audit trail.");
+    }
+    auditEvents = Array.isArray(result.data) ? result.data : [];
+  } catch (error) {
+    console.error("Unable to load audit trail:", error);
+    auditEvents = [];
+  }
+}
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+async function fetchExpenseReport(month) {
+  const response = await fetch(
+    `${EXPENSES_API}?month=${encodeURIComponent(month)}`,
+    { credentials: "include", headers: { Accept: "application/json" } },
+  );
+  const result = await response.json();
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "Unable to load monthly expenses.");
+  }
+  return result.data;
+}
+async function loadExpenseReport() {
+  try {
+    expenseReport = await fetchExpenseReport(getMonthKey());
+  } catch (error) {
+    console.error("Unable to load monthly expenses:", error);
+    expenseReport = null;
+  }
+}
+function renderExpenseChange() {
+  const element = document.getElementById("expenseChange");
+  if (!element) {
+    return;
+  }
+  const wrapper = element.closest(".expense-change");
+  const icon = wrapper?.querySelector("i");
+  const current = Number(expenseReport?.total || 0);
+  const previous = Number(expenseReport?.previous_total || 0);
+  let text = "0% vs last month";
+  let direction = "up";
+  if (previous > 0) {
+    const change = ((current - previous) / previous) * 100;
+    direction = change > 0 ? "up" : "down";
+    text = `${Math.abs(change).toFixed(1)}% vs last month`;
+  } else if (current > 0) {
+    text = "New vs last month";
+  }
+  element.textContent = text;
+  wrapper?.classList.toggle("down", direction === "down" && previous > 0);
+  if (icon) {
+    icon.className = `fa-solid fa-arrow-${direction}`;
+  }
+}
+function getMonthLabel(monthKey) {
+  const [year, month] = String(monthKey).split("-").map(Number);
+  return new Date(year, (month || 1) - 1, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+function openExpensesModal() {
+  const select = document.getElementById("expensesMonthSelect");
+  if (select) {
+    select.innerHTML = "";
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    for (let monthIndex = currentMonth; monthIndex >= 0; monthIndex--) {
+      const date = new Date(currentYear, monthIndex, 1);
+      const option = document.createElement("option");
+      option.value = getMonthKey(date);
+      option.textContent = getMonthLabel(option.value);
+      select.appendChild(option);
+    }
+  }
+  const dateInput = document.getElementById("expenseDate");
+  if (dateInput) {
+    dateInput.value = getTodayKey();
+  }
+  document.getElementById("expensesModal")?.classList.add("show");
+  loadExpensesModal(select?.value || getMonthKey());
+}
+function closeExpensesModal() {
+  document.getElementById("expensesModal")?.classList.remove("show");
+}
+async function loadExpensesModal(month) {
+  try {
+    expensesModalReport = await fetchExpenseReport(month);
+  } catch (error) {
+    console.error("Unable to load monthly expenses:", error);
+    expensesModalReport = null;
+  }
+  renderExpensesModal(month);
+}
+function renderExpensesModal(month) {
+  const report = expensesModalReport;
+  const total = Number(report?.total || 0);
+  const previous = Number(report?.previous_total || 0);
+  document.getElementById("expensesModalTotal").textContent =
+    formatMoney(total);
+  document.getElementById("expensesModalCompare").textContent = report
+    ? previous > 0
+      ? `${getMonthLabel(month)} · ${(((total - previous) / previous) * 100).toFixed(1)}% vs previous month`
+      : `${getMonthLabel(month)} · no expenses in the previous month`
+    : "Unable to load expenses.";
+  const categories = Array.isArray(report?.categories) ? report.categories : [];
+  document.getElementById("expensesBreakdown").innerHTML = categories
+    .map((item) => {
+      const amount = Number(item.amount || 0);
+      const percent = total > 0 ? (amount / total) * 100 : 0;
+      const color = EXPENSE_COLORS[item.key] || EXPENSE_COLORS.other;
+      return `<div class="breakdown-row"><span class="breakdown-name"><span class="expense-color" style="background:${color}"></span>${escapeHtml(item.label)}</span><div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:${percent}%;background:${color}"></div></div><span class="breakdown-amount">${formatMoney(amount)}</span></div>`;
+    })
+    .join("");
+  const inventory = report?.inventory || { items: [], total: 0 };
+  const inventoryCount = inventory.items.length;
+  document.getElementById("overviewInventoryTotal").textContent = formatMoney(
+    inventory.total,
+  );
+  document.getElementById("overviewInventoryCount").textContent =
+    `${inventoryCount} purchase${inventoryCount === 1 ? "" : "s"}`;
+  const body = document.getElementById("inventoryPurchasesBody");
+  body.innerHTML = inventory.items.length
+    ? inventory.items
+        .map((item) => {
+          const stamp = String(item.movement_date || "");
+          return `<tr><td>${formatShortDate(stamp.slice(0, 10))}</td><td>${escapeHtml(item.item_name)}</td><td class="num">${escapeHtml(String(item.quantity))} ${escapeHtml(item.unit || "")}</td><td class="num">${formatMoney(item.unit_cost)}</td><td class="num"><strong>${formatMoney(item.total_cost)}</strong></td></tr>`;
+        })
+        .join("")
+    : '<tr><td colspan="5" class="empty-cell">No inventory purchases this month.</td></tr>';
+  document.getElementById("inventoryPurchasesTotal").textContent = formatMoney(
+    inventory.total,
+  );
+  const missing = Number(inventory.missing_cost_count || 0);
+  document.getElementById("inventoryMissingNote").textContent = missing
+    ? `${missing} purchase${missing === 1 ? " has" : "s have"} no unit cost set (counted as ₱0.00)`
+    : "";
+  const canEdit = Boolean(report?.can_edit);
+  document
+    .getElementById("expenseAddSection")
+    ?.classList.toggle("hidden", !canEdit);
+  const entries = Array.isArray(report?.manual_entries)
+    ? report.manual_entries
+    : [];
+  const otherTotal = Math.max(total - Number(inventory.total || 0), 0);
+  document.getElementById("overviewOtherTotal").textContent =
+    formatMoney(otherTotal);
+  document.getElementById("overviewOtherCount").textContent = entries.length
+    ? `${entries.length} entr${entries.length === 1 ? "y" : "ies"}`
+    : "No entries";
+  document.getElementById("manualExpenseList").innerHTML = entries.length
+    ? entries
+        .map(
+          (entry) =>
+            `<div class="expense-entry"><div class="expense-entry-info"><strong>${escapeHtml(entry.category_label)}${entry.description ? ` · ${escapeHtml(entry.description)}` : ""}</strong><span>${escapeHtml(formatLongDate(entry.expense_date))}</span></div><div class="expense-entry-right">${formatMoney(entry.amount)}${canEdit ? `<button type="button" class="expense-delete" title="Delete" data-uid="${escapeHtml(entry.expense_uid)}"><i class="fa-solid fa-trash-can"></i></button>` : ""}</div></div>`,
+        )
+        .join("")
+    : '<div class="expense-empty">No other expenses recorded this month.</div>';
+  document.querySelectorAll(".expense-delete").forEach((button) => {
+    button.addEventListener("click", () =>
+      deleteManualExpense(button.dataset.uid),
+    );
+  });
+}
+async function refreshAfterExpenseChange() {
+  const month =
+    document.getElementById("expensesMonthSelect")?.value || getMonthKey();
+  await Promise.all([
+    loadExpenseReport(),
+    loadAuditTrail(),
+    loadExpensesModal(month),
+  ]);
+  renderFinance();
+}
+async function addManualExpense() {
+  const category = document.getElementById("expenseCategory")?.value || "";
+  const description = (
+    document.getElementById("expenseDescription")?.value || ""
+  ).trim();
+  const amount = Number(document.getElementById("expenseAmount")?.value) || 0;
+  const date = document.getElementById("expenseDate")?.value || "";
+  if (amount <= 0) {
+    alert("Please enter a valid amount.");
+    return;
+  }
+  if (!date) {
+    alert("Please select the expense date.");
+    return;
+  }
+  const button = document.getElementById("addExpenseButton");
+  try {
+    if (button) {
+      button.disabled = true;
+    }
+    const response = await fetch(EXPENSES_API, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ category, description, amount, date }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to save expense.");
+    }
+    document.getElementById("expenseDescription").value = "";
+    document.getElementById("expenseAmount").value = "";
+    const select = document.getElementById("expensesMonthSelect");
+    if (
+      select &&
+      Array.from(select.options).some((o) => o.value === date.slice(0, 7))
+    ) {
+      select.value = date.slice(0, 7);
+    }
+    await refreshAfterExpenseChange();
+  } catch (error) {
+    console.error("Unable to save expense:", error);
+    alert(error.message || "Unable to save expense.");
+  } finally {
+    if (button) {
+      button.disabled = false;
+    }
+  }
+}
+async function deleteManualExpense(uid) {
+  if (!uid || !confirm("Delete this expense?")) {
+    return;
+  }
+  try {
+    const response = await fetch(
+      `${EXPENSES_API}?expense_uid=${encodeURIComponent(uid)}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      },
+    );
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to delete expense.");
+    }
+    await refreshAfterExpenseChange();
+  } catch (error) {
+    console.error("Unable to delete expense:", error);
+    alert(error.message || "Unable to delete expense.");
+  }
 }
 function openPaymentModal() {
   const modal = document.getElementById("paymentModal");
@@ -918,6 +1387,8 @@ async function savePayment() {
       throw new Error(result.message || "Failed to create treatment charge.");
     }
     await loadTransactions();
+    await loadAuditTrail();
+    renderAuditTrail();
     window.__treatmentChargeContext = null;
     closePaymentModal();
   } catch (error) {
@@ -1030,11 +1501,9 @@ function closeDetailsModal() {
 }
 function printReceipt() {
   const transaction = currentDetailsTransaction;
-
   if (!transaction) {
     return;
   }
-
   openPaymentReceipt(transaction);
 }
 function getTodayKey() {
@@ -1060,7 +1529,7 @@ function getMonthlyRevenue() {
     .reduce((sum, transaction) => sum + transaction.paid, 0);
 }
 function getMonthlyExpenses() {
-  return expenseData.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  return Number(expenseReport?.total || 0);
 }
 function getRevenueForMonth(monthIndex) {
   const currentYear = new Date().getFullYear();

@@ -16,10 +16,7 @@
     />
     <link rel="stylesheet" href="../navigationbar/sidebar.css" />
     <link rel="stylesheet" href="../profile/profile.css" />
-    <link
-      rel="stylesheet"
-      href="finance.css?v=20260927-doctor-finance-layout"
-    />
+    <link rel="stylesheet" href="finance.css?v=20261008-audit-limit" />
   </head>
   <body>
     <div class="dashboard-wrapper">
@@ -154,6 +151,43 @@
               <tbody id="transactionsTableBody"></tbody>
             </table>
           </div>
+          <div
+            class="transaction-pagination"
+            id="transactionPagination"
+            style="display: none"
+          >
+            <div
+              class="transaction-pagination-summary"
+              id="transactionPaginationSummary"
+            >
+              Showing 1–10 of 0 transactions
+            </div>
+            <div class="transaction-pagination-controls">
+              <button
+                type="button"
+                class="transaction-pagination-button"
+                id="transactionPrevPageBtn"
+                disabled
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+                <span>Previous</span>
+              </button>
+              <span
+                class="transaction-pagination-page-info"
+                id="transactionPaginationPageInfo"
+                >Page 1 of 1</span
+              >
+              <button
+                type="button"
+                class="transaction-pagination-button"
+                id="transactionNextPageBtn"
+                disabled
+              >
+                <span>Next</span>
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
         </section>
         <section class="charts-grid">
           <article class="content-card chart-card">
@@ -212,6 +246,14 @@
               <div class="audit-title">
                 <i class="fa-solid fa-lock"></i>
                 <h2>Financial Audit Trail</h2>
+                <button
+                  type="button"
+                  class="view-all-btn"
+                  id="viewAllAuditButton"
+                  style="display: none"
+                >
+                  View All
+                </button>
               </div>
               <div id="auditTrail"></div>
             </article>
@@ -222,10 +264,6 @@
                 <h2>Collections</h2>
                 <p>Payment collection</p>
               </div>
-              <button type="button" class="view-all-btn">
-                View All
-                <i class="fa-solid fa-arrow-right"></i>
-              </button>
             </div>
             <div class="collection-tabs">
               <button
@@ -398,6 +436,150 @@
           </button>
           <button type="button" class="secondary-btn" id="printReceiptBtn">
             Print Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="expensesModal">
+      <div class="expenses-modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-label">EXPENSES</span>
+            <h2>Monthly Expenses</h2>
+          </div>
+          <div class="expenses-header-tools">
+            <select id="expensesMonthSelect" aria-label="Select month"></select>
+            <button type="button" class="close-button" id="closeExpensesBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div class="expenses-content">
+          <div class="expenses-section">
+            <h3>Monthly Overview</h3>
+            <div class="expenses-overview">
+              <div class="overview-card total-card">
+                <div class="overview-card-icon green-overview-icon">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="overview-card-content">
+                  <span>Total Expenses</span>
+                  <strong id="expensesModalTotal">₱0.00</strong>
+                  <small id="expensesModalCompare"></small>
+                </div>
+              </div>
+              <div class="overview-card inventory-overview-card">
+                <div class="overview-card-icon blue-overview-icon">
+                  <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div class="overview-card-content">
+                  <span>Inventory Purchases</span>
+                  <strong id="overviewInventoryTotal">₱0.00</strong>
+                  <small id="overviewInventoryCount">0 purchases</small>
+                </div>
+              </div>
+              <div class="overview-card other-overview-card">
+                <div class="overview-card-icon purple-overview-icon">
+                  <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div class="overview-card-content">
+                  <span>Other Expenses</span>
+                  <strong id="overviewOtherTotal">₱0.00</strong>
+                  <small id="overviewOtherCount">0 entries</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="expenses-section">
+            <h3>Expense Breakdown</h3>
+            <div class="expenses-breakdown" id="expensesBreakdown"></div>
+          </div>
+          <div class="expenses-section">
+            <div class="expenses-section-head">
+              <h3>Inventory Purchases</h3>
+              <span class="expenses-note" id="inventoryMissingNote"></span>
+            </div>
+            <div class="expenses-table-wrap">
+              <table class="expenses-table">
+                <thead>
+                  <tr>
+                    <th>DATE</th>
+                    <th>ITEM</th>
+                    <th class="num">QTY</th>
+                    <th class="num">UNIT COST</th>
+                    <th class="num">TOTAL</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryPurchasesBody"></tbody>
+              </table>
+            </div>
+            <div class="expenses-subtotal">
+              <span>Total Inventory Purchases</span>
+              <strong id="inventoryPurchasesTotal">₱0.00</strong>
+            </div>
+            <p class="expenses-hint">
+              Only stock replenishments count as expenses. Treatment usage and
+              treatment reversals are never counted again.
+            </p>
+          </div>
+          <div class="expenses-section" id="expenseAddSection">
+            <h3>Add Other Expense</h3>
+            <div class="expense-add-form" id="expenseAddForm">
+              <select id="expenseCategory">
+                <option value="utilities">Utilities</option>
+                <option value="maintenance">Equipment Maintenance</option>
+                <option value="marketing">Marketing</option>
+                <option value="other">Other</option>
+              </select>
+              <input
+                type="text"
+                id="expenseDescription"
+                placeholder="Description (optional)"
+                maxlength="255"
+              />
+              <input
+                type="number"
+                id="expenseAmount"
+                min="0"
+                step="0.01"
+                placeholder="Amount"
+              />
+              <input type="date" id="expenseDate" />
+              <button type="button" class="primary-btn" id="addExpenseButton">
+                <i class="fa-solid fa-plus"></i>
+                Add
+              </button>
+            </div>
+          </div>
+          <div class="expenses-section">
+            <h3>Other Expenses</h3>
+            <div class="expense-entry-list" id="manualExpenseList"></div>
+          </div>
+        </div>
+        <div class="details-actions">
+          <button type="button" class="secondary-btn" id="expensesCloseButton">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="auditModal">
+      <div class="audit-modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-label">AUDIT</span>
+            <h2>Financial Audit Trail</h2>
+          </div>
+          <button type="button" class="close-button" id="closeAuditBtn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="audit-modal-content">
+          <div id="auditModalList"></div>
+        </div>
+        <div class="details-actions">
+          <button type="button" class="secondary-btn" id="auditCloseButton">
+            Close
           </button>
         </div>
       </div>
