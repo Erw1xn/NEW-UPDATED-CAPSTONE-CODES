@@ -27,9 +27,8 @@ if ($role !== 'doctor' && $role !== 'staff') {
 }
 
 /*
- * Manual (non-inventory) expenses: utilities, salaries, maintenance, marketing...
- * Inventory purchases are NOT stored here. They are read live from
- * tbl_inventory_movements so Finance never duplicates Inventory data.
+ * Manual non-inventory expenses are stored here.
+ * Inventory purchases are read live from tbl_inventory_movements.
  */
 $conn->query(
     "CREATE TABLE IF NOT EXISTS tbl_finance_expenses (
@@ -49,7 +48,6 @@ $conn->query(
 const MANUAL_CATEGORIES = [
     'utilities' => 'Utilities',
     'maintenance' => 'Equipment Maintenance',
-    'marketing' => 'Marketing',
     'other' => 'Other',
 ];
 

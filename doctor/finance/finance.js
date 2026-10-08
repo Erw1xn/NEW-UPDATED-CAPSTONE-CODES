@@ -6,7 +6,6 @@ const PATIENT_API = "../../api/patient_records.php";
 const APPOINTMENTS_API = "../../api/appointments.php?scope=doctor_appointments";
 let transactions = [];
 let patients = [];
-let collectionPeriod = "today";
 let revenueMode = "today";
 let expenseReport = null;
 let auditEvents = [];
@@ -14,19 +13,10 @@ let expensesModalReport = null;
 let currentDetailsTransaction = null;
 const TRANSACTION_PAGE_SIZE = 10;
 let transactionCurrentPage = 1;
-const sampleProcedureData = [
-  { name: "Dental Cleaning", amount: 18500 },
-  { name: "Tooth Filling / Pasta", amount: 14200 },
-  { name: "Tooth Extraction", amount: 11800 },
-  { name: "Braces Adjustment", amount: 9600 },
-  { name: "Root Canal", amount: 8200 },
-  { name: "Consultation", amount: 5600 },
-];
 const EXPENSE_COLORS = {
   inventory: "#16803d",
   utilities: "#2f80ed",
   maintenance: "#9b51e0",
-  marketing: "#e84a8a",
   other: "#8a9690",
 };
 document.addEventListener("DOMContentLoaded", async () => {
@@ -42,6 +32,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 function setupEvents() {
   setupPatientSelector();
+  document
+    .getElementById("procedureChartFilter")
+    ?.addEventListener("change", renderProcedureChart);
   document
     .getElementById("transactionSearch")
     ?.addEventListener("input", () => {
@@ -84,16 +77,6 @@ function setupEvents() {
   document
     .getElementById("revenueSwitch")
     ?.addEventListener("click", toggleRevenueMode);
-  document.querySelectorAll(".collection-tab").forEach((button) => {
-    button.addEventListener("click", () => {
-      collectionPeriod = button.dataset.period || "today";
-      document.querySelectorAll(".collection-tab").forEach((item) => {
-        item.classList.remove("active");
-      });
-      button.classList.add("active");
-      renderCollection();
-    });
-  });
   document
     .getElementById("monthlyExpensesButton")
     ?.addEventListener("click", openExpensesModal);
@@ -167,6 +150,7 @@ function setupEvents() {
         closeDetailsModal();
       }
     });
+  window.addEventListener("resize", renderRevenueExpenseChart);
 }
 async function loadTransactions() {
   try {
@@ -452,7 +436,6 @@ function renderFinance() {
   renderProcedureChart();
   renderRevenueExpenseChart();
   renderExpenseChart();
-  renderCollection();
   renderAuditTrail();
 }
 function toggleRevenueMode() {
@@ -635,22 +618,52 @@ function renderTransactionPagination(totalTransactions, totalPages) {
 }
 function renderProcedureChart() {
   const container = document.getElementById("procedureChart");
+  const filter = document.getElementById("procedureChartFilter");
   if (!container) {
     return;
   }
   container.innerHTML = "";
-  let data = sampleProcedureData.map((item) => [item.name, item.amount]);
+  const revenueByProcedure = new Map();
+  transactions.forEach((transaction) => {
+    const service = String(transaction.service || "Other").trim() || "Other";
+    const revenue = Math.max(Number(transaction.paid) || 0, 0);
+    revenueByProcedure.set(
+      service,
+      (revenueByProcedure.get(service) || 0) + revenue,
+    );
+  });
+  let data = Array.from(revenueByProcedure.entries())
+    .map(([name, amount]) => ({ name, amount }))
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
   if (!data.length) {
+    container.innerHTML =
+      '<div class="procedure-chart-empty">No procedure revenue data available.</div>';
     return;
   }
-  data.sort((a, b) => b[1] - a[1]);
-  data = data.slice(0, 6);
-  const max = Math.max(...data.map((item) => item[1]), 1);
-  data.forEach(([name, value]) => {
+  const totalRevenue = data.reduce((sum, item) => sum + item.amount, 0);
+  const selectedLimit = filter?.value || "10";
+  if (selectedLimit !== "all") {
+    data = data.slice(0, Number(selectedLimit));
+  }
+  const max = Math.max(...data.map((item) => item.amount), 1);
+  data.forEach((item) => {
     const row = document.createElement("div");
     row.className = "procedure-row";
-    const percentage = (value / max) * 100;
-    row.innerHTML = `<span class="procedure-name">${escapeHtml(shortenService(name))}</span><div class="procedure-bar-bg"><div class="procedure-bar" style="width:${percentage}%"></div></div><span class="procedure-value">${formatMoney(value)}</span>`;
+    const percentage = (item.amount / max) * 100;
+    const share = totalRevenue > 0 ? (item.amount / totalRevenue) * 100 : 0;
+    row.innerHTML = `
+      <span class="procedure-name" title="${escapeHtml(item.name)}">${escapeHtml(shortenService(item.name))}</span>
+      <div class="procedure-bar-bg">
+        <div class="procedure-bar" style="width:${Math.max(percentage, 1.5)}%"></div>
+      </div>
+      <span class="procedure-value">${formatMoney(item.amount)}</span>
+      <div class="procedure-tooltip">
+        <strong>${escapeHtml(item.name)}</strong>
+        <span>Revenue · ${share.toFixed(1)}% share</span>
+        <b>${formatMoney(item.amount)}</b>
+      </div>
+    `;
     container.appendChild(row);
   });
 }
@@ -673,12 +686,13 @@ function renderRevenueExpenseChart() {
   );
   const allValues = [...revenue, ...expenses];
   const maxValue = Math.max(...allValues, 1000);
-  const width = 700;
-  const height = 300;
-  const left = 50;
-  const right = 18;
-  const top = 20;
-  const bottom = 45;
+  const width = Math.max(svg.clientWidth || 640, 320);
+  const height = Math.max(svg.clientHeight || 230, 180);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  const left = 56;
+  const right = 24;
+  const top = 16;
+  const bottom = 34;
   const chartWidth = width - left - right;
   const chartHeight = height - top - bottom;
   const xStep = chartWidth / (months.length - 1);
@@ -696,8 +710,9 @@ function renderRevenueExpenseChart() {
     line.setAttribute("class", "chart-grid-line");
     svg.appendChild(line);
     const label = document.createElementNS(svgNamespace, "text");
-    label.setAttribute("x", 4);
-    label.setAttribute("y", y + 4);
+    label.setAttribute("x", left - 10);
+    label.setAttribute("y", y + 3);
+    label.setAttribute("text-anchor", "end");
     label.setAttribute("class", "chart-axis-label");
     label.textContent = formatCompactMoney(maxValue - (maxValue / 5) * i);
     svg.appendChild(label);
@@ -706,7 +721,7 @@ function renderRevenueExpenseChart() {
     const x = left + xStep * index;
     const label = document.createElementNS(svgNamespace, "text");
     label.setAttribute("x", x);
-    label.setAttribute("y", height - 13);
+    label.setAttribute("y", height - 10);
     label.setAttribute("text-anchor", "middle");
     label.setAttribute("class", "chart-axis-label");
     label.textContent = month;
@@ -723,8 +738,20 @@ function renderRevenueExpenseChart() {
       .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
       .join(" ");
   }
+  function makeAreaPath(points) {
+    const baseline = top + chartHeight;
+    return `${makePath(points)} L ${points[points.length - 1].x} ${baseline} L ${points[0].x} ${baseline} Z`;
+  }
   const revenuePoints = makePoints(revenue);
   const expensePoints = makePoints(expenses);
+  const expenseArea = document.createElementNS(svgNamespace, "path");
+  expenseArea.setAttribute("d", makeAreaPath(expensePoints));
+  expenseArea.setAttribute("class", "expense-area");
+  svg.appendChild(expenseArea);
+  const revenueArea = document.createElementNS(svgNamespace, "path");
+  revenueArea.setAttribute("d", makeAreaPath(revenuePoints));
+  revenueArea.setAttribute("class", "revenue-area");
+  svg.appendChild(revenueArea);
   const revenuePath = document.createElementNS(svgNamespace, "path");
   revenuePath.setAttribute("d", makePath(revenuePoints));
   revenuePath.setAttribute("class", "revenue-line");
@@ -820,7 +847,7 @@ function renderExpenseChart() {
     }
     const itemElement = document.createElement("div");
     itemElement.className = "expense-category";
-    itemElement.innerHTML = `<span class="expense-color" style="background:${color}"></span><span>${escapeHtml(item.label)}: ${formatMoney(amount)} (${percentage.toFixed(1)}%)</span>`;
+    itemElement.innerHTML = `<span class="expense-color" style="background:${color}"></span><span class="expense-category-label">${escapeHtml(item.label)}</span><span class="expense-category-amount">${formatMoney(amount)}</span><span class="expense-category-percent">${percentage.toFixed(1)}%</span>`;
     list.appendChild(itemElement);
   });
   if (!categories.length || total <= 0) {
@@ -830,71 +857,7 @@ function renderExpenseChart() {
     return;
   }
   pie.style.background = `conic-gradient(${gradients.join(",")})`;
-}
-function renderCollection() {
-  const list = document.getElementById("collectionList");
-  const totalElement = document.getElementById("collectionTotal");
-  const totalLabel = document.getElementById("collectionTotalLabel");
-  if (!list) {
-    return;
-  }
-  list.innerHTML = "";
-  const methods = [
-    {
-      value: "Cash",
-      name: "Cash",
-      icon: "fa-money-bill-wave",
-      className: "cash",
-    },
-    {
-      value: "GCash",
-      name: "GCash",
-      icon: "fa-mobile-screen-button",
-      className: "gcash",
-    },
-    {
-      value: "Bank Transfer",
-      name: "Bank Transfer",
-      icon: "fa-building-columns",
-      className: "bank",
-    },
-  ];
-  let grandTotal = 0;
-  methods.forEach((method) => {
-    const methodPayments = transactions
-      .flatMap((transaction) =>
-        getPaymentHistory(transaction).filter(
-          (payment) =>
-            payment.paymentMethod === method.value &&
-            payment.status === "paid" &&
-            payment.amount > 0,
-        ),
-      )
-      .filter((payment) => {
-        if (collectionPeriod === "today") {
-          return payment.date === getTodayKey();
-        }
-        return isCurrentMonth(payment.date);
-      });
-    const amount = methodPayments.reduce(
-      (sum, payment) => sum + payment.amount,
-      0,
-    );
-    grandTotal += amount;
-    const item = document.createElement("div");
-    item.className = "collection-item";
-    item.innerHTML = `<div class="collection-icon ${method.className}"><i class="fa-solid ${method.icon}"></i></div><div class="collection-details"><span class="collection-name">${method.name}</span><span class="collection-transactions">${methodPayments.length} transaction${methodPayments.length === 1 ? "" : "s"}</span></div><span class="collection-amount">${formatMoney(amount)}</span>`;
-    list.appendChild(item);
-  });
-  if (totalElement) {
-    totalElement.textContent = formatMoney(grandTotal);
-  }
-  if (totalLabel) {
-    totalLabel.textContent =
-      collectionPeriod === "today"
-        ? "Total Collected Today"
-        : "Total Collected This Month";
-  }
+  pie.innerHTML = `<div class="expense-pie-center"><span>Total</span><strong>${formatMoney(total)}</strong></div>`;
 }
 function getAuditItemHtml(event) {
   const icons = {
@@ -907,7 +870,12 @@ function getAuditItemHtml(event) {
   const when = `${formatShortDate(stamp.slice(0, 10))} · ${formatTime(stamp.slice(11, 16))}`;
   const sign =
     event.type === "expense" || event.type === "inventory" ? "-" : "";
-  return `<div class="audit-item"><div class="audit-item-icon ${escapeHtml(event.type)}"><i class="fa-solid ${icons[event.type] || "fa-circle-info"}"></i></div><div class="audit-item-body"><strong>${escapeHtml(event.title)}</strong><span title="${escapeHtml(event.detail)}">${escapeHtml(event.detail)}</span><span>${escapeHtml(event.reference || "")} · by ${escapeHtml(event.actor || "System")}</span></div><div class="audit-item-meta"><strong>${sign}${formatMoney(event.amount)}</strong><span>${escapeHtml(when)}</span></div></div>`;
+  const amountClass = sign
+    ? "amount-out"
+    : event.type === "payment"
+      ? "amount-in"
+      : "";
+  return `<div class="audit-item"><div class="audit-item-icon ${escapeHtml(event.type)}"><i class="fa-solid ${icons[event.type] || "fa-circle-info"}"></i></div><div class="audit-item-body"><strong>${escapeHtml(event.title)}</strong><span title="${escapeHtml(event.detail)}">${escapeHtml(event.detail)}</span><span>${escapeHtml(event.reference || "")} · by ${escapeHtml(event.actor || "System")}</span></div><div class="audit-item-meta"><strong class="${amountClass}">${sign}${formatMoney(event.amount)}</strong><span>${escapeHtml(when)}</span></div></div>`;
 }
 function renderAuditTrail() {
   const container = document.getElementById("auditTrail");
@@ -926,7 +894,7 @@ function renderAuditTrail() {
   if (viewAllButton) {
     viewAllButton.style.display = "";
   }
-  container.innerHTML = `<div class="audit-list">${getAuditItemHtml(auditEvents[0])}</div>`;
+  container.innerHTML = `<div class="audit-list">${auditEvents.slice(0, 3).map(getAuditItemHtml).join("")}</div>`;
   renderAuditModalList();
 }
 function renderAuditModalList() {
