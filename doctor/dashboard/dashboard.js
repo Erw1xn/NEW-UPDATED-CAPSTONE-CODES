@@ -13,6 +13,7 @@ const STATUS = {
 let appointments = [];
 let patients = [];
 let transactions = [];
+let serviceTransactions = [];
 let currentUser = null;
 document.addEventListener("DOMContentLoaded", () => {
   updateDateTime();
@@ -49,7 +50,7 @@ function loadFinanceTransactions() {
   return transactions;
 }
 function loadDashboardSampleTransactions() {
-  return transactions;
+  return serviceTransactions;
 }
 async function refreshDashboardData() {
   try {
@@ -109,8 +110,14 @@ async function refreshDashboardData() {
       Array.isArray(financeResult.data)
     ) {
       transactions = flattenFinancePayments(financeResult.data);
+      serviceTransactions = financeResult.data.map((transaction) => ({
+        service:
+          String(transaction.service_name || "").trim() || "Consultation",
+        paid: Math.max(Number(transaction.paid_amount) || 0, 0),
+      }));
     } else {
       transactions = [];
+      serviceTransactions = [];
     }
     renderDashboard();
   } catch (error) {
@@ -336,7 +343,7 @@ function renderDashboard() {
   updateClinicSummary(todayAppointments);
   renderTodayAppointments(todayAppointments);
   updateProduction(transactions);
-  renderWeeklyChart(dashboardSampleTransactions);
+  renderWeeklyChart(transactions);
   renderProcedureChart(dashboardSampleTransactions);
 }
 function updatePatientCount(patients) {
@@ -564,6 +571,7 @@ function renderWeeklyChart(transactions) {
   monday.setHours(0, 0, 0, 0);
   monday.setDate(today.getDate() + mondayOffset);
   const production = [];
+  const dayNames = ["Mon", "Tues", "Wed", "Thur", "Fri", "Sat", "Sun"];
   for (let i = 0; i < 7; i++) {
     const date = new Date(monday);
     date.setDate(monday.getDate() + i);
@@ -582,16 +590,25 @@ function renderWeeklyChart(transactions) {
     DAILY_GOAL,
     DAILY_GOAL,
   ];
-  const max = DAILY_GOAL;
+  const max = Math.max(DAILY_GOAL, ...production);
+  const yAxisLabels = document.querySelectorAll(".chart-y-axis span");
+  yAxisLabels.forEach((labelElement, index) => {
+    const steps = Math.max(yAxisLabels.length - 1, 1);
+    labelElement.textContent = Math.round(
+      max * (1 - index / steps),
+    ).toLocaleString("en-PH");
+  });
   for (let i = 0; i < 7; i++) {
     const day = document.createElement("div");
     day.className = "day-bar";
     const productionBar = document.createElement("div");
     productionBar.className = "bar production-bar";
     productionBar.style.height = `${Math.min(100, (production[i] / max) * 100)}%`;
+    productionBar.title = `${dayNames[i]} Production: ${formatPeso(production[i])}`;
     const goalBar = document.createElement("div");
     goalBar.className = "bar goal-bar";
     goalBar.style.height = `${Math.min(100, (goal[i] / max) * 100)}%`;
+    goalBar.title = `${dayNames[i]} Goal: ${formatPeso(goal[i])}`;
     day.appendChild(productionBar);
     day.appendChild(goalBar);
     container.appendChild(day);
@@ -603,35 +620,27 @@ function renderProcedureChart(transactions) {
   if (!procedureDonut || !procedureTotal) {
     return;
   }
-  const procedureTotals = {
-    "Tooth Filling": 0,
-    "Dental Cleaning": 0,
-    Consultation: 0,
-    "Tooth Extraction": 0,
-    Emergency: 0,
-  };
+  const revenueByService = new Map();
   transactions.forEach((transaction) => {
-    const service = getTransactionService(transaction).toLowerCase();
-    const amount = getTransactionAmount(transaction);
-    if (service.includes("filling")) {
-      procedureTotals["Tooth Filling"] += amount;
-    } else if (service.includes("cleaning")) {
-      procedureTotals["Dental Cleaning"] += amount;
-    } else if (
-      service.includes("consultation") ||
-      service.includes("evaluation")
-    ) {
-      procedureTotals["Consultation"] += amount;
-    } else if (service.includes("extraction")) {
-      procedureTotals["Tooth Extraction"] += amount;
-    } else if (service.includes("emergency")) {
-      procedureTotals["Emergency"] += amount;
-    }
+    const service = getTransactionService(transaction) || "Other";
+    const amount = Math.max(getTransactionAmount(transaction), 0);
+    revenueByService.set(
+      service,
+      (revenueByService.get(service) || 0) + amount,
+    );
   });
-  const total = Object.values(procedureTotals).reduce(
-    (sum, value) => sum + value,
-    0,
-  );
+  const data = Array.from(revenueByService.entries())
+    .map(([name, amount]) => ({ name, amount }))
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+  let slots = data.slice(0, 5);
+  if (data.length > 5) {
+    const othersAmount = data
+      .slice(4)
+      .reduce((sum, item) => sum + item.amount, 0);
+    slots = [...data.slice(0, 4), { name: "Others", amount: othersAmount }];
+  }
+  const total = data.reduce((sum, item) => sum + item.amount, 0);
   procedureTotal.textContent = formatPeso(total).replace(".00", "");
   if (total === 0) {
     procedureDonut.style.background = "conic-gradient(#dfe5e1 0 100%)";
@@ -645,8 +654,8 @@ function renderProcedureChart(transactions) {
       "#ef4444",
       "#8b5cf6",
     ];
-    Object.values(procedureTotals).forEach((value, index) => {
-      const percentage = (value / total) * 100;
+    slots.forEach((item, index) => {
+      const percentage = (item.amount / total) * 100;
       segments.push(
         `${segmentColors[index]} ${current}% ${current + percentage}%`,
       );
@@ -654,36 +663,34 @@ function renderProcedureChart(transactions) {
     });
     procedureDonut.style.background = `conic-gradient(${segments.join(", ")})`;
   }
-  setProcedureLabel(
+  const labelIds = [
     "fillingLabel",
-    "Fillings",
-    procedureTotals["Tooth Filling"],
-    total,
-  );
-  setProcedureLabel(
     "cleaningLabel",
-    "Cleaning",
-    procedureTotals["Dental Cleaning"],
-    total,
-  );
-  setProcedureLabel(
     "evaluationLabel",
-    "Evaluation",
-    procedureTotals["Consultation"],
-    total,
-  );
-  setProcedureLabel(
     "extractionLabel",
-    "Extraction",
-    procedureTotals["Tooth Extraction"],
-    total,
-  );
-  setProcedureLabel(
     "emergencyLabel",
-    "Emergency",
-    procedureTotals["Emergency"],
-    total,
-  );
+  ];
+  labelIds.forEach((id, index) => {
+    const slot = slots[index];
+    if (slot) {
+      setProcedureLabel(id, shortenService(slot.name), slot.amount, total);
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = "";
+        element.title = "";
+      }
+    }
+  });
+}
+function shortenService(service) {
+  const replacements = {
+    "Dental Cleaning": "Cleaning",
+    "Tooth Filling / Pasta": "Composite",
+    "Tooth Extraction": "Extraction",
+    "Braces Adjustment": "Braces",
+  };
+  return replacements[service] || service;
 }
 function setProcedureLabel(id, label, value, total) {
   const element = document.getElementById(id);
@@ -692,6 +699,7 @@ function setProcedureLabel(id, label, value, total) {
   }
   const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
   element.textContent = `${label} ${percentage}%`;
+  element.title = `${label}: ${formatPeso(value)}`;
 }
 function formatDateKey(date) {
   const year = date.getFullYear();

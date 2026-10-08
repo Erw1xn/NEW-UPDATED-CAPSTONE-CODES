@@ -504,7 +504,13 @@ function getFilteredTransactions() {
   );
   const dateFilter =
     document.getElementById("transactionDateFilter")?.value || "all";
+  const doctorPatientIds = new Set(
+    patients.map((patient) => getPatientId(patient)).filter(Boolean),
+  );
   return transactions
+    .filter((transaction) => {
+      return doctorPatientIds.has(String(transaction.patientId || "").trim());
+    })
     .filter((transaction) => {
       if (!search) {
         return true;
