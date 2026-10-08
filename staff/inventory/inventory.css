@@ -909,7 +909,6 @@ button {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  pointer-events: none;
 }
 #inventoryPage2 .forecast-chart-empty {
   min-height: 220px;

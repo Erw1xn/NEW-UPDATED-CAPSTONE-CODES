@@ -186,11 +186,56 @@
       .balance-top-group {
         grid-column: 2;
       }
-      .discount-top-group {
+
+      .discount-type-group {
         grid-column: 1;
       }
+
+      .discount-top-group {
+        grid-column: 2;
+      }
+
       .payment-paid-group {
-        grid-column: 1/-1;
+        grid-column: 1;
+      }
+
+      .payment-change-group {
+        grid-column: 2;
+      }
+
+      .discount-type-group select {
+        width: 100%;
+        height: 39px;
+        padding: 0 12px;
+        border: 1px solid #dce6e0;
+        border-radius: 10px;
+        background: #fff;
+        color: #29352e;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .discount-type-group select:focus {
+        border-color: #a9d2ba;
+        box-shadow: 0 0 0 3px rgba(8, 120, 63, 0.06);
+      }
+
+      .payment-change-group .calculated-input {
+        background: #f3faf6;
+        border-color: #d4e9dc;
+      }
+
+      .payment-change-group .calculated-input input {
+        background: #f3faf6;
+        color: #08783f;
+        font-weight: 800;
+      }
+
+      #paymentDiscount {
+        cursor: default;
       }
       .payment-modal {
         width: min(650px, 100%);
@@ -686,14 +731,19 @@
         .payment-method-options {
           grid-template-columns: 1fr;
         }
+
         .payment-method-option {
           min-height: 78px;
         }
+
         .balance-top-group,
+        .discount-type-group,
         .discount-top-group,
-        .payment-paid-group {
+        .payment-paid-group,
+        .payment-change-group {
           grid-column: 1;
         }
+
         .patient-cell {
           min-width: 145px;
         }
@@ -1307,210 +1357,336 @@
         </div>
       </div>
     </aside>
+    <!-- REPLACE the whole block: <div class="modal-overlay" id="paymentModal"> ... </div>
+     (the one that ends right before <div class="payment-verification-overlay" ...>) -->
     <div class="modal-overlay" id="paymentModal">
       <div class="payment-modal">
         <div class="modal-header">
           <div>
-            <span class="modal-label">FINANCE</span>
+            <span class="modal-label" id="paymentStepLabel"
+              >FINANCE · STEP 1 OF 2</span
+            >
             <h2 id="modalTitle">Record Payment</h2>
           </div>
           <button type="button" class="close-button" id="closeModalBtn">
             <i data-lucide="x"></i>
           </button>
         </div>
-        <div class="appointment-payment-info" id="appointmentPaymentInfo">
-          <div class="appointment-info-grid">
-            <div class="appointment-info-item">
-              <span class="appointment-info-title">Appointment</span>
-              <strong id="appointmentInfoDate">-</strong>
-            </div>
 
-            <div class="appointment-info-item">
-              <span class="appointment-info-title">Dentist</span>
-              <strong id="appointmentInfoDentist">-</strong>
-            </div>
-          </div>
-        </div>
-        <form id="paymentForm">
+        <form id="paymentForm" novalidate>
           <input type="hidden" id="transactionId" />
           <input type="hidden" id="paymentStatus" value="Unpaid" />
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="patientName">Patient Name <span>*</span></label>
-              <div class="patient-select-wrapper" id="patientSelectWrapper">
-                <input
-                  type="text"
-                  id="patientName"
-                  class="form-control patient-select-input"
-                  placeholder="Type patient name or patient ID"
-                  autocomplete="off"
-                  aria-autocomplete="list"
-                  aria-expanded="false"
-                />
-                <i class="fa-solid fa-chevron-down patient-select-arrow"></i>
-                <div
-                  class="patient-dropdown"
-                  id="patientDropdown"
-                  role="listbox"
-                ></div>
+
+          <!-- ===================== STEP 1 : DISCOUNT ===================== -->
+          <div class="payment-step" id="paymentStep1">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="patientName">Patient Name <span>*</span></label>
+                <div class="patient-select-wrapper" id="patientSelectWrapper">
+                  <input
+                    type="text"
+                    id="patientName"
+                    class="form-control patient-select-input"
+                    placeholder="Type patient name or patient ID"
+                    autocomplete="off"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                  />
+                  <i class="fa-solid fa-chevron-down patient-select-arrow"></i>
+                  <div
+                    class="patient-dropdown"
+                    id="patientDropdown"
+                    role="listbox"
+                  ></div>
+                </div>
+                <small class="field-help"
+                  >Only patients already registered in the Patients page can be
+                  selected.</small
+                >
               </div>
-              <small class="field-help"
-                >Only patients already registered in the Patients page can be
-                selected.</small
+
+              <div class="form-group">
+                <label for="serviceName">Service <span>*</span></label>
+                <div class="service-select-wrapper" id="serviceSelectWrapper">
+                  <input
+                    type="text"
+                    id="serviceName"
+                    class="service-select-input"
+                    placeholder="e.g. Dental Cleaning"
+                    autocomplete="off"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    required
+                  />
+                  <i class="fa-solid fa-chevron-down service-select-arrow"></i>
+                  <div
+                    class="service-dropdown"
+                    id="serviceDropdown"
+                    role="listbox"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentDate">Payment Date <span>*</span></label>
+                <input type="date" id="paymentDate" required />
+              </div>
+
+              <div class="form-group">
+                <label for="paymentTotal">Total Amount <span>*</span></label>
+                <div class="amount-input">
+                  <span>₱</span>
+                  <input
+                    type="number"
+                    id="paymentTotal"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="discountType">Discount Type <span>*</span></label>
+                <select id="discountType">
+                  <option value="none">No Discount</option>
+                  <option value="senior">Senior Citizen</option>
+                  <option value="pwd">PWD</option>
+                  <option value="promo">Clinic Promotional</option>
+                  <option value="other">Other Authorized</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="discountRate">Discount Rate</label>
+                <div class="amount-input">
+                  <input
+                    type="number"
+                    id="discountRate"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value="0"
+                    placeholder="0.00"
+                    disabled
+                  />
+                  <span class="rate-suffix">%</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentDiscount">Discount Amount</label>
+                <div class="amount-input calculated-input">
+                  <span>₱</span>
+                  <input
+                    type="text"
+                    id="paymentDiscount"
+                    value="0.00"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentNet">Net Amount</label>
+                <div class="amount-input calculated-input">
+                  <span>₱</span>
+                  <input type="text" id="paymentNet" value="0.00" readonly />
+                </div>
+              </div>
+
+              <small
+                class="field-help payment-status-hidden"
+                id="discountLockedNote"
+                style="grid-column: 1 / -1"
               >
+                The discount was already applied to this transaction and cannot
+                be changed or applied again.
+              </small>
             </div>
-            <div class="form-group">
-              <label for="serviceName">Service <span>*</span></label>
-              <div class="service-select-wrapper" id="serviceSelectWrapper">
-                <input
-                  type="text"
-                  id="serviceName"
-                  class="service-select-input"
-                  placeholder="e.g. Dental Cleaning"
-                  autocomplete="off"
-                  aria-autocomplete="list"
-                  aria-expanded="false"
+          </div>
+
+          <!-- ===================== STEP 2 : PAYMENT ===================== -->
+          <div class="payment-step payment-status-hidden" id="paymentStep2">
+            <div class="payment-summary">
+              <span class="payment-summary-title">Payment Summary</span>
+              <div class="payment-summary-grid">
+                <div>
+                  <span>Patient Name</span><strong id="sumPatient">-</strong>
+                </div>
+                <div>
+                  <span>Service</span><strong id="sumService">-</strong>
+                </div>
+                <div>
+                  <span>Total Amount</span><strong id="sumTotal">₱0.00</strong>
+                </div>
+                <div>
+                  <span>Discount</span><strong id="sumDiscount">₱0.00</strong>
+                </div>
+                <div>
+                  <span>Net Amount</span><strong id="sumNet">₱0.00</strong>
+                </div>
+                <div>
+                  <span>Balance</span><strong id="sumBalance">₱0.00</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group payment-method-form-group">
+                <label class="payment-method-selector-label" for="paymentMethod"
+                  >Payment Method <span>*</span></label
+                >
+                <select
+                  id="paymentMethod"
+                  class="payment-method-native-select"
                   required
-                />
-                <i class="fa-solid fa-chevron-down service-select-arrow"></i>
+                  aria-hidden="true"
+                  tabindex="-1"
+                >
+                  <option value="">Select method</option>
+                  <option value="Cash">Cash</option>
+                  <option value="GCash">GCash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
                 <div
-                  class="service-dropdown"
-                  id="serviceDropdown"
-                  role="listbox"
-                ></div>
+                  class="payment-method-options"
+                  role="group"
+                  aria-label="Payment Method"
+                >
+                  <button
+                    type="button"
+                    class="payment-method-option cash-option"
+                    data-payment-method="Cash"
+                    aria-pressed="false"
+                  >
+                    <span class="payment-method-option-icon"
+                      ><i class="fa-solid fa-money-bill-wave"></i
+                    ></span>
+                    <strong>Cash</strong><small>Pay at clinic</small>
+                    <span class="payment-method-option-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="payment-method-option gcash-option"
+                    data-payment-method="GCash"
+                    aria-pressed="false"
+                  >
+                    <span class="payment-method-option-icon"
+                      ><i class="fa-solid fa-mobile-screen-button"></i
+                    ></span>
+                    <strong>GCash</strong><small>Digital payment</small>
+                    <span class="payment-method-option-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    class="payment-method-option bank-option"
+                    data-payment-method="Bank Transfer"
+                    aria-pressed="false"
+                  >
+                    <span class="payment-method-option-icon"
+                      ><i class="fa-solid fa-building-columns"></i
+                    ></span>
+                    <strong>Bank Transfer</strong
+                    ><small>Direct bank transfer</small>
+                    <span class="payment-method-option-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="form-group">
-              <label for="paymentDate">Payment Date <span>*</span></label>
-              <input type="date" id="paymentDate" required />
-            </div>
-            <div class="form-group">
-              <label for="paymentTotal">Total Amount <span>*</span></label>
-              <div class="amount-input">
-                <span>₱</span
-                ><input
-                  type="number"
-                  id="paymentTotal"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-            </div>
-            <div class="form-group discount-top-group">
-              <label for="paymentDiscount">Discount</label>
-              <div class="amount-input">
-                <span>₱</span
-                ><input
-                  type="number"
-                  id="paymentDiscount"
-                  min="0"
-                  step="0.01"
-                  value="0"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div class="form-group balance-top-group">
-              <label for="paymentBalance">Remaining Balance</label>
-              <div class="amount-input calculated-input">
-                <span>₱</span
-                ><input type="text" id="paymentBalance" value="0.00" readonly />
-              </div>
-            </div>
-            <div class="form-group payment-method-form-group">
-              <label class="payment-method-selector-label" for="paymentMethod"
-                >Payment Method <span>*</span></label
-              >
-              <select
-                id="paymentMethod"
-                class="payment-method-native-select"
-                required
-                aria-hidden="true"
-                tabindex="-1"
-              >
-                <option value="">Select method</option>
-                <option value="Cash">Cash</option>
-                <option value="GCash">GCash</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-              </select>
+
               <div
-                class="payment-method-options"
-                role="group"
-                aria-label="Payment Method"
+                class="form-group full-width-process"
+                id="paymentProcessWrapper"
+                style="display: none"
               >
-                <button
-                  type="button"
-                  class="payment-method-option cash-option"
-                  data-payment-method="Cash"
-                  aria-pressed="false"
-                >
-                  <span class="payment-method-option-icon"
-                    ><i class="fa-solid fa-money-bill-wave"></i></span
-                  ><strong>Cash</strong><small>Pay at clinic</small
-                  ><span class="payment-method-option-check"
-                    ><i class="fa-solid fa-check"></i
-                  ></span>
-                </button>
-                <button
-                  type="button"
-                  class="payment-method-option gcash-option"
-                  data-payment-method="GCash"
-                  aria-pressed="false"
-                >
-                  <span class="payment-method-option-icon"
-                    ><i class="fa-solid fa-mobile-screen-button"></i></span
-                  ><strong>GCash</strong><small>Digital payment</small
-                  ><span class="payment-method-option-check"
-                    ><i class="fa-solid fa-check"></i
-                  ></span>
-                </button>
-                <button
-                  type="button"
-                  class="payment-method-option bank-option"
-                  data-payment-method="Bank Transfer"
-                  aria-pressed="false"
-                >
-                  <span class="payment-method-option-icon"
-                    ><i class="fa-solid fa-building-columns"></i></span
-                  ><strong>Bank Transfer</strong
-                  ><small>Direct bank transfer</small
-                  ><span class="payment-method-option-check"
-                    ><i class="fa-solid fa-check"></i
-                  ></span>
-                </button>
+                <div class="payment-process-box" id="paymentProcessBox"></div>
               </div>
-            </div>
-            <div
-              class="form-group full-width-process"
-              id="paymentProcessWrapper"
-              style="display: none"
-            >
-              <div class="payment-process-box" id="paymentProcessBox"></div>
-            </div>
-            <div class="form-group payment-paid-group">
-              <label for="paymentPaid">Amount Received <span>*</span></label>
-              <div class="amount-input">
-                <span>₱</span
-                ><input
-                  type="number"
-                  id="paymentPaid"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  required
-                />
+
+              <div class="form-group" id="paymentDueGroup">
+                <label for="paymentAmountDue">Amount to Pay</label>
+                <div class="amount-input calculated-input">
+                  <span>₱</span>
+                  <input
+                    type="text"
+                    id="paymentAmountDue"
+                    value="0.00"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <div class="form-group payment-received-group">
+                <label for="paymentPaid">Amount Received <span>*</span></label>
+                <div class="amount-input">
+                  <span>₱</span>
+                  <input
+                    type="number"
+                    id="paymentPaid"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group" id="paymentChangeGroup">
+                <label for="paymentChange">Change</label>
+                <div class="amount-input calculated-input">
+                  <span>₱</span>
+                  <input type="text" id="paymentChange" value="0.00" readonly />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentBalance">Balance After Payment</label>
+                <div class="amount-input calculated-input">
+                  <span>₱</span>
+                  <input
+                    type="text"
+                    id="paymentBalance"
+                    value="0.00"
+                    readonly
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div class="modal-actions">
+
+          <!-- ===================== FOOTERS ===================== -->
+          <div class="modal-actions" id="paymentActionsStep1">
             <button
               type="button"
               class="secondary-button"
               id="cancelPaymentBtn"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              id="nextPaymentStepBtn"
+            >
+              <span>Next</span><i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+          <div
+            class="modal-actions payment-status-hidden"
+            id="paymentActionsStep2"
+          >
+            <button
+              type="button"
+              class="secondary-button"
+              id="backPaymentStepBtn"
+            >
+              <i data-lucide="arrow-left"></i><span>Back</span>
             </button>
             <button
               type="submit"
@@ -1621,7 +1797,7 @@
     </div>
     <script src="../../navigation_bar/sidebar.js"></script>
     <script src="../../shared/receipt/receipt.js"></script>
-    <script src="finance.js"></script>
+    <script src="finance.js?v=20261007"></script>
     <script src="../profile/profile.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

@@ -11,10 +11,10 @@
   const INVENTORY_PAGE_URL = "../inventory/inventory.html";
 
   const COLORS = {
-    actual: "#19793f",
-    actualFill: "rgba(25,121,63,0.10)",
-    sma: "#2064c9",
-    rf: "#7440c9",
+    actual: "#36a2eb",
+    actualFill: "rgba(54,162,235,0.10)",
+    sma: "#ff6384",
+    rf: "#ff9f40",
     grid: "#e7ece9",
     text: "#6b7970",
   };

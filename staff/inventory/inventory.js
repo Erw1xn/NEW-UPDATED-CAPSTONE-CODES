@@ -1497,6 +1497,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const chartContext = canvas.getContext("2d");
 
+    const inventoryItem = getItems().find(
+      (item) =>
+        normalizeForecastChartItemName(item.name) ===
+        normalizeForecastChartItemName(itemName),
+    );
+
+    const unit = inventoryItem?.unit ? String(inventoryItem.unit) : "units";
+
     forecastDemandChart = new Chart(chartContext, {
       type: "line",
 
@@ -1510,6 +1518,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 3,
+            pointHoverRadius: 6,
+            pointHitRadius: 12,
           },
 
           {
@@ -1520,6 +1530,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 2,
+            pointHoverRadius: 6,
+            pointHitRadius: 12,
           },
 
           {
@@ -1528,6 +1540,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             tension: 0.3,
             borderWidth: 2,
             pointRadius: 3,
+            pointHoverRadius: 6,
+            pointHitRadius: 12,
           },
         ],
       },
@@ -1548,6 +1562,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           tooltip: {
             enabled: true,
+
+            filter: (context) => context.parsed.y !== null,
+
+            callbacks: {
+              label: (context) =>
+                ` ${context.dataset.label}: ${Number(
+                  context.parsed.y,
+                ).toLocaleString("en-US", {
+                  maximumFractionDigits: 2,
+                })} ${unit}`,
+            },
           },
         },
 
@@ -1564,7 +1589,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             title: {
               display: true,
-              text: "Quantity Used",
+              text: `Quantity Used (${unit})`,
             },
           },
         },

@@ -5,12 +5,25 @@ document.addEventListener("DOMContentLoaded", function () {
   const TRANSACTIONS_API = "../../api/finance/transactions.php";
   const XENDIT_CREATE_PAYMENT_API = "../../api/xendit/create_payment.php";
   const PAGE_SIZE = 10;
+
+  // Discount types: value stored in tbl_finance_transactions.discount_type
+  const DISCOUNT_TYPES = {
+    none: { label: "No Discount", rate: 0 },
+    senior: { label: "Senior Citizen", rate: 20 },
+    pwd: { label: "PWD", rate: 20 },
+    promo: { label: "Clinic Promotional", rate: 10 },
+    other: { label: "Other Authorized", rate: 0 },
+  };
+
   let transactions = [];
   let patients = [];
   let currentPage = 1;
   let selectedPatientId = "";
   let currentTransaction = null;
   let pendingAppointmentPayment = null;
+  let currentStep = 1;
+  let discountLocked = false;
+
   const recordPaymentBtn = document.getElementById("recordPaymentBtn");
   const closeModalBtn = document.getElementById("closeModalBtn");
   const cancelPaymentBtn = document.getElementById("cancelPaymentBtn");
@@ -32,12 +45,24 @@ document.addEventListener("DOMContentLoaded", function () {
     "paymentProcessWrapper",
   );
   const paymentProcessBox = document.getElementById("paymentProcessBox");
+
+  // New: 2-step flow elements
+  const discountTypeInput = document.getElementById("discountType");
+  const discountRateInput = document.getElementById("discountRate");
+  const paymentNetInput = document.getElementById("paymentNet");
+  const paymentAmountDueInput = document.getElementById("paymentAmountDue");
+  const paymentChangeInput = document.getElementById("paymentChange");
+  const paymentStep1 = document.getElementById("paymentStep1");
+  const paymentStep2 = document.getElementById("paymentStep2");
+  const paymentActionsStep1 = document.getElementById("paymentActionsStep1");
+  const paymentActionsStep2 = document.getElementById("paymentActionsStep2");
+  const paymentStepLabel = document.getElementById("paymentStepLabel");
+  const nextPaymentStepBtn = document.getElementById("nextPaymentStepBtn");
+  const backPaymentStepBtn = document.getElementById("backPaymentStepBtn");
+  const discountLockedNote = document.getElementById("discountLockedNote");
+
   let paymentProcessConfirmed = false;
-  let xenditPaymentState = {
-    status: "idle",
-    paymentId: "",
-    action: null,
-  };
+  let xenditPaymentState = { status: "idle", paymentId: "", action: null };
   const paymentStatusInput = document.getElementById("paymentStatus");
   const transactionIdInput = document.getElementById("transactionId");
   const savePaymentBtn = document.getElementById("savePaymentBtn");
@@ -101,7 +126,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const closeDetailsBtn = document.getElementById("closeDetailsBtn");
   const detailsCloseButton = document.getElementById("detailsCloseButton");
   const printReceiptBtn = document.getElementById("printReceiptBtn");
+
   initialize();
+
   function initialize() {
     const fromAppointment = loadAppointmentPaymentFromURL();
     loadTransactions();
@@ -114,12 +141,19 @@ document.addEventListener("DOMContentLoaded", function () {
       lucide.createIcons();
     }
     loadPatientsFromDatabase();
-    if (fromAppointment) {
+
+    if (fromAppointment && pendingAppointmentPayment) {
       setTimeout(() => {
         openPaymentModal();
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
       }, 150);
     }
   }
+
   function loadPatientsFromLocalStorage() {
     try {
       const stored = localStorage.getItem(PATIENT_STORAGE_KEY);
@@ -134,6 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
       patients = [];
     }
   }
+
   async function loadPatientsFromDatabase() {
     try {
       const response = await fetch(PATIENT_API, {
@@ -157,10 +192,9 @@ document.addEventListener("DOMContentLoaded", function () {
       );
     }
   }
+
   function normalizePatient(patient) {
-    const normalized = {
-      ...patient,
-    };
+    const normalized = { ...patient };
     normalized.patientId =
       normalized.patientId || normalized.patient_id || normalized.id || "";
     normalized.id = normalized.id || normalized.patientId || "";
@@ -168,6 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
       normalized.fullName || normalized.full_name || normalized.name || "";
     return normalized;
   }
+
   function getPatientName(patient) {
     if (!patient) {
       return "";
@@ -182,11 +217,13 @@ document.addEventListener("DOMContentLoaded", function () {
       patient.fullName || patient.name || patient.patientName || "",
     ).trim();
   }
+
   function getPatientId(patient) {
     return String(
       patient?.patientId || patient?.patient_id || patient?.id || "",
     );
   }
+
   function findPatientById(patientId) {
     if (!patientId) {
       return null;
@@ -200,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }) || null
     );
   }
+
   function getPatientMatches(query) {
     const value = String(query || "")
       .trim()
@@ -213,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return name.includes(value) || id.includes(value);
     });
   }
+
   function renderPatientDropdown(query) {
     if (!patientDropdown) {
       return;
@@ -240,6 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
       patientDropdown.appendChild(button);
     });
   }
+
   function selectPatient(patient) {
     const patientId = getPatientId(patient);
     const patientName = getPatientName(patient);
@@ -252,6 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
     closePatientDropdown();
     updateSaveButton();
   }
+
   function openPatientDropdown() {
     if (!patientDropdown || !patientSelectWrapper) {
       return;
@@ -260,6 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
     patientSelectWrapper.classList.add("open");
     patientNameInput.setAttribute("aria-expanded", "true");
   }
+
   function closePatientDropdown() {
     if (!patientDropdown || !patientSelectWrapper) {
       return;
@@ -267,6 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
     patientSelectWrapper.classList.remove("open");
     patientNameInput.setAttribute("aria-expanded", "false");
   }
+
   function getServiceMatches(query) {
     const services = [
       "Consultation",
@@ -286,6 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return service.toLowerCase().includes(value);
     });
   }
+
   function renderServiceDropdown(query) {
     if (!serviceDropdown) {
       return;
@@ -313,6 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
       serviceDropdown.appendChild(button);
     });
   }
+
   function openServiceDropdown() {
     if (!serviceDropdown || !serviceSelectWrapper) {
       return;
@@ -321,6 +366,7 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceSelectWrapper.classList.add("open");
     serviceNameInput.setAttribute("aria-expanded", "true");
   }
+
   function closeServiceDropdown() {
     if (!serviceDropdown || !serviceSelectWrapper) {
       return;
@@ -328,6 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceSelectWrapper.classList.remove("open");
     serviceNameInput.setAttribute("aria-expanded", "false");
   }
+
   function getTodayString() {
     const date = new Date();
     const year = date.getFullYear();
@@ -335,19 +382,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
+
   function getCurrentTime() {
     const date = new Date();
     return date.toTimeString().slice(0, 8);
   }
+
   function getTodayKey() {
     return getTodayString();
   }
+
   function formatCurrency(value) {
     return `₱${Number(value || 0).toLocaleString("en-PH", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   }
+
   function formatDate(value) {
     if (!value) {
       return "-";
@@ -362,6 +413,7 @@ document.addEventListener("DOMContentLoaded", function () {
       year: "numeric",
     });
   }
+
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -370,12 +422,15 @@ document.addEventListener("DOMContentLoaded", function () {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+
   function generateTransactionId() {
     return `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   }
+
   function generatePaymentId() {
     return `PAY-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   }
+
   function getStatus(paid, balance) {
     const normalizedPaid = Number(paid) || 0;
     const normalizedBalance = Number(balance) || 0;
@@ -387,6 +442,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return "Unpaid";
   }
+
   function getLatestPaymentMethod(transaction) {
     if (
       !transaction ||
@@ -400,12 +456,14 @@ document.addEventListener("DOMContentLoaded", function () {
         .paymentMethod || "-"
     );
   }
+
   function isSuccessfulPayment(payment) {
     const status = String(
       payment?.status || payment?.paymentStatus || "",
     ).toLowerCase();
     return status === "paid";
   }
+
   function getTransactionPaid(transaction) {
     if (!transaction) {
       return 0;
@@ -420,6 +478,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return Number(transaction.paid) || 0;
   }
+
   function getTransactionBalance(transaction) {
     if (!transaction) {
       return 0;
@@ -428,10 +487,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const discount = Number(transaction.discount) || 0;
     return Math.max(total - discount - getTransactionPaid(transaction), 0);
   }
+
   function normalizeTransaction(transaction) {
-    const normalized = {
-      ...transaction,
-    };
+    const normalized = { ...transaction };
     normalized.id =
       normalized.id || normalized.transactionId || generateTransactionId();
     normalized.patientId = normalized.patientId || "";
@@ -440,6 +498,8 @@ document.addEventListener("DOMContentLoaded", function () {
     normalized.date = normalized.date || getTodayString();
     normalized.total = Number(normalized.total) || 0;
     normalized.discount = Number(normalized.discount) || 0;
+    normalized.discountType = normalized.discountType || "none";
+    normalized.discountRate = Number(normalized.discountRate) || 0;
     if (!Array.isArray(normalized.paymentHistory)) {
       normalized.paymentHistory = [];
     }
@@ -491,6 +551,7 @@ document.addEventListener("DOMContentLoaded", function () {
       normalized.updatedTime || normalized.createdTime || "";
     return normalized;
   }
+
   function normalizeDatabaseTransaction(transaction) {
     const total = Number(transaction.total_amount) || 0;
     const discount = Number(transaction.discount_amount) || 0;
@@ -557,6 +618,8 @@ document.addEventListener("DOMContentLoaded", function () {
         : getTodayString(),
       total,
       discount,
+      discountType: transaction.discount_type || "none",
+      discountRate: Number(transaction.discount_rate) || 0,
       paid: paymentHistory.length ? calculatedPaid : paid,
       balance: paymentHistory.length
         ? Math.max(total - discount - calculatedPaid, 0)
@@ -583,6 +646,7 @@ document.addEventListener("DOMContentLoaded", function () {
         latestPayment?.xenditStatus || transaction.xendit_status || "",
     };
   }
+
   function normalizePaymentMethod(method) {
     const normalized = String(method || "")
       .trim()
@@ -598,6 +662,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return method || "-";
   }
+
   async function loadTransactions() {
     try {
       const response = await fetch(TRANSACTIONS_API, {
@@ -627,9 +692,11 @@ document.addEventListener("DOMContentLoaded", function () {
       renderCollections();
     }
   }
+
   function saveTransactions() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
   }
+
   function renderTransactions() {
     const filtered = getFilteredTransactions();
     const totalPages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
@@ -658,7 +725,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const statusClass = normalized.status.toLowerCase().replace(/\s+/g, "-");
       const method = normalized.paymentMethod || "-";
       const balance = normalized.balance;
-      row.innerHTML = `<td><div class="patient-cell"><strong>${escapeHtml(normalized.patientName || "-")}</strong><span>${escapeHtml(normalized.patientId || "-")}</span></div></td><td><span class="service-cell">${escapeHtml(normalized.service || "-")}</span></td><td>${escapeHtml(formatDate(normalized.date))}</td><td>${formatCurrency(normalized.total)}</td><td>${formatCurrency(normalized.discount)}</td><td>${formatCurrency(normalized.paid)}</td><td><span class="payment-method-badge ${escapeHtml(method.toLowerCase().replace(/\s+/g, "-"))}">${escapeHtml(method)}</span></td><td class="${balance > 0 ? "balance-due" : "balance-clear"}">${formatCurrency(balance)}</td><td><span class="status-badge ${statusClass}">${escapeHtml(normalized.status)}</span></td><td class="action-cell"><button type="button" class="table-action-button view-details-btn" data-transaction-id="${escapeHtml(normalized.id)}" title="View details"><i data-lucide="eye"></i></button>${balance > 0 ? `<button type="button" class="table-action-button record-payment-btn" data-transaction-id="${escapeHtml(normalized.id)}" title="Record payment"><i data-lucide="plus"></i></button>` : ""}</td>`;
+      const discountTitle =
+        normalized.discount > 0
+          ? `${getDiscountLabel(normalized.discountType)}${normalized.discountRate > 0 ? ` (${normalized.discountRate}%)` : ""}`
+          : "";
+      row.innerHTML = `<td><div class="patient-cell"><strong>${escapeHtml(normalized.patientName || "-")}</strong><span>${escapeHtml(normalized.patientId || "-")}</span></div></td><td><span class="service-cell">${escapeHtml(normalized.service || "-")}</span></td><td>${escapeHtml(formatDate(normalized.date))}</td><td>${formatCurrency(normalized.total)}</td><td title="${escapeHtml(discountTitle)}">${formatCurrency(normalized.discount)}</td><td>${formatCurrency(normalized.paid)}</td><td><span class="payment-method-badge ${escapeHtml(method.toLowerCase().replace(/\s+/g, "-"))}">${escapeHtml(method)}</span></td><td class="${balance > 0 ? "balance-due" : "balance-clear"}">${formatCurrency(balance)}</td><td><span class="status-badge ${statusClass}">${escapeHtml(normalized.status)}</span></td><td class="action-cell"><button type="button" class="table-action-button view-details-btn" data-transaction-id="${escapeHtml(normalized.id)}" title="View details"><i data-lucide="eye"></i></button>${balance > 0 ? `<button type="button" class="table-action-button record-payment-btn" data-transaction-id="${escapeHtml(normalized.id)}" title="Record payment"><i data-lucide="plus"></i></button>` : ""}</td>`;
       tableBody.appendChild(row);
     });
     if (totalPages > 1) {
@@ -673,6 +744,7 @@ document.addEventListener("DOMContentLoaded", function () {
       lucide.createIcons();
     }
   }
+
   function getFilteredTransactions() {
     const searchValue = searchInput.value.trim().toLowerCase();
     const methodValue = paymentMethodFilter.value;
@@ -693,25 +765,18 @@ document.addEventListener("DOMContentLoaded", function () {
       return matchesSearch && matchesMethod && matchesStatus;
     });
   }
+
   function renderCollections() {
     renderTodayCollection();
     renderMonthlyCollection();
     renderCollectionsSummary();
   }
+
   function getCollectionTotals(from, to) {
     const totals = {
-      Cash: {
-        amount: 0,
-        count: 0,
-      },
-      GCash: {
-        amount: 0,
-        count: 0,
-      },
-      "Bank Transfer": {
-        amount: 0,
-        count: 0,
-      },
+      Cash: { amount: 0, count: 0 },
+      GCash: { amount: 0, count: 0 },
+      "Bank Transfer": { amount: 0, count: 0 },
       total: 0,
     };
     transactions.forEach(function (transaction) {
@@ -735,6 +800,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     return totals;
   }
+
   function renderTodayCollection() {
     const today = getTodayKey();
     const totals = getCollectionTotals(today, today);
@@ -749,6 +815,7 @@ document.addEventListener("DOMContentLoaded", function () {
       todayCollectionDescription.textContent = `Payment collection for ${formatDate(today)}.`;
     }
   }
+
   function renderMonthlyCollection() {
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -767,51 +834,22 @@ document.addEventListener("DOMContentLoaded", function () {
     setText("monthlyBankCount", transactionText(totals["Bank Transfer"].count));
     setText("monthlyPaymentMethodTotal", formatCurrency(totals.total));
   }
+
   function calculateCollectionTotals(from, to) {
-    const totals = {
-      Cash: {
-        amount: 0,
-        count: 0,
-      },
-      GCash: {
-        amount: 0,
-        count: 0,
-      },
-      "Bank Transfer": {
-        amount: 0,
-        count: 0,
-      },
-      total: 0,
-    };
-    transactions.forEach(function (item) {
-      const transaction = normalizeTransaction(item);
-      transaction.paymentHistory.forEach(function (payment) {
-        if (payment.date < from || payment.date > to) {
-          return;
-        }
-        if (!isSuccessfulPayment(payment)) {
-          return;
-        }
-        const method = payment.paymentMethod;
-        const amount = Number(payment.amount) || 0;
-        if (totals[method]) {
-          totals[method].amount += amount;
-          totals[method].count++;
-          totals.total += amount;
-        }
-      });
-    });
-    return totals;
+    return getCollectionTotals(from, to);
   }
+
   function loadAppointmentPaymentFromURL() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("source") !== "appointment") {
       return false;
     }
+
     const appointmentId = params.get("appointmentId");
     if (!appointmentId) {
       return false;
     }
+
     pendingAppointmentPayment = {
       appointmentId,
       appointmentUid: params.get("appointmentUid") || "",
@@ -826,9 +864,10 @@ document.addEventListener("DOMContentLoaded", function () {
       amount: Number(params.get("amount")) || 0,
       paymentStatus: params.get("paymentStatus") || "unpaid",
     };
-    window.history.replaceState({}, document.title, window.location.pathname);
+
     return true;
   }
+
   function formatAppointmentDateTime(dateString, timeString, durationMinutes) {
     if (!dateString || !timeString) {
       return "-";
@@ -858,31 +897,17 @@ document.addEventListener("DOMContentLoaded", function () {
       minute: "2-digit",
       hour12: true,
     });
-    const dateText = dateFormatter.format(startDate);
-    const startTimeText = timeFormatter.format(startDate);
-    const endTimeText = timeFormatter.format(endDate);
-    return `${dateText} · ${startTimeText} – ${endTimeText}`;
+    return `${dateFormatter.format(startDate)} · ${timeFormatter.format(startDate)} – ${timeFormatter.format(endDate)}`;
   }
+
   function populateAppointmentPaymentInfo() {
     if (!pendingAppointmentPayment) {
       return;
     }
     const data = pendingAppointmentPayment;
-    const infoPatient = document.getElementById("appointmentInfoPatient");
-    const infoPatientId = document.getElementById("appointmentInfoPatientId");
-    const infoService = document.getElementById("appointmentInfoService");
     const infoDate = document.getElementById("appointmentInfoDate");
     const infoDentist = document.getElementById("appointmentInfoDentist");
     const infoPanel = document.getElementById("appointmentPaymentInfo");
-    if (infoPatient) {
-      infoPatient.textContent = data.patientName || "-";
-    }
-    if (infoPatientId) {
-      infoPatientId.textContent = data.patientId || "-";
-    }
-    if (infoService) {
-      infoService.textContent = data.service || "-";
-    }
     if (infoDate) {
       infoDate.textContent = formatAppointmentDateTime(
         data.appointmentDate,
@@ -897,6 +922,7 @@ document.addEventListener("DOMContentLoaded", function () {
       infoPanel.style.display = "block";
     }
   }
+
   function applyAppointmentPaymentToForm() {
     if (!pendingAppointmentPayment) {
       return;
@@ -910,15 +936,190 @@ document.addEventListener("DOMContentLoaded", function () {
     if (data.amount > 0) {
       paymentTotalInput.value = data.amount.toFixed(2);
     }
-    paymentDiscountInput.value = "0";
     patientNameInput.disabled = true;
     serviceNameInput.disabled = true;
     paymentDateInput.disabled = true;
     populateAppointmentPaymentInfo();
+    updateDiscountCalculation();
     updatePaymentCalculation();
     renderPaymentProcessSection();
     updateSaveButton();
   }
+
+  // ======================================================================
+  // STEP 1 — DISCOUNT
+  // ======================================================================
+  function getDiscountLabel(type) {
+    return (DISCOUNT_TYPES[type] || DISCOUNT_TYPES.none).label;
+  }
+
+  function getSelectedDiscountType() {
+    const value = discountTypeInput ? discountTypeInput.value : "none";
+    return DISCOUNT_TYPES[value] ? value : "none";
+  }
+
+  function getDiscountRateValue() {
+    if (getSelectedDiscountType() === "none") {
+      return 0;
+    }
+    return Math.min(Math.max(Number(discountRateInput.value) || 0, 0), 100);
+  }
+
+  function syncDiscountRateState() {
+    const isNone = getSelectedDiscountType() === "none";
+    discountRateInput.disabled = isNone || discountLocked;
+  }
+
+  function setDiscountLocked(locked) {
+    discountLocked = Boolean(locked);
+    discountTypeInput.disabled = discountLocked;
+    paymentTotalInput.disabled = discountLocked;
+    syncDiscountRateState();
+    if (discountLockedNote) {
+      discountLockedNote.classList.toggle(
+        "payment-status-hidden",
+        !discountLocked,
+      );
+    }
+  }
+
+  // Discount applies ONCE per transaction: when locked we never recompute.
+  function updateDiscountCalculation() {
+    const total = Math.max(Number(paymentTotalInput.value) || 0, 0);
+    if (!discountLocked) {
+      const rate = getDiscountRateValue();
+      const amount = Math.round(total * rate) / 100;
+      paymentDiscountInput.value = amount.toFixed(2);
+    }
+    const discount = Math.min(
+      Math.max(Number(paymentDiscountInput.value) || 0, 0),
+      total,
+    );
+    paymentNetInput.value = Math.max(total - discount, 0).toFixed(2);
+    updatePaymentCalculation();
+  }
+
+  function handleDiscountTypeChange() {
+    const type = getSelectedDiscountType();
+    discountRateInput.value = Number(DISCOUNT_TYPES[type].rate).toFixed(2);
+    syncDiscountRateState();
+    updateDiscountCalculation();
+  }
+
+  function normalizeDiscountRateInput() {
+    const rate = getDiscountRateValue();
+    discountRateInput.value = rate.toFixed(2);
+    updateDiscountCalculation();
+  }
+
+  function getDiscountPayload() {
+    const type = getSelectedDiscountType();
+    return {
+      discountType: type,
+      discountRate: type === "none" ? 0 : getDiscountRateValue(),
+      discountAmount: Math.max(Number(paymentDiscountInput.value) || 0, 0),
+    };
+  }
+
+  // ======================================================================
+  // Step navigation
+  // ======================================================================
+  function showStep(step) {
+    currentStep = step === 2 ? 2 : 1;
+    paymentStep1.classList.toggle("payment-status-hidden", currentStep !== 1);
+    paymentActionsStep1.classList.toggle(
+      "payment-status-hidden",
+      currentStep !== 1,
+    );
+    paymentStep2.classList.toggle("payment-status-hidden", currentStep !== 2);
+    paymentActionsStep2.classList.toggle(
+      "payment-status-hidden",
+      currentStep !== 2,
+    );
+    if (paymentStepLabel) {
+      paymentStepLabel.textContent = `FINANCE · STEP ${currentStep} OF 2`;
+    }
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  }
+
+  function validateStep1() {
+    const patientId =
+      selectedPatientId || patientNameInput.dataset.patientId || "";
+    if (!patientId) {
+      showToast("Please select a registered patient.");
+      return false;
+    }
+    if (!serviceNameInput.value.trim()) {
+      showToast("Please select a service.");
+      return false;
+    }
+    if (!paymentDateInput.value) {
+      showToast("Please select a payment date.");
+      return false;
+    }
+    const total = Number(paymentTotalInput.value) || 0;
+    if (total <= 0) {
+      showToast("Please enter a valid total amount.");
+      return false;
+    }
+    if (!discountLocked && getSelectedDiscountType() !== "none") {
+      const rate = Number(discountRateInput.value) || 0;
+      if (rate <= 0 || rate > 100) {
+        showToast("Discount rate must be between 0.01% and 100%.");
+        return false;
+      }
+    }
+    if (getPaymentAmountDue() <= 0) {
+      showToast("This payment is already fully paid.");
+      return false;
+    }
+    return true;
+  }
+
+  function fillPaymentSummary() {
+    const total = Math.max(Number(paymentTotalInput.value) || 0, 0);
+    const discount = Math.max(Number(paymentDiscountInput.value) || 0, 0);
+    const type =
+      discountLocked && currentTransaction
+        ? currentTransaction.discountType || "none"
+        : getSelectedDiscountType();
+    const rate =
+      discountLocked && currentTransaction
+        ? Number(currentTransaction.discountRate) || 0
+        : getDiscountRateValue();
+    const discountText =
+      discount > 0
+        ? `-${formatCurrency(discount)}${type !== "none" ? ` (${getDiscountLabel(type)}${rate > 0 ? ` ${rate}%` : ""})` : ""}`
+        : formatCurrency(0);
+    setText("sumPatient", patientNameInput.value || "-");
+    setText("sumService", serviceNameInput.value || "-");
+    setText("sumTotal", formatCurrency(total));
+    setText("sumDiscount", discountText);
+    setText("sumNet", formatCurrency(Math.max(total - discount, 0)));
+    setText("sumBalance", formatCurrency(getPaymentAmountDue()));
+  }
+
+  function goToPaymentStep2() {
+    if (!validateStep1()) {
+      return;
+    }
+    fillPaymentSummary();
+    showStep(2);
+    renderPaymentProcessSection();
+    updatePaymentCalculation();
+  }
+
+  function goToPaymentStep1() {
+    // Leaving Step 2: discard any unfinished payment-process UI.
+    paymentPaidInput.value = "";
+    resetPaymentProcess();
+    setOnlinePaymentMode(false);
+    updatePaymentCalculation();
+    showStep(1);
+  }
+
   function openPaymentModal(transaction = null) {
     currentTransaction = transaction;
     paymentModal.classList.add("active");
@@ -930,10 +1131,11 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       paymentDateInput.value = getTodayString();
     }
-    updatePaymentCalculation();
+    updateDiscountCalculation();
     renderPaymentProcessSection();
     updateSaveButton();
   }
+
   function closePaymentModal() {
     paymentModal.classList.remove("active");
     currentTransaction = null;
@@ -943,13 +1145,13 @@ document.addEventListener("DOMContentLoaded", function () {
     closePatientDropdown();
     closeServiceDropdown();
   }
+
   function resetPaymentForm() {
     paymentForm.reset();
     patientNameInput.disabled = false;
     serviceNameInput.disabled = false;
     paymentDateInput.disabled = false;
     paymentTotalInput.disabled = false;
-    paymentDiscountInput.disabled = false;
     transactionIdInput.value = "";
     selectedPatientId = "";
     patientNameInput.value = "";
@@ -957,9 +1159,15 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceNameInput.value = "";
     paymentDateInput.value = getTodayString();
     paymentTotalInput.value = "";
-    paymentDiscountInput.value = "0";
+    discountTypeInput.value = "none";
+    discountRateInput.value = "0.00";
+    paymentDiscountInput.value = "0.00";
+    paymentNetInput.value = "0.00";
+    setDiscountLocked(false);
     paymentPaidInput.value = "";
     paymentBalanceInput.value = "0.00";
+    if (paymentAmountDueInput) paymentAmountDueInput.value = "0.00";
+    if (paymentChangeInput) paymentChangeInput.value = "0.00";
     paymentMethodInput.value = "";
     paymentStatusInput.value = "Unpaid";
     const appointmentPaymentInfo = document.getElementById(
@@ -971,10 +1179,12 @@ document.addEventListener("DOMContentLoaded", function () {
     resetPaymentProcess();
     setOnlinePaymentMode(false);
     updatePaymentActionButton();
+    showStep(1);
     if (savePaymentBtn) {
       savePaymentBtn.disabled = true;
     }
   }
+
   function loadTransactionIntoForm(transaction) {
     const normalized = normalizeTransaction(transaction);
     transactionIdInput.value = normalized.id;
@@ -990,19 +1200,27 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceNameInput.value = normalized.service || "";
     paymentDateInput.value = getTodayString();
     paymentTotalInput.value = Number(normalized.total || 0).toFixed(2);
+
+    // Discount was already applied on this transaction -> show it, locked.
+    discountTypeInput.value = DISCOUNT_TYPES[normalized.discountType]
+      ? normalized.discountType
+      : "none";
+    discountRateInput.value = Number(normalized.discountRate || 0).toFixed(2);
     paymentDiscountInput.value = Number(normalized.discount || 0).toFixed(2);
+    setDiscountLocked(true);
+
     paymentPaidInput.value = "0.00";
     paymentMethodInput.value = getLatestPaymentMethod(normalized);
     patientNameInput.disabled = true;
     serviceNameInput.disabled = true;
     paymentDateInput.disabled = true;
-    paymentTotalInput.disabled = true;
-    updatePaymentCalculation();
+    updateDiscountCalculation();
     if (["GCash", "Bank Transfer"].includes(paymentMethodInput.value)) {
       const remaining = getPaymentAmountDue();
       paymentPaidInput.value = remaining > 0 ? remaining.toFixed(2) : "";
     }
   }
+
   function updatePaymentCalculation() {
     const total = Math.max(Number(paymentTotalInput.value) || 0, 0);
     const discount = Math.min(
@@ -1019,6 +1237,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const totalPaidAfterPayment = Math.min(existingPaid + newPayment, netTotal);
     const balance = Math.max(netTotal - totalPaidAfterPayment, 0);
     paymentBalanceInput.value = balance.toFixed(2);
+    if (paymentAmountDueInput) {
+      paymentAmountDueInput.value = remainingBeforePayment.toFixed(2);
+    }
+    if (paymentChangeInput) {
+      paymentChangeInput.value = Math.max(
+        amountReceived - remainingBeforePayment,
+        0,
+      ).toFixed(2);
+    }
     if (balance <= 0 && netTotal > 0) {
       paymentStatusInput.value = "Paid";
     } else if (totalPaidAfterPayment > 0) {
@@ -1028,24 +1255,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     updateSaveButton();
   }
-  function getPaymentPaidGroup() {
-    return paymentPaidInput?.closest(".form-group") || null;
-  }
+
   function getPaymentBalanceGroup() {
     return paymentBalanceInput?.closest(".form-group") || null;
   }
-  function getPaymentStatusGroup() {
-    return paymentStatusInput?.closest(".form-group") || null;
-  }
+
   function setPaymentGroupVisible(element, visible) {
     const group = element?.closest(".form-group");
     if (group) {
       group.style.display = visible ? "" : "none";
     }
   }
+
   function setOnlinePaymentMode(isOnline) {
     setPaymentGroupVisible(paymentPaidInput, !isOnline);
     setPaymentGroupVisible(paymentStatusInput, !isOnline);
+    setPaymentGroupVisible(paymentAmountDueInput, !isOnline);
+    setPaymentGroupVisible(paymentChangeInput, !isOnline);
     if (paymentBalanceInput) {
       const balanceGroup = getPaymentBalanceGroup();
       if (balanceGroup) {
@@ -1053,19 +1279,11 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       const balanceLabel = balanceGroup?.querySelector("label");
       if (balanceLabel) {
-        balanceLabel.textContent = isOnline
-          ? "Balance After Payment"
-          : "Balance";
+        balanceLabel.textContent = "Balance After Payment";
       }
     }
   }
-  function getOnlinePaymentAmount() {
-    const input = document.getElementById("onlinePaymentAmount");
-    if (input) {
-      return Math.max(Number(input.value) || 0, 0);
-    }
-    return Math.max(Number(paymentPaidInput.value) || 0, 0);
-  }
+
   function syncOnlinePaymentAmount() {
     const input = document.getElementById("onlinePaymentAmount");
     if (!input) {
@@ -1081,6 +1299,7 @@ document.addEventListener("DOMContentLoaded", function () {
     input.value = amount > 0 ? amount.toFixed(2) : "";
     paymentPaidInput.value = amount > 0 ? amount.toFixed(2) : "";
   }
+
   function updatePaymentActionButton() {
     if (!savePaymentBtn) {
       return;
@@ -1097,13 +1316,10 @@ document.addEventListener("DOMContentLoaded", function () {
       lucide.createIcons();
     }
   }
+
   function resetPaymentProcess() {
     paymentProcessConfirmed = false;
-    xenditPaymentState = {
-      status: "idle",
-      paymentId: "",
-      action: null,
-    };
+    xenditPaymentState = { status: "idle", paymentId: "", action: null };
     if (paymentProcessBox) {
       paymentProcessBox.innerHTML = "";
     }
@@ -1111,6 +1327,7 @@ document.addEventListener("DOMContentLoaded", function () {
       paymentProcessWrapper.style.display = "none";
     }
   }
+
   function getPaymentAmountDue() {
     const total = Math.max(Number(paymentTotalInput.value) || 0, 0);
     const discount = Math.min(
@@ -1123,6 +1340,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     return Math.max(total - discount - alreadyPaid, 0);
   }
+
   function updatePaymentProcessAmounts() {
     if (!paymentProcessBox || !paymentProcessWrapper) {
       return;
@@ -1159,6 +1377,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
   function renderPaymentProcessSection() {
     if (!paymentProcessWrapper || !paymentProcessBox) {
       return;
@@ -1236,73 +1455,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     setOnlinePaymentMode(false);
-    if (method === "Cash") {
-      paymentProcessWrapper.style.display = "none";
-      paymentProcessBox.innerHTML = "";
-      updateSaveButton();
-      return;
-    }
     paymentProcessWrapper.style.display = "none";
     paymentProcessBox.innerHTML = "";
     updateSaveButton();
   }
-  function confirmPaymentProcess() {
-    const method = paymentMethodInput?.value || "";
-    if (!method) {
-      showToast("Please select a payment method.");
-      return;
-    }
-    if (method === "GCash") {
-      startStaffXenditPayment();
-      return;
-    }
-    if (method === "Bank Transfer") {
-      startStaffXenditPayment();
-      return;
-    }
-    const amountDue = getPaymentAmountDue();
-    let amountReceived = Math.max(Number(paymentPaidInput.value) || 0, 0);
-    if (amountReceived <= 0) {
-      showToast("Please enter the amount received.");
-      return;
-    }
-    if (amountDue <= 0) {
-      showToast("This payment is already fully paid.");
-      return;
-    }
-    if (method === "Cash") {
-      if (amountReceived > amountDue) {
-        paymentPaidInput.value = amountDue.toFixed(2);
-      }
-    }
-    const finalAmount = Math.max(Number(paymentPaidInput.value) || 0, 0);
-    if (finalAmount > amountDue) {
-      showToast(
-        `Payment cannot exceed the remaining balance of ${formatCurrency(amountDue)}.`,
-      );
-      return;
-    }
-    paymentProcessConfirmed = true;
-    updatePaymentCalculation();
-    if (paymentProcessBox) {
-      paymentProcessBox.innerHTML = `
-          <div class="payment-process-status">
-            <div class="payment-process-status-icon">
-              <i data-lucide="check-circle"></i>
-            </div>
-            <div>
-              <strong>Payment Process Confirmed</strong>
-              <span>Cash payment of ${escapeHtml(formatCurrency(finalAmount))} is ready to be saved.</span>
-            </div>
-          </div>
-        `;
-    }
-    if (window.lucide) {
-      lucide.createIcons();
-    }
-    updateSaveButton();
-    showToast("Cash payment process confirmed.");
-  }
+
   async function startStaffXenditPayment() {
     const method = paymentMethodInput?.value || "";
     const allowedMethods = ["GCash", "Bank Transfer"];
@@ -1323,10 +1480,6 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const total = Math.max(Number(paymentTotalInput.value) || 0, 0);
-    const discount = Math.min(
-      Math.max(Number(paymentDiscountInput.value) || 0, 0),
-      total,
-    );
     const amount = Math.max(Number(paymentPaidInput.value) || 0, 0);
     const remaining = getPaymentAmountDue();
     if (total <= 0) {
@@ -1355,18 +1508,13 @@ document.addEventListener("DOMContentLoaded", function () {
         lucide.createIcons();
       }
     }
-    xenditPaymentState = {
-      status: "processing",
-      paymentId: "",
-      action: null,
-    };
+    xenditPaymentState = { status: "processing", paymentId: "", action: null };
     try {
       if (!currentTransaction) {
+        const discountPayload = getDiscountPayload();
         const transactionResponse = await fetch(TRANSACTIONS_API, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
           cache: "no-store",
           body: JSON.stringify({
@@ -1374,7 +1522,9 @@ document.addEventListener("DOMContentLoaded", function () {
             appointmentId: pendingAppointmentPayment?.appointmentId || null,
             service,
             totalAmount: total,
-            discountAmount: discount,
+            discountType: discountPayload.discountType,
+            discountRate: discountPayload.discountRate,
+            discountAmount: discountPayload.discountAmount,
           }),
         });
         const transactionResult = await transactionResponse.json();
@@ -1395,6 +1545,11 @@ document.addEventListener("DOMContentLoaded", function () {
         currentTransaction = normalizeDatabaseTransaction(createdTransaction);
         transactionIdInput.value =
           currentTransaction.transactionUid || currentTransaction.id || "";
+        // Transaction now exists with this discount -> it can't change anymore.
+        paymentDiscountInput.value = Number(
+          currentTransaction.discount || 0,
+        ).toFixed(2);
+        setDiscountLocked(true);
       }
       const transactionUid =
         currentTransaction?.transactionUid ||
@@ -1405,9 +1560,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       const response = await fetch(XENDIT_CREATE_PAYMENT_API, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           transactionUid,
@@ -1444,16 +1597,13 @@ document.addEventListener("DOMContentLoaded", function () {
       renderXenditPendingState(method, result);
     } catch (error) {
       console.error("Staff Xendit payment error:", error);
-      xenditPaymentState = {
-        status: "FAILED",
-        paymentId: "",
-        action: null,
-      };
+      xenditPaymentState = { status: "FAILED", paymentId: "", action: null };
       renderXenditErrorState(
         error.message || "Unable to start Xendit payment.",
       );
     }
   }
+
   function renderXenditPendingState(method, result) {
     if (!paymentProcessWrapper || !paymentProcessBox) {
       return;
@@ -1491,11 +1641,7 @@ document.addEventListener("DOMContentLoaded", function () {
             : `<div class="payment-process-description">Complete the payment using the instructions provided by Xendit.</div>`
         }
       </div>
-      ${
-        paymentId
-          ? `<div class="payment-process-meta">Xendit Payment ID: ${escapeHtml(paymentId)}</div>`
-          : ""
-      }
+      ${paymentId ? `<div class="payment-process-meta">Xendit Payment ID: ${escapeHtml(paymentId)}</div>` : ""}
       <div class="payment-process-meta">
         Do not save this online payment manually. Finance will record it after Xendit confirmation.
       </div>
@@ -1513,6 +1659,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
   function renderXenditErrorState(message) {
     if (!paymentProcessWrapper || !paymentProcessBox) {
       return;
@@ -1535,7 +1682,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (window.lucide) {
       lucide.createIcons();
     }
+    if (message) {
+      showToast(message);
+    }
   }
+
   function updateSaveButton() {
     if (!savePaymentBtn) {
       return;
@@ -1549,7 +1700,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const method = paymentMethodInput.value;
     const remaining = getPaymentAmountDue();
     updatePaymentActionButton();
-    if (method === "GCash") {
+    if (method === "GCash" || method === "Bank Transfer") {
       const valid =
         Boolean(patientId) &&
         Boolean(service) &&
@@ -1561,37 +1712,25 @@ document.addEventListener("DOMContentLoaded", function () {
       savePaymentBtn.disabled = !valid;
       return;
     }
-    if (method === "Bank Transfer") {
-      const valid =
-        Boolean(patientId) &&
-        Boolean(service) &&
-        Boolean(date) &&
-        total > 0 &&
-        remaining > 0 &&
-        paid > 0 &&
-        paid <= remaining;
-      savePaymentBtn.disabled = !valid;
-      return;
-    }
-    const processReady = true;
+    // Cash: amount received may exceed the amount due (change is returned).
     const valid =
       Boolean(patientId) &&
       Boolean(service) &&
       Boolean(date) &&
       total > 0 &&
+      remaining > 0 &&
       paid > 0 &&
-      Boolean(method) &&
-      processReady;
+      Boolean(method);
     savePaymentBtn.disabled = !valid;
   }
+
   async function savePayment() {
     const method = paymentMethodInput.value;
-    if (method === "GCash") {
-      syncOnlinePaymentAmount();
-      startStaffXenditPayment();
+    if (!method) {
+      showToast("Please select a payment method.");
       return;
     }
-    if (method === "Bank Transfer") {
+    if (method === "GCash" || method === "Bank Transfer") {
       syncOnlinePaymentAmount();
       startStaffXenditPayment();
       return;
@@ -1625,15 +1764,17 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Please enter the amount received.");
       return;
     }
-    if (amountReceived > remainingBeforePayment) {
-      showToast(
-        `Amount received cannot exceed the remaining balance of ${formatCurrency(remainingBeforePayment)}.`,
-      );
+    if (remainingBeforePayment <= 0) {
+      showToast("This payment is already fully paid.");
       return;
     }
+    // Anything above the amount due is change, not payment.
+    const amountPaid =
+      Math.round(Math.min(amountReceived, remainingBeforePayment) * 100) / 100;
     try {
       let transactionUid = currentTransaction?.transactionUid || "";
       if (!currentTransaction) {
+        const discountPayload = getDiscountPayload();
         const createResponse = await fetch(TRANSACTIONS_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1644,7 +1785,9 @@ document.addEventListener("DOMContentLoaded", function () {
             appointmentId: pendingAppointmentPayment?.appointmentId || null,
             service,
             totalAmount: total,
-            discountAmount: discount,
+            discountType: discountPayload.discountType,
+            discountRate: discountPayload.discountRate,
+            discountAmount: discountPayload.discountAmount,
           }),
         });
         const createResult = await createResponse.json();
@@ -1675,7 +1818,7 @@ document.addEventListener("DOMContentLoaded", function () {
           action: "record_payment",
           transactionUid,
           patientId,
-          amount: amountReceived,
+          amount: amountPaid,
           paymentMethod: method,
           date: paymentDateInput.value,
         }),
@@ -1691,6 +1834,7 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast(error.message || "Unable to save payment.");
     }
   }
+
   function exportTransactionsToCsv() {
     const filteredTransactions = getFilteredTransactions();
     if (!filteredTransactions.length) {
@@ -1704,6 +1848,8 @@ document.addEventListener("DOMContentLoaded", function () {
       "Service",
       "Date",
       "Total Amount",
+      "Discount Type",
+      "Discount Rate (%)",
       "Discount",
       "Net Amount",
       "Paid",
@@ -1736,6 +1882,8 @@ document.addEventListener("DOMContentLoaded", function () {
         transaction.service,
         transaction.date,
         transaction.total,
+        getDiscountLabel(transaction.discountType),
+        transaction.discountRate,
         transaction.discount,
         netAmount,
         transaction.paid,
@@ -1750,9 +1898,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .join(",");
     });
     const csv = [headers.map(escapeCsvValue).join(","), ...rows].join("\n");
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -1765,29 +1911,40 @@ document.addEventListener("DOMContentLoaded", function () {
       `${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? "" : "s"} exported successfully.`,
     );
   }
+
   function setupEvents() {
     recordPaymentBtn.addEventListener("click", function () {
-      pendingAppointmentPayment = null;
       currentTransaction = null;
+      pendingAppointmentPayment = null;
       openPaymentModal();
     });
     exportCsvBtn?.addEventListener("click", exportTransactionsToCsv);
     closeModalBtn.addEventListener("click", closePaymentModal);
     cancelPaymentBtn.addEventListener("click", closePaymentModal);
+
+    // Step navigation
+    nextPaymentStepBtn.addEventListener("click", goToPaymentStep2);
+    backPaymentStepBtn.addEventListener("click", goToPaymentStep1);
+
     paymentForm.addEventListener("submit", function (event) {
       event.preventDefault();
+      if (currentStep === 1) {
+        goToPaymentStep2();
+        return;
+      }
       savePayment();
     });
+
+    // Step 1: discount
+    discountTypeInput.addEventListener("change", handleDiscountTypeChange);
+    discountRateInput.addEventListener("input", updateDiscountCalculation);
+    discountRateInput.addEventListener("blur", normalizeDiscountRateInput);
     paymentTotalInput.addEventListener("input", function () {
       paymentProcessConfirmed = false;
-      updatePaymentCalculation();
-      renderPaymentProcessSection();
+      updateDiscountCalculation();
     });
-    paymentDiscountInput.addEventListener("input", function () {
-      paymentProcessConfirmed = false;
-      updatePaymentCalculation();
-      renderPaymentProcessSection();
-    });
+
+    // Step 2: payment
     paymentPaidInput.addEventListener("input", function () {
       paymentProcessConfirmed = false;
       updatePaymentCalculation();
@@ -1902,25 +2059,30 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
   function closeCollectionDrawer() {
     collectionDrawer.classList.remove("active");
     collectionDrawerOverlay.classList.remove("active");
   }
+
   function showTodayCollection() {
     todayCollectionPage.classList.add("active");
     monthlyCollectionPage.classList.remove("active");
     customCollectionPage.classList.remove("active");
   }
+
   function showMonthlyCollection() {
     todayCollectionPage.classList.remove("active");
     monthlyCollectionPage.classList.add("active");
     customCollectionPage.classList.remove("active");
   }
+
   function showCustomCollection() {
     todayCollectionPage.classList.remove("active");
     monthlyCollectionPage.classList.remove("active");
     customCollectionPage.classList.add("active");
   }
+
   function applyCustomCollection() {
     const from = customDateFrom.value;
     const to = customDateTo.value;
@@ -1944,6 +2106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       customCollectionDescription.textContent = `Payment collection from ${formatDate(from)} to ${formatDate(to)}.`;
     }
   }
+
   function setupDate() {
     const today = getTodayString();
     paymentDateInput.value = today;
@@ -1969,15 +2132,18 @@ document.addEventListener("DOMContentLoaded", function () {
         "Select a date range to view payment collection.";
     }
   }
+
   function setText(id, value) {
     const element = document.getElementById(id);
     if (element) {
       element.textContent = value;
     }
   }
+
   function transactionText(count) {
     return `${count} transaction${count === 1 ? "" : "s"}`;
   }
+
   function showToast(message) {
     let toast = document.getElementById("financeToast");
     if (!toast) {
@@ -1993,6 +2159,7 @@ document.addEventListener("DOMContentLoaded", function () {
       toast.classList.remove("show");
     }, 2600);
   }
+
   function renderCollectionsSummary() {
     const totals = getCollectionTotals(getTodayKey(), getTodayKey());
     setText("overviewTodayCollection", formatCurrency(totals.total));
@@ -2012,11 +2179,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 0);
     setText("overviewOutstandingBalance", formatCurrency(outstanding));
   }
-  function renderCollections() {
-    renderTodayCollection();
-    renderMonthlyCollection();
-    renderCollectionsSummary();
-  }
+
   function getPaymentDetails(transactionId) {
     const transaction = transactions.find(function (item) {
       return String(item.id) === String(transactionId);
@@ -2057,6 +2220,7 @@ document.addEventListener("DOMContentLoaded", function () {
     normalized.paymentMethod = getLatestPaymentMethod(normalized);
     return normalized;
   }
+
   function openDetails(transactionId) {
     const transaction = getPaymentDetails(transactionId);
     if (!transaction) {
@@ -2093,7 +2257,11 @@ document.addEventListener("DOMContentLoaded", function () {
       detailTotal.textContent = formatCurrency(transaction.total);
     }
     if (detailDiscount) {
-      detailDiscount.textContent = formatCurrency(transaction.discount);
+      const hasType =
+        transaction.discountType && transaction.discountType !== "none";
+      detailDiscount.textContent = hasType
+        ? `${formatCurrency(transaction.discount)} (${getDiscountLabel(transaction.discountType)}${transaction.discountRate > 0 ? ` ${transaction.discountRate}%` : ""})`
+        : formatCurrency(transaction.discount);
     }
     if (detailPaid) {
       detailPaid.textContent = formatCurrency(transaction.paid);
@@ -2135,17 +2303,16 @@ document.addEventListener("DOMContentLoaded", function () {
             .join("")
         : `<div class="payment-history-empty"><div class="payment-history-empty-icon"><i data-lucide="history"></i></div><strong>No payment history</strong><p>Additional payments will appear here.</p></div>`;
     }
-    if (window.lucide) {
-      lucide.createIcons();
-    }
     detailsModal.classList.add("active");
     if (window.lucide) {
       lucide.createIcons();
     }
   }
+
   function closeDetails() {
     detailsModal.classList.remove("active");
   }
+
   function printReceipt() {
     const transactionId = detailsModal?.dataset.transactionId || "";
     const transaction = getPaymentDetails(transactionId);
@@ -2155,12 +2322,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     window.openPaymentReceipt(transaction);
   }
+
   tableBody.addEventListener("click", function (event) {
     const viewButton = event.target.closest(".view-details-btn");
     const paymentButton = event.target.closest(".record-payment-btn");
     if (viewButton) {
-      const transactionId = viewButton.dataset.transactionId;
-      openDetails(transactionId);
+      openDetails(viewButton.dataset.transactionId);
       return;
     }
     if (paymentButton) {
@@ -2169,15 +2336,9 @@ document.addEventListener("DOMContentLoaded", function () {
         return String(item.id) === String(transactionId);
       });
       if (transaction) {
+        pendingAppointmentPayment = null;
         openPaymentModal(transaction);
       }
     }
   });
-  if (detailsModal) {
-    detailsModal.addEventListener("click", function (event) {
-      if (event.target === detailsModal) {
-        closeDetails();
-      }
-    });
-  }
 });

@@ -3267,3 +3267,69 @@ button {
     height: 50px;
   }
 }
+/* APPEND to the end of finance.css */
+.payment-step[hidden] {
+  display: none;
+}
+.payment-modal .amount-input > .rate-suffix {
+  padding: 0 12px 0 0;
+  color: #68736c;
+  font-size: 11px;
+  font-weight: 700;
+}
+.payment-modal .amount-input input:disabled {
+  background: transparent;
+}
+.payment-modal .form-group select:disabled {
+  background: #f3f7f4;
+  color: #435149;
+}
+.payment-summary {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid #dfe9e3;
+  border-radius: 14px;
+  background: #f8fbf9;
+}
+.payment-summary-title {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--primary-green);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px 20px;
+}
+.payment-summary-grid > div {
+  min-width: 0;
+}
+.payment-summary-grid span {
+  display: block;
+  margin-bottom: 3px;
+  color: #87918b;
+  font-size: 8.5px;
+  font-weight: 600;
+}
+.payment-summary-grid strong {
+  display: block;
+  overflow: hidden;
+  color: #25302a;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.payment-step + .modal-actions,
+#paymentStep2 .form-grid {
+  margin-top: 0;
+}
+@media (max-width: 650px) {
+  .payment-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

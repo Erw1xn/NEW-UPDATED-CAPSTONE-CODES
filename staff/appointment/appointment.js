@@ -4,7 +4,7 @@ const DOCTORS_API = "../../api/doctors.php";
 const DOCTORS_STORAGE_KEY = "dentanueva_doctors";
 const START_HOUR = 10;
 const FIRST_BOOKABLE_HOUR = 10;
-const END_HOUR = 23.9833;
+const END_HOUR = 17.5;
 const SLOT_MIN = 30;
 const NO_SHOW_GRACE_PERIOD_MIN = 15;
 const NO_SHOW_TESTING_MODE = false;
@@ -2698,42 +2698,66 @@ function startConsultation(id) {
   showToast(`${appt.patient}'s consultation has started.`);
 }
 function recordPaymentForAppointment(id) {
-  const appt = appointments.find((item) => item.id === id);
+  const appt = appointments.find((item) => String(item.id) === String(id));
   if (!appt || appt.status !== APPOINTMENT_STATUS.COMPLETED) {
     return;
   }
+
   const databaseAppointmentId = Number(
-    appt.databaseAppointmentId ?? appt.database_appointment_id ?? 0,
+    appt.databaseAppointmentId ??
+      appt.database_appointment_id ??
+      appt.appointment_id ??
+      0,
   );
+
   if (!databaseAppointmentId) {
     showToast("Unable to link this payment to the appointment.");
     return;
   }
+
   const dentist = getDentistRecord(appt.dentist) || {
     name: "Unassigned",
   };
+
   const pendingPayment = {
     source: "appointment",
     appointmentId: databaseAppointmentId,
     appointmentUid:
       appt.appointmentUid || appt.appointment_uid || appt.id || "",
-    patientId: appt.patientId || "",
-    patientName: appt.patient || "",
-    dentistId: appt.dentist || "",
-    dentistName: dentist.name || appt.dentist || "",
-    service: appt.type || "",
-    appointmentDate: appt.date || "",
-    appointmentTime: appt.start || "",
+    patientId: appt.patientId || appt.patient_id || "",
+    patientName: appt.patient || appt.patientName || "",
+    dentistId: appt.dentist || appt.dentistId || appt.dentist_id || "",
+    dentistName:
+      dentist.name ||
+      appt.dentistName ||
+      appt.dentist_name ||
+      appt.dentist ||
+      "Unassigned",
+    service:
+      appt.type || appt.service || appt.serviceType || appt.service_type || "",
+    appointmentDate:
+      appt.date || appt.appointmentDate || appt.appointment_date || "",
+    appointmentTime:
+      appt.start ||
+      appt.time ||
+      appt.appointmentTime ||
+      appt.appointment_time ||
+      "",
     duration: Number(appt.duration) || 0,
-    amount: Number(appt.paymentAmount) || 0,
+    amount: Number(
+      appt.paymentAmount || appt.totalAmount || appt.total_amount || 0,
+    ),
     paymentStatus: appt.paymentStatus || "unpaid",
   };
+
   const params = new URLSearchParams();
+
   Object.entries(pendingPayment).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
       params.set(key, String(value));
     }
   });
+
   window.location.href = `../finance/finance.html?${params.toString()}`;
 }
 function openStatusConfirmation(id, actionType) {
