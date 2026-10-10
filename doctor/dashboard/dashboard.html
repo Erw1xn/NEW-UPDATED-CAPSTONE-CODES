@@ -110,81 +110,6 @@
           </div>
           <div class="progress-label" id="productionPercent">0% Complete</div>
         </section>
-        <section class="lower-grid">
-          <div
-            class="dashboard-card appointments-card"
-            title="Shows today's scheduled patients, their appointment time, service, and current appointment status."
-          >
-            <div class="card-header appointment-header">
-              <div>
-                <h2>Today's Appointments</h2>
-                <p>Today's scheduled patients</p>
-              </div>
-            </div>
-            <div class="appointments-list" id="todayAppointmentsList"></div>
-          </div>
-          <div
-            class="dashboard-card clinic-summary-card"
-            title="Provides a quick overview of today's appointment workflow, including scheduled, in-consultation, completed, and no-show patients."
-          >
-            <div class="card-header">
-              <div>
-                <h2>Today's Clinic Summary</h2>
-                <p>Real-time overview of today's operations</p>
-              </div>
-            </div>
-            <div class="summary-grid">
-              <div
-                class="summary-item"
-                title="Shows the number of patients who have appointments scheduled today but have not yet entered the clinic workflow."
-              >
-                <div class="summary-icon scheduled-icon">
-                  <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div>
-                  <span>Scheduled</span>
-                  <strong id="summaryScheduled">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of patients currently being attended to by the dentist."
-              >
-                <div class="summary-icon consultation-icon">
-                  <i class="fa-solid fa-tooth"></i>
-                </div>
-                <div>
-                  <span>In Consultation</span>
-                  <strong id="summaryConsultation">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of appointments completed today."
-              >
-                <div class="summary-icon completed-icon">
-                  <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <div>
-                  <span>Completed</span>
-                  <strong id="summaryCompleted">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of appointments automatically marked as no-show today."
-              >
-                <div class="summary-icon no-show-icon">
-                  <i class="fa-solid fa-user-xmark"></i>
-                </div>
-                <div>
-                  <span>No Show</span>
-                  <strong id="summaryNoShow">0</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
         <section class="charts-grid">
           <div
             class="dashboard-card chart-card"
@@ -263,6 +188,81 @@
                 id="emergencyLabel"
                 title="Shows the percentage of total procedure revenue coming from emergency dental services."
               ></div>
+            </div>
+          </div>
+        </section>
+        <section class="lower-grid">
+          <div
+            class="dashboard-card appointments-card"
+            title="Shows today's scheduled patients, their appointment time, service, and current appointment status."
+          >
+            <div class="card-header appointment-header">
+              <div>
+                <h2>Today's Appointments</h2>
+                <p>Today's scheduled patients</p>
+              </div>
+            </div>
+            <div class="appointments-list" id="todayAppointmentsList"></div>
+          </div>
+          <div
+            class="dashboard-card clinic-summary-card"
+            title="Provides a quick overview of today's appointment workflow, including scheduled, in-consultation, completed, and no-show patients."
+          >
+            <div class="card-header">
+              <div>
+                <h2>Today's Clinic Summary</h2>
+                <p>Real-time overview of today's operations</p>
+              </div>
+            </div>
+            <div class="summary-grid">
+              <div
+                class="summary-item"
+                title="Shows the number of patients who have appointments scheduled today but have not yet entered the clinic workflow."
+              >
+                <div class="summary-icon scheduled-icon">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                  <span>Scheduled</span>
+                  <strong id="summaryScheduled">0</strong>
+                </div>
+              </div>
+              <div
+                class="summary-item"
+                title="Shows the number of patients currently being attended to by the dentist."
+              >
+                <div class="summary-icon consultation-icon">
+                  <i class="fa-solid fa-tooth"></i>
+                </div>
+                <div>
+                  <span>In Consultation</span>
+                  <strong id="summaryConsultation">0</strong>
+                </div>
+              </div>
+              <div
+                class="summary-item"
+                title="Shows the number of appointments completed today."
+              >
+                <div class="summary-icon completed-icon">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <span>Completed</span>
+                  <strong id="summaryCompleted">0</strong>
+                </div>
+              </div>
+              <div
+                class="summary-item"
+                title="Shows the number of appointments automatically marked as no-show today."
+              >
+                <div class="summary-icon no-show-icon">
+                  <i class="fa-solid fa-user-xmark"></i>
+                </div>
+                <div>
+                  <span>No Show</span>
+                  <strong id="summaryNoShow">0</strong>
+                </div>
+              </div>
             </div>
           </div>
         </section>

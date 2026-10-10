@@ -14,10 +14,10 @@ let currentDetailsTransaction = null;
 const TRANSACTION_PAGE_SIZE = 10;
 let transactionCurrentPage = 1;
 const EXPENSE_COLORS = {
-  inventory: "#16803d",
-  utilities: "#2f80ed",
-  maintenance: "#9b51e0",
-  other: "#8a9690",
+  utilities: "#2F80ED",
+  maintenance: "#A855F7",
+  rent_facilities: "#F59E0B",
+  other: "#8A9690",
 };
 document.addEventListener("DOMContentLoaded", async () => {
   await loadPatients();
@@ -869,13 +869,11 @@ function getAuditItemHtml(event) {
   const icons = {
     payment: "fa-peso-sign",
     charge: "fa-file-invoice-dollar",
-    inventory: "fa-boxes-stacked",
     expense: "fa-receipt",
   };
   const stamp = String(event.timestamp || "");
   const when = `${formatShortDate(stamp.slice(0, 10))} · ${formatTime(stamp.slice(11, 16))}`;
-  const sign =
-    event.type === "expense" || event.type === "inventory" ? "-" : "";
+  const sign = event.type === "expense" ? "-" : "";
   const amountClass = sign
     ? "amount-out"
     : event.type === "payment"
@@ -1042,29 +1040,6 @@ function renderExpensesModal(month) {
       return `<div class="breakdown-row"><span class="breakdown-name"><span class="expense-color" style="background:${color}"></span>${escapeHtml(item.label)}</span><div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:${percent}%;background:${color}"></div></div><span class="breakdown-amount">${formatMoney(amount)}</span></div>`;
     })
     .join("");
-  const inventory = report?.inventory || { items: [], total: 0 };
-  const inventoryCount = inventory.items.length;
-  document.getElementById("overviewInventoryTotal").textContent = formatMoney(
-    inventory.total,
-  );
-  document.getElementById("overviewInventoryCount").textContent =
-    `${inventoryCount} purchase${inventoryCount === 1 ? "" : "s"}`;
-  const body = document.getElementById("inventoryPurchasesBody");
-  body.innerHTML = inventory.items.length
-    ? inventory.items
-        .map((item) => {
-          const stamp = String(item.movement_date || "");
-          return `<tr><td>${formatShortDate(stamp.slice(0, 10))}</td><td>${escapeHtml(item.item_name)}</td><td class="num">${escapeHtml(String(item.quantity))} ${escapeHtml(item.unit || "")}</td><td class="num">${formatMoney(item.unit_cost)}</td><td class="num"><strong>${formatMoney(item.total_cost)}</strong></td></tr>`;
-        })
-        .join("")
-    : '<tr><td colspan="5" class="empty-cell">No inventory purchases this month.</td></tr>';
-  document.getElementById("inventoryPurchasesTotal").textContent = formatMoney(
-    inventory.total,
-  );
-  const missing = Number(inventory.missing_cost_count || 0);
-  document.getElementById("inventoryMissingNote").textContent = missing
-    ? `${missing} purchase${missing === 1 ? " has" : "s have"} no unit cost set (counted as ₱0.00)`
-    : "";
   const canEdit = Boolean(report?.can_edit);
   document
     .getElementById("expenseAddSection")
@@ -1072,9 +1047,8 @@ function renderExpensesModal(month) {
   const entries = Array.isArray(report?.manual_entries)
     ? report.manual_entries
     : [];
-  const otherTotal = Math.max(total - Number(inventory.total || 0), 0);
   document.getElementById("overviewOtherTotal").textContent =
-    formatMoney(otherTotal);
+    formatMoney(total);
   document.getElementById("overviewOtherCount").textContent = entries.length
     ? `${entries.length} entr${entries.length === 1 ? "y" : "ies"}`
     : "No entries";

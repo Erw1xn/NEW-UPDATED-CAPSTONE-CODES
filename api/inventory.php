@@ -27,7 +27,6 @@ function normalizeItemRow(array $row): array
         'itemName' => $itemName,
         'category' => (string) ($row['category'] ?? 'Other'),
         'unit' => (string) ($row['unit'] ?? 'unit'),
-        'unitCost' => (float) ($row['unit_cost'] ?? $row['unitCost'] ?? 0),
         'stock' => (float) ($row['stock_quantity'] ?? $row['stock'] ?? 0),
         'stock_quantity' => (float) ($row['stock_quantity'] ?? $row['stock'] ?? 0),
         'minimum' => (float) ($row['reorder_level'] ?? $row['minimum'] ?? 0),
@@ -47,7 +46,6 @@ function normalizeMovementRow(array $row): array
         'itemId' => $itemId,
         'itemName' => $itemName,
         'unit' => (string) ($row['unit'] ?? 'unit'),
-        'unitCost' => (float) ($row['unit_cost'] ?? $row['unitCost'] ?? 0),
         'type' => (string) ($row['movement_type'] ?? $row['type'] ?? 'stock-out'),
         'quantity' => (float) ($row['quantity'] ?? 0),
         'previousStock' => (float) ($row['previous_stock'] ?? 0),
@@ -62,12 +60,12 @@ function normalizeMovementRow(array $row): array
 }
 function loadInventoryData(mysqli $conn): array
 {
-    $itemsResult = $conn->query("SELECT item_id, item_name, category, unit, unit_cost, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items ORDER BY item_name ASC");
+    $itemsResult = $conn->query("SELECT item_id, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items ORDER BY item_name ASC");
     $items = [];
     while ($row = $itemsResult ? $itemsResult->fetch_assoc() : null) {
         $items[] = normalizeItemRow($row);
     }
-    $movementsResult = $conn->query("SELECT movement_id, item_id, item_name, movement_type, quantity, unit, unit_cost, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at FROM tbl_inventory_movements ORDER BY movement_date DESC, movement_id DESC");
+    $movementsResult = $conn->query("SELECT movement_id, item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at FROM tbl_inventory_movements ORDER BY movement_date DESC, movement_id DESC");
     $movements = [];
     while ($row = $movementsResult ? $movementsResult->fetch_assoc() : null) {
         $movements[] = normalizeMovementRow($row);
@@ -96,14 +94,14 @@ function normalizeTreatmentKey(array $treatment, int $treatmentId): string
 function resolveInventoryItem(mysqli $conn, string $itemId, string $itemName, bool $forUpdate = false): ?array
 {
     if ($itemId !== '' && ctype_digit($itemId) && (int) $itemId > 0) {
-        $stmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE item_id = ? LIMIT 1' . ($forUpdate ? ' FOR UPDATE' : ''));
+        $stmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE item_id = ? LIMIT 1' . ($forUpdate ? ' FOR UPDATE' : ''));
         $id = (int) $itemId;
         $stmt->bind_param('i', $id);
     } else {
         if ($itemName === '') {
             return null;
         }
-        $stmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE LOWER(item_name) = LOWER(?) LIMIT 1' . ($forUpdate ? ' FOR UPDATE' : ''));
+        $stmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE LOWER(item_name) = LOWER(?) LIMIT 1' . ($forUpdate ? ' FOR UPDATE' : ''));
         $stmt->bind_param('s', $itemName);
     }
     $stmt->execute();
@@ -220,7 +218,6 @@ if ($action === 'save_item') {
     $stock = max(0, (float) ($input['stock'] ?? $input['stock_quantity'] ?? 0));
     $minimum = max(0, (float) ($input['minimum'] ?? $input['reorder_level'] ?? 0));
     $expiry = trim((string) ($input['expiry'] ?? ''));
-    $unitCost = max(0, (float) ($input['unitCost'] ?? $input['unit_cost'] ?? 0));
     if ($name === '') {
         jsonResponse(false, 'Inventory item name is required.', null, 422);
     }
@@ -252,7 +249,6 @@ if ($action === 'save_item') {
             'UPDATE tbl_inventory_items
              SET category = ?,
                  unit = ?,
-                 unit_cost = ?,
                  stock_quantity = ?,
                  reorder_level = ?,
                  expiry_date = ?,
@@ -262,10 +258,9 @@ if ($action === 'save_item') {
         $expiryDate = $expiry !== '' ? $expiry : null;
         $itemIdInt = (int) $itemId;
         $stmt->bind_param(
-            'ssdddsi',
+            'ssddsi',
             $category,
             $unit,
-            $unitCost,
             $stock,
             $minimum,
             $expiryDate,
@@ -274,14 +269,14 @@ if ($action === 'save_item') {
         $stmt->execute();
         $stmt->close();
     } else {
-        $stmt = $conn->prepare('INSERT INTO tbl_inventory_items (item_name, category, unit, unit_cost, stock_quantity, reorder_level, expiry_date) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO tbl_inventory_items (item_name, category, unit, stock_quantity, reorder_level, expiry_date) VALUES (?, ?, ?, ?, ?, ?)');
         $expiryDate = $expiry !== '' ? $expiry : null;
-        $stmt->bind_param('sssddds', $name, $category, $unit, $unitCost, $stock, $minimum, $expiryDate);
+        $stmt->bind_param('sssdds', $name, $category, $unit, $stock, $minimum, $expiryDate);
         $stmt->execute();
         $itemId = (string) $stmt->insert_id;
         $stmt->close();
     }
-    $updated = $conn->query("SELECT item_id, item_name, category, unit, unit_cost, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items WHERE item_id = " . (int) $itemId . " LIMIT 1");
+    $updated = $conn->query("SELECT item_id, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items WHERE item_id = " . (int) $itemId . " LIMIT 1");
     $row = $updated ? $updated->fetch_assoc() : null;
     jsonResponse(true, 'Inventory item saved.', $row ? normalizeItemRow($row) : null);
 }
@@ -391,10 +386,10 @@ if ($action === 'record_movement') {
     }
     if ($itemIdentifier !== '') {
         $itemIdentifierInt = (int) $itemIdentifier;
-        $itemSelect = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE item_id = ? LIMIT 1');
+        $itemSelect = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE item_id = ? LIMIT 1');
         $itemSelect->bind_param('i', $itemIdentifierInt);
     } else {
-        $itemSelect = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE LOWER(item_name) = LOWER(?) LIMIT 1');
+        $itemSelect = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE LOWER(item_name) = LOWER(?) LIMIT 1');
         $itemSelect->bind_param('s', $itemName);
     }
     $itemSelect->execute();
@@ -405,7 +400,6 @@ if ($action === 'record_movement') {
     }
     $previousStock = (float) ($item['stock_quantity'] ?? 0);
     $unit = (string) ($item['unit'] ?? 'unit');
-    $unitCost = (float) ($item['unit_cost'] ?? 0);
     $newStock = $previousStock;
     if ($type === 'stock-out') {
         if ($quantity > $previousStock) {
@@ -421,9 +415,9 @@ if ($action === 'record_movement') {
     $updateStmt->bind_param('di', $newStock, $itemIdForUpdate);
     $updateStmt->execute();
     $updateStmt->close();
-    $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, unit_cost, previous_stock, new_stock, source, appointment_id, patient_id, movement_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
+    $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
     $movementType = $type === 'stock-out' ? 'stock-out' : 'stock-in';
-    $movementStmt->bind_param('issddsddsss', $itemIdForUpdate, $itemNameForMovement, $movementType, $quantity, $unit, $unitCost, $previousStock, $newStock, $reason, $appointmentId, $patientId);
+    $movementStmt->bind_param('issdsddsss', $itemIdForUpdate, $itemNameForMovement, $movementType, $quantity, $unit, $previousStock, $newStock, $reason, $appointmentId, $patientId);
     $movementStmt->execute();
     $movementStmt->close();
     jsonResponse(true, 'Inventory movement recorded.', loadInventoryData($conn));
@@ -561,7 +555,7 @@ if ($action === 'deduct_for_treatment') {
         foreach ($existingUsage as $oldUsage) {
             $oldItemId = (int) $oldUsage['itemId'];
             $oldQuantity = (float) $oldUsage['quantity'];
-            $oldItemStmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE item_id = ? LIMIT 1 FOR UPDATE');
+            $oldItemStmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE item_id = ? LIMIT 1 FOR UPDATE');
             $oldItemStmt->bind_param('i', $oldItemId);
             if (!$oldItemStmt->execute()) {
                 $oldItemStmt->close();
@@ -582,12 +576,11 @@ if ($action === 'deduct_for_treatment') {
             }
             $oldUpdateStmt->close();
             $reverseReason = 'Treatment inventory reversal: ' . $procedure . ' (' . $patientLabel . ')';
-            $reverseMovementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, unit_cost, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
+            $reverseMovementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
             $reverseMovementType = 'stock-in';
             $oldItemName = (string) $oldItem['item_name'];
             $oldUnit = (string) ($oldItem['unit'] ?? 'unit');
-            $oldUnitCost = (float) ($oldItem['unit_cost'] ?? 0);
-            $reverseMovementStmt->bind_param('issddsddsss', $oldItemId, $oldItemName, $reverseMovementType, $oldQuantity, $oldUnit, $oldUnitCost, $oldPreviousStock, $oldNewStock, $reverseReason, $appointmentId, $patientId);
+            $reverseMovementStmt->bind_param('issdsddsss', $oldItemId, $oldItemName, $reverseMovementType, $oldQuantity, $oldUnit, $oldPreviousStock, $oldNewStock, $reverseReason, $appointmentId, $patientId);
             if (!$reverseMovementStmt->execute()) {
                 $reverseMovementStmt->close();
                 throw new RuntimeException('Unable to record inventory reversal movement.');
@@ -611,7 +604,7 @@ if ($action === 'deduct_for_treatment') {
         foreach ($aggregatedRequested as $material) {
             $itemId = (int) $material['itemId'];
             $quantity = (float) $material['quantity'];
-            $itemStmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit, unit_cost FROM tbl_inventory_items WHERE item_id = ? LIMIT 1 FOR UPDATE');
+            $itemStmt = $conn->prepare('SELECT item_id, item_name, stock_quantity, unit FROM tbl_inventory_items WHERE item_id = ? LIMIT 1 FOR UPDATE');
             $itemStmt->bind_param('i', $itemId);
             if (!$itemStmt->execute()) {
                 $itemStmt->close();
@@ -630,7 +623,6 @@ if ($action === 'deduct_for_treatment') {
             $newStock = $previousStock - $quantity;
             $itemName = (string) $item['item_name'];
             $unit = (string) ($item['unit'] ?? 'unit');
-            $unitCost = (float) ($item['unit_cost'] ?? 0);
             $updateStmt = $conn->prepare('UPDATE tbl_inventory_items SET stock_quantity = ?, updated_at = NOW() WHERE item_id = ?');
             $updateStmt->bind_param('di', $newStock, $itemId);
             if (!$updateStmt->execute()) {
@@ -639,9 +631,9 @@ if ($action === 'deduct_for_treatment') {
             }
             $updateStmt->close();
             $reason = 'Patient treatment: ' . $procedure . ' (' . $patientLabel . ')';
-            $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, unit_cost, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
+            $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
             $movementType = 'stock-out';
-            $movementStmt->bind_param('issddsddsss', $itemId, $itemName, $movementType, $quantity, $unit, $unitCost, $previousStock, $newStock, $reason, $appointmentId, $patientId);
+            $movementStmt->bind_param('issdsddsss', $itemId, $itemName, $movementType, $quantity, $unit, $previousStock, $newStock, $reason, $appointmentId, $patientId);
             if (!$movementStmt->execute()) {
                 $movementStmt->close();
                 throw new RuntimeException('Unable to record inventory movement.');
@@ -662,7 +654,6 @@ if ($action === 'deduct_for_treatment') {
                 'itemId' => (string) $itemId,
                 'itemName' => $itemName,
                 'unit' => $unit,
-                'unitCost' => $unitCost,
                 'type' => 'stock-out',
                 'quantity' => $quantity,
                 'previousStock' => $previousStock,

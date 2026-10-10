@@ -444,16 +444,6 @@
                   <small id="expensesModalCompare"></small>
                 </div>
               </div>
-              <div class="overview-card inventory-overview-card">
-                <div class="overview-card-icon blue-overview-icon">
-                  <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <div class="overview-card-content">
-                  <span>Inventory Purchases</span>
-                  <strong id="overviewInventoryTotal">₱0.00</strong>
-                  <small id="overviewInventoryCount">0 purchases</small>
-                </div>
-              </div>
               <div class="overview-card other-overview-card">
                 <div class="overview-card-icon purple-overview-icon">
                   <i class="fa-solid fa-receipt"></i>
@@ -470,40 +460,13 @@
             <h3>Expense Breakdown</h3>
             <div class="expenses-breakdown" id="expensesBreakdown"></div>
           </div>
-          <div class="expenses-section">
-            <div class="expenses-section-head">
-              <h3>Inventory Purchases</h3>
-              <span class="expenses-note" id="inventoryMissingNote"></span>
-            </div>
-            <div class="expenses-table-wrap">
-              <table class="expenses-table">
-                <thead>
-                  <tr>
-                    <th>DATE</th>
-                    <th>ITEM</th>
-                    <th class="num">QTY</th>
-                    <th class="num">UNIT COST</th>
-                    <th class="num">TOTAL</th>
-                  </tr>
-                </thead>
-                <tbody id="inventoryPurchasesBody"></tbody>
-              </table>
-            </div>
-            <div class="expenses-subtotal">
-              <span>Total Inventory Purchases</span>
-              <strong id="inventoryPurchasesTotal">₱0.00</strong>
-            </div>
-            <p class="expenses-hint">
-              Only stock replenishments count as expenses. Treatment usage and
-              treatment reversals are never counted again.
-            </p>
-          </div>
           <div class="expenses-section" id="expenseAddSection">
             <h3>Add Other Expense</h3>
             <div class="expense-add-form" id="expenseAddForm">
               <select id="expenseCategory">
                 <option value="utilities">Utilities</option>
                 <option value="maintenance">Equipment Maintenance</option>
+                <option value="rent_facilities">Rent and Facilities</option>
                 <option value="other">Other</option>
               </select>
               <input
