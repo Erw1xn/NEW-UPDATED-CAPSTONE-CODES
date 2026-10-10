@@ -284,12 +284,10 @@ select:focus-visible {
   align-items: center;
   gap: 10px;
 }
-
 .queue-text {
   min-width: 0;
   flex: 1;
 }
-
 .queue-name {
   display: block;
   color: var(--ink-900);
@@ -300,7 +298,6 @@ select:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .queue-dentist {
   display: block;
   margin-top: 3px;
@@ -648,11 +645,9 @@ select:focus-visible {
   gap: 12px;
   min-width: 0;
 }
-
 .schedule-heading-group h3 {
   margin: 0;
 }
-
 .schedule-date-label {
   display: inline-flex;
   align-items: center;
@@ -3497,172 +3492,6 @@ body {
     padding: 9px 13px 12px;
   }
 }
-.appointments-page-header {
-  width: 100%;
-  padding: 20px 28px 0;
-}
-
-.appointments-page-header-content {
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 15px 18px;
-  background: #ffffff;
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  box-shadow: var(--panel-shadow);
-}
-
-.appointments-page-heading {
-  min-width: 0;
-}
-
-.appointments-page-heading h1 {
-  margin: 0;
-  color: var(--ink-900);
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.appointments-page-heading p {
-  margin: 4px 0 0;
-  color: var(--ink-500);
-  font-size: 9px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.appointments-page-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-shrink: 0;
-}
-
-.page-header-new-appointment {
-  height: 36px;
-  min-height: 36px;
-  padding: 0 13px;
-  border-radius: 8px;
-  font-size: 9.5px;
-}
-
-.page-header-new-appointment i {
-  font-size: 9px;
-}
-
-.appointments-layout {
-  padding-top: 14px;
-}
-
-@media (min-width: 1400px) {
-  .appointments-page-header {
-    padding: 20px 28px 0;
-  }
-
-  .appointments-layout {
-    padding-top: 14px;
-  }
-}
-
-@media (max-width: 1250px) {
-  .appointments-page-header {
-    padding: 18px 18px 0;
-  }
-
-  .appointments-layout {
-    padding-top: 12px;
-  }
-}
-
-@media (max-width: 800px) {
-  .appointments-page-header {
-    padding: 14px 16px 0;
-  }
-
-  .appointments-page-header-content {
-    min-height: auto;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 15px;
-  }
-
-  .appointments-page-heading {
-    width: 100%;
-  }
-
-  .appointments-page-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .page-header-new-appointment {
-    width: 100%;
-  }
-
-  .appointments-layout {
-    padding-top: 10px;
-  }
-}
-
-@media (max-width: 640px) {
-  .appointments-page-header {
-    padding: 10px 10px 0;
-  }
-
-  .appointments-page-header-content {
-    gap: 10px;
-    padding: 13px;
-    border-radius: 12px;
-  }
-
-  .appointments-page-heading h1 {
-    font-size: 15px;
-  }
-
-  .appointments-page-heading p {
-    font-size: 8px;
-  }
-
-  .page-header-new-appointment {
-    height: 34px;
-    min-height: 34px;
-    font-size: 8.5px;
-  }
-
-  .appointments-layout {
-    padding-top: 10px;
-  }
-}
-
-@media (max-width: 400px) {
-  .appointments-page-header {
-    padding: 8px 7px 0;
-  }
-
-  .appointments-page-header-content {
-    padding: 11px;
-  }
-
-  .appointments-page-heading h1 {
-    font-size: 14px;
-  }
-
-  .appointments-page-heading p {
-    font-size: 7.5px;
-  }
-
-  .page-header-new-appointment {
-    height: 32px;
-    min-height: 32px;
-    font-size: 8px;
-  }
-}
 .side-section-title-line {
   display: flex;
   align-items: center;
@@ -4188,16 +4017,413 @@ body {
 .reschedule-review-approve:hover {
   background: var(--green-900);
 }
-.schedule-panel {
-  height: 600px !important;
-  min-height: 600px !important;
+body {
+  background: #eef3f0;
+}
+.main-content {
+  padding: 16px 20px 22px;
+}
+.appointments-shell {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 26px 26px;
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  border-radius: 28px;
+  box-shadow: 0 10px 34px rgba(20, 57, 36, 0.06);
+}
+.appointments-page-header {
+  width: 100%;
+  padding: 0;
+}
+.appointments-page-header-content {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.appointments-page-heading {
+  min-width: 0;
+}
+.appointments-page-heading h1 {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.appointments-page-heading p {
+  margin: 5px 0 0;
+  color: var(--ink-500);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.appointments-page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.appointments-page-actions .dentist-filter-wrapper {
+  width: 200px;
+}
+.appointments-page-actions .search-box-wrapper {
+  width: 210px;
+}
+.appointments-page-actions .dentist-filter,
+.appointments-page-actions .patient-search-input {
+  height: 38px;
+  background: #f4f8f5;
+  border: 1px solid #e1e9e4;
+  border-radius: 999px;
+  font-size: 9.5px;
+}
+.appointments-page-actions .dentist-filter {
+  padding-left: 32px;
+}
+.appointments-page-actions .patient-search-input {
+  padding-left: 34px;
+}
+.appointments-page-actions .dentist-filter-icon {
+  left: 13px;
+}
+.appointments-page-actions .search-icon {
+  left: 14px;
+}
+.page-header-new-appointment {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 9.5px;
+}
+.page-header-new-appointment i {
+  font-size: 9px;
+}
+.appointments-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  min-height: 0;
+  padding: 0;
+}
+.side-col-stack,
+.main-col-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+}
+.panel {
+  border-color: #e6ede9;
+  border-radius: 22px;
+  box-shadow: none;
+}
+.panel:hover {
+  transform: none;
+  box-shadow: none;
 }
 .calendar-panel {
-  min-height: 280px !important;
+  min-height: 0;
+  padding: 18px;
+  background: #f8fbf9;
+}
+.calendar-panel h4 {
+  font-size: 13px;
+}
+.calendar-nav-btns button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.day {
+  min-height: 33px;
+  border-radius: 10px;
+}
+.day.selected {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(23, 107, 56, 0.2);
 }
 .side-content-panel {
-  min-height: 304px !important;
+  min-height: 0;
+  background: #ffffff;
+}
+.side-content-header {
+  border-bottom: 0;
+}
+.side-section-header {
+  min-height: 64px;
+  padding: 16px 18px 6px;
+}
+.side-section-title-line h3 {
+  font-size: 13px;
+}
+.side-section-description {
+  max-width: 220px;
+  font-size: 8.5px;
+}
+.side-content-body {
+  padding: 8px 14px 16px;
+}
+.queue-item {
+  height: auto;
+  min-height: 58px;
+  max-height: none;
+  padding: 9px 11px;
+  background: #f8fbf9;
+  border: 1px solid transparent;
+  border-radius: 14px;
+}
+.queue-item:hover {
+  background: #f1f8f3;
+  border-color: #d9e8de;
+  box-shadow: none;
+  transform: none;
+}
+.queue-avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+}
+.queue-type {
+  max-width: 90px;
+  padding: 6px 9px;
+  background: var(--green-100);
+  color: var(--green-700);
+  border-radius: 999px;
+  font-size: 7.2px;
+}
+.schedule-panel,
+.schedule-panel.schedule-panel--expanded {
+  height: 640px;
+  min-height: 640px;
+  background: #ffffff;
+}
+.schedule-panel.schedule-panel--expanded .time-slots-container {
+  overflow-y: auto;
+}
+.schedule-main-header {
+  min-height: 76px;
+  padding: 16px 24px;
+  border-bottom: 1px solid #edf2ef;
+}
+.schedule-main-header h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
 }
 .schedule-date-label {
-  transform: translateY(1px);
+  padding: 6px 12px;
+  background: var(--green-50);
+  border: 1px solid #dcebe1;
+  border-radius: 999px;
+  font-size: 9.5px;
+  transform: none;
+}
+.time-slots-container {
+  gap: 0;
+  padding: 6px 20px 20px 24px;
+}
+.tl-row {
+  grid-template-columns: 78px minmax(0, 1fr);
+  min-height: 74px;
+  border-top: 1px dashed #e4ece7;
+  border-bottom: none;
+}
+.tl-row:first-child {
+  border-top: none;
+}
+.tl-time {
+  padding-top: 14px;
+  font-size: 9.5px;
+}
+.tl-slot {
+  padding: 8px 0;
+}
+.appt-card {
+  min-height: 60px;
+  padding: 10px 14px;
+  border-left-width: 4px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(20, 57, 36, 0.05);
+}
+.appt-card:hover {
+  box-shadow: 0 6px 16px rgba(20, 57, 36, 0.09);
+}
+.tooth-badge {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 12px;
+}
+.pname {
+  font-size: 10.5px;
+}
+.ptype,
+.appt-time-range {
+  font-size: 8.5px;
+}
+.appt-status-btn {
+  min-height: 28px;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+.appt-status-badge {
+  padding: 6px 11px;
+}
+@media (max-width: 1250px) {
+  .appointments-layout {
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 16px;
+    padding: 0;
+  }
+  .appointments-page-actions .dentist-filter-wrapper {
+    width: 170px;
+  }
+  .appointments-page-actions .search-box-wrapper {
+    width: 170px;
+  }
+}
+@media (max-width: 1050px) {
+  .appointments-layout {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  .side-col-stack {
+    display: grid;
+    grid-template-columns: minmax(250px, 0.85fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+  .schedule-panel,
+  .schedule-panel.schedule-panel--expanded {
+    height: 620px;
+    min-height: 0;
+  }
+}
+@media (max-width: 800px) {
+  .main-content {
+    padding: 12px 12px 18px;
+  }
+  .appointments-shell {
+    gap: 16px;
+    padding: 18px 16px 20px;
+    border-radius: 22px;
+  }
+  .appointments-page-header {
+    padding: 0;
+  }
+  .appointments-page-header-content {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 0;
+  }
+  .appointments-page-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .appointments-page-actions .dentist-filter-wrapper,
+  .appointments-page-actions .search-box-wrapper {
+    flex: 1;
+    min-width: 150px;
+    width: auto;
+  }
+  .page-header-new-appointment {
+    width: auto;
+  }
+  .side-col-stack {
+    display: flex;
+    flex-direction: column;
+  }
+}
+@media (max-width: 640px) {
+  .main-content {
+    padding: 8px 8px 14px;
+  }
+  .appointments-shell {
+    padding: 14px 12px 16px;
+    border-radius: 18px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 19px;
+  }
+  .appointments-page-heading p {
+    font-size: 8.5px;
+  }
+  .appointments-layout {
+    gap: 12px;
+    padding: 0;
+  }
+  .panel {
+    border-radius: 16px;
+  }
+  .schedule-panel,
+  .schedule-panel.schedule-panel--expanded {
+    height: 570px;
+  }
+  .schedule-main-header {
+    padding: 13px 14px;
+  }
+  .time-slots-container {
+    padding: 6px 10px 12px 12px;
+  }
+  .tl-row {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+  .queue-item {
+    height: auto;
+    min-height: 58px;
+    max-height: none;
+  }
+}
+@media (max-width: 400px) {
+  .appointments-shell {
+    padding: 12px 10px 14px;
+  }
+  .appointments-page-actions .dentist-filter,
+  .appointments-page-actions .patient-search-input,
+  .page-header-new-appointment {
+    height: 34px;
+    min-height: 34px;
+  }
+  .tl-row {
+    grid-template-columns: 51px minmax(0, 1fr);
+  }
+  .queue-item {
+    min-height: 56px;
+  }
+}
+.time-picker-option.doctor-unavailable {
+  background: #fff0f0 !important;
+  color: #dc3838 !important;
+  border-color: #f2caca !important;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.time-picker-unavailable-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  background: #fff0f0;
+  border: 1px solid #f2caca;
+  border-radius: 8px;
+  color: #dc3838;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
 }

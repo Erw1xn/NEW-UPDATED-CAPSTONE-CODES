@@ -22,70 +22,102 @@
     <div class="dashboard-wrapper">
       <aside id="sidebar-container"></aside>
       <main class="main-content">
-        <header class="topbar">
-          <div class="topbar-left">
-            <div class="page-heading-block">
-              <h1 class="page-title">Appointments</h1>
-              <p class="page-description">
-                Manage and organize patient appointments and daily schedules.
-              </p>
-            </div>
-          </div>
-          <div class="topbar-right-actions">
-            <div class="search-box-wrapper">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input
-                type="text"
-                id="searchInput"
-                class="patient-search-input"
-                placeholder="Search patient name..."
-                autocomplete="off"
-              />
-            </div>
-          </div>
-        </header>
-        <div class="appointments-layout">
-          <section class="panel schedule-panel">
-            <div class="schedule-main-header">
-              <div class="schedule-heading">
-                <span class="panel-eyebrow">DAILY SCHEDULE</span>
-                <div class="schedule-title-row">
-                  <h3 id="scheduleTitle">Today's Appointments</h3>
-                  <span
-                    id="scheduleDateLabel"
-                    class="schedule-date-label"
-                  ></span>
+        <div class="appointments-shell">
+          <header class="appointments-page-header">
+            <div class="appointments-page-header-content">
+              <div class="appointments-page-heading">
+                <h1>Appointments</h1>
+                <p>
+                  Manage and organize patient appointments and daily schedules.
+                </p>
+              </div>
+              <div class="appointments-page-actions">
+                <div class="search-box-wrapper">
+                  <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="patient-search-input"
+                    placeholder="Search patient name..."
+                    autocomplete="off"
+                  />
                 </div>
+                <button
+                  type="button"
+                  class="btn-mark-unavailable"
+                  onclick="openUnavailableModal()"
+                >
+                  <i class="fa-solid fa-user-clock"></i>
+                  <span>Mark Unavailable</span>
+                </button>
               </div>
             </div>
-            <div class="time-slots-container" id="timeline"></div>
-          </section>
-          <div class="right-col-stack">
-            <section class="panel calendar-panel">
-              <div class="calendar-header">
-                <div class="calendar-heading">
-                  <span class="panel-eyebrow">CALENDAR</span>
+          </header>
+          <div class="appointments-layout">
+            <div class="side-col-stack">
+              <section class="panel calendar-panel">
+                <div class="calendar-header">
                   <h4 id="calMonthLabel">—</h4>
+                  <div class="calendar-nav-btns">
+                    <button
+                      type="button"
+                      onclick="shiftMonth(-1)"
+                      aria-label="Previous month"
+                    >
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button
+                      type="button"
+                      onclick="shiftMonth(1)"
+                      aria-label="Next month"
+                    >
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="calendar-nav-btns">
-                  <button
-                    type="button"
-                    onclick="shiftMonth(-1)"
-                    aria-label="Previous month"
+                <div class="calendar-grid-days" id="calGrid"></div>
+              </section>
+              <section class="panel side-content-panel">
+                <div class="side-content-header">
+                  <div
+                    class="side-section-header active"
+                    id="waitingQueueHeader"
                   >
-                    <i class="fa-solid fa-chevron-left"></i>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="shiftMonth(1)"
-                    aria-label="Next month"
-                  >
-                    <i class="fa-solid fa-chevron-right"></i>
-                  </button>
+                    <div class="side-section-title">
+                      <div class="side-section-text">
+                        <div class="side-section-title-line">
+                          <h3>Today's Appointments</h3>
+                        </div>
+                        <span class="side-section-description"
+                          >Today's appointments and current status</span
+                        >
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="calendar-grid-days" id="calGrid"></div>
-            </section>
+                <div class="side-content-body active" id="waitingQueuePage">
+                  <div class="waiting-queue-list" id="waitingQueueList"></div>
+                </div>
+              </section>
+            </div>
+            <div class="main-col-stack">
+              <section class="panel schedule-panel">
+                <div class="schedule-main-header">
+                  <div class="schedule-heading-group">
+                    <h3 id="scheduleTitle">Today's Schedule</h3>
+                    <span
+                      id="scheduleDateLabel"
+                      class="schedule-date-label"
+                    ></span>
+                  </div>
+                  <div
+                    class="schedule-unavailable-area"
+                    id="scheduleUnavailableArea"
+                  ></div>
+                </div>
+                <div class="time-slots-container" id="timeline"></div>
+              </section>
+            </div>
           </div>
         </div>
       </main>
@@ -155,12 +187,167 @@
               >
             </div>
           </div>
+          <button
+            type="button"
+            id="markApptUnavailableBtn"
+            class="btn-appt-unavailable"
+            onclick="requestMarkAppointmentUnavailable()"
+          >
+            <i class="fa-solid fa-user-slash"></i>
+            <span id="markApptUnavailableLabel"
+              >Mark Unavailable for This Time</span
+            >
+          </button>
         </div>
         <div class="modal-actions">
           <div></div>
           <div class="modal-right-actions">
             <button class="btn-cancel" type="button" onclick="closeModal()">
               Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="unavailableOverlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div>
+            <h3>Mark Unavailable</h3>
+            <span class="modal-subtitle"
+              >Patients and staff cannot book the date or time you block</span
+            >
+          </div>
+          <button
+            class="modal-close-icon"
+            type="button"
+            onclick="closeUnavailableModal()"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="u_date">Date</label>
+            <input type="date" id="u_date" class="form-control" />
+          </div>
+          <label class="unavailable-allday">
+            <input
+              type="checkbox"
+              id="u_allday"
+              onchange="toggleUnavailableAllDay()"
+            />
+            <span>Unavailable all day</span>
+          </label>
+          <div class="form-row-inline" id="u_time_row">
+            <div class="form-group">
+              <label for="u_start">From</label>
+              <input
+                type="time"
+                id="u_start"
+                class="form-control"
+                min="10:00"
+                max="18:00"
+                step="1800"
+              />
+            </div>
+            <div class="form-group">
+              <label for="u_end">To</label>
+              <input
+                type="time"
+                id="u_end"
+                class="form-control"
+                min="10:00"
+                max="18:00"
+                step="1800"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="u_reason">Reason (optional)</label>
+            <input
+              type="text"
+              id="u_reason"
+              class="form-control"
+              maxlength="150"
+              placeholder="e.g. Seminar, personal leave"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <div></div>
+          <div class="modal-right-actions">
+            <button
+              class="btn-cancel"
+              type="button"
+              onclick="closeUnavailableModal()"
+            >
+              Cancel
+            </button>
+            <button
+              class="btn-unavailable-save"
+              type="button"
+              id="u_save"
+              onclick="saveUnavailability()"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="unavailabilityDetailOverlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div>
+            <h3>Unavailable Time</h3>
+            <span id="ud_subtitle" class="modal-subtitle"></span>
+          </div>
+          <button
+            class="modal-close-icon"
+            type="button"
+            onclick="closeUnavailabilityDetails()"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="ud_date">Date</label>
+            <input type="text" id="ud_date" class="form-control" disabled />
+          </div>
+          <div class="form-group">
+            <label for="ud_time">Time</label>
+            <input type="text" id="ud_time" class="form-control" disabled />
+          </div>
+          <div class="form-group">
+            <label for="ud_reason">Reason</label>
+            <input type="text" id="ud_reason" class="form-control" disabled />
+          </div>
+          <div class="view-only-notice">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+              <strong>Schedule blocked</strong>
+              <span
+                >Patients and staff cannot book this date or time while it is
+                marked unavailable.</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <div></div>
+          <div class="modal-right-actions">
+            <button
+              class="btn-reopen"
+              type="button"
+              id="ud_reopen"
+              onclick="reopenUnavailability()"
+            >
+              Open Schedule Again
             </button>
           </div>
         </div>
@@ -173,6 +360,14 @@
         </div>
         <h3 id="statusConfirmTitle">Confirm Appointment</h3>
         <p id="statusConfirmMessage">Are you sure you want to continue?</p>
+        <input
+          type="text"
+          id="statusConfirmReason"
+          class="form-control status-confirm-reason"
+          maxlength="150"
+          placeholder="Reason why you are unavailable"
+          autocomplete="off"
+        />
         <div class="status-confirm-actions">
           <button
             type="button"

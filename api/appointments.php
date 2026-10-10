@@ -1,27 +1,21 @@
 <?php
 declare(strict_types=1);
-
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
-
 require_once __DIR__ . '/../php/db_connect.php';
-
 function appointmentResponse(bool $success, string $message = '', $data = null, int $status = 200): void
 {
     http_response_code($status);
     echo json_encode(['success' => $success, 'message' => $message, 'data' => $data], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
 if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
     appointmentResponse(false, 'Authentication required.', null, 401);
 }
-
 $role = strtolower(trim((string) ($_SESSION['role'] ?? '')));
 $userId = (int) $_SESSION['user_id'];
 $method = strtoupper($_SERVER['REQUEST_METHOD']);
-
 function appointmentPatientAccess(mysqli $conn, string $patientId, int $userId, string $role): void
 {
     if ($role === 'doctor' || $role === 'staff') {
@@ -36,7 +30,6 @@ function appointmentPatientAccess(mysqli $conn, string $patientId, int $userId, 
         appointmentResponse(false, 'You may access only your own appointments.', null, 403);
     }
 }
-
 function appointmentDoctorUserId(mysqli $conn, string $value): ?int
 {
     $value = trim($value);
@@ -57,7 +50,23 @@ function appointmentDoctorUserId(mysqli $conn, string $value): ?int
     $stmt->close();
     return $row ? (int) $row['user_id'] : null;
 }
-
+function appointmentDoctorUnavailable(mysqli $conn, int $doctorUserId, string $date, string $time, int $duration): bool
+{
+    $parts = explode(':', $time);
+    $startMinutes = ((int) ($parts[0] ?? 0)) * 60 + (int) ($parts[1] ?? 0);
+    $endMinutes = min($startMinutes + max($duration, 1), 1439);
+    $startTime = sprintf('%02d:%02d:00', intdiv($startMinutes, 60), $startMinutes % 60);
+    $endTime = sprintf('%02d:%02d:00', intdiv($endMinutes, 60), $endMinutes % 60);
+    $stmt = $conn->prepare('SELECT unavailability_id FROM tbl_doctor_unavailability WHERE doctor_id = ? AND unavailable_date = ? AND (all_day = 1 OR (start_time < ? AND end_time > ?)) LIMIT 1');
+    if (!$stmt) {
+        return false;
+    }
+    $stmt->bind_param('isss', $doctorUserId, $date, $endTime, $startTime);
+    $stmt->execute();
+    $blocked = $stmt->get_result()->num_rows > 0;
+    $stmt->close();
+    return $blocked;
+}
 function appointmentPayload(array $row): array
 {
     $doctorId = (string) ($row['doctor_code'] ?? '');
@@ -102,7 +111,6 @@ function appointmentPayload(array $row): array
         'cancelledAt' => $row['cancelled_at'],
     ]);
 }
-
 function loadAppointments(mysqli $conn, string $patientId = ''): array
 {
     $sql = "SELECT a.*, p.first_name, p.last_name, COALESCE(NULLIF(u.doctor_id, ''), CONCAT('DOC-', LPAD(u.user_id, 4, '0'))) AS doctor_code, TRIM(COALESCE(u.name, CONCAT(u.firstname, ' ', u.lastname))) AS doctor_name FROM tbl_patient_appointments a JOIN tbl_patients p ON p.patient_id = a.patient_id LEFT JOIN tbl_users u ON u.user_id = a.doctor_id";
@@ -123,12 +131,10 @@ function loadAppointments(mysqli $conn, string $patientId = ''): array
     $stmt->close();
     return $appointments;
 }
-
 if ($method === 'GET') {
     $scope = strtolower(trim((string) ($_GET['scope'] ?? '')));
     $doctorId = trim((string) ($_GET['doctor_id'] ?? $_GET['dentist_id'] ?? ''));
     $date = trim((string) ($_GET['date'] ?? ''));
-
     if ($scope === 'reschedule_requests') {
         $sql = "SELECT r.*, a.appointment_uid, a.appointment_date AS current_sched_date, a.appointment_time AS current_sched_time FROM tbl_reschedule_requests r JOIN tbl_patient_appointments a ON a.appointment_id = r.appointment_id";
         $patientId = '';
@@ -157,7 +163,6 @@ if ($method === 'GET') {
         $stmt->close();
         appointmentResponse(true, 'Reschedule requests loaded.', $requests);
     }
-
     if ($scope === 'doctor_schedule' && $doctorId !== '' && $date !== '') {
         $doctorUserId = appointmentDoctorUserId($conn, $doctorId);
         $sql = "SELECT a.*, p.first_name, p.last_name, COALESCE(NULLIF(u.doctor_id, ''), CONCAT('DOC-', LPAD(u.user_id, 4, '0'))) AS doctor_code, TRIM(COALESCE(u.name, CONCAT(u.firstname, ' ', u.lastname))) AS doctor_name FROM tbl_patient_appointments a JOIN tbl_patients p ON p.patient_id = a.patient_id LEFT JOIN tbl_users u ON u.user_id = a.doctor_id WHERE a.appointment_date = ? AND (a.doctor_id = ? OR u.doctor_id = ? OR u.user_id = ?) ORDER BY a.appointment_time ASC";
@@ -172,7 +177,6 @@ if ($method === 'GET') {
         $stmt->close();
         appointmentResponse(true, 'Doctor schedule loaded.', $appointments);
     }
-
     $patientId = trim((string) ($_GET['patient_id'] ?? ''));
     if ($role === 'user') {
         $patientId = 'PN-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT);
@@ -182,12 +186,10 @@ if ($method === 'GET') {
     }
     appointmentResponse(true, 'Appointments loaded.', loadAppointments($conn, $patientId));
 }
-
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input)) {
     $input = $_POST;
 }
-
 if ($method === 'DELETE') {
     $appointmentId = trim((string) ($input['id'] ?? $_GET['id'] ?? ''));
     if ($appointmentId === '') {
@@ -209,11 +211,9 @@ if ($method === 'DELETE') {
     $stmt->close();
     appointmentResponse(true, 'Appointment deleted.');
 }
-
 if ($method !== 'POST') {
     appointmentResponse(false, 'Unsupported request method.', null, 405);
 }
-
 if (isset($input['reschedule']) && is_array($input['reschedule'])) {
     $appointment = $input['reschedule'];
     $appointmentId = trim((string) ($appointment['id'] ?? $appointment['appointmentId'] ?? $appointment['appointment_id'] ?? ''));
@@ -226,13 +226,17 @@ if (isset($input['reschedule']) && is_array($input['reschedule'])) {
     appointmentPatientAccess($conn, $patientId, $userId, $role);
     $numericAppointmentId = ctype_digit($appointmentId) ? (int) $appointmentId : 0;
     $metadata = json_encode($appointment, JSON_UNESCAPED_UNICODE);
-    $lookup = $conn->prepare('SELECT appointment_id, patient_id FROM tbl_patient_appointments WHERE appointment_uid = ? OR appointment_id = ? LIMIT 1');
+    $lookup = $conn->prepare('SELECT appointment_id, patient_id, doctor_id, appointment_date, appointment_time, duration_minutes FROM tbl_patient_appointments WHERE appointment_uid = ? OR appointment_id = ? LIMIT 1');
     $lookup->bind_param('si', $appointmentId, $numericAppointmentId);
     $lookup->execute();
     $existing = $lookup->get_result()->fetch_assoc();
     $lookup->close();
     if (!$existing || (string) $existing['patient_id'] !== $patientId) {
         appointmentResponse(false, 'Appointment could not be found for this patient.', null, 404);
+    }
+    $scheduleChanged = (string) $existing['appointment_date'] !== $date || substr((string) $existing['appointment_time'], 0, 5) !== substr($time, 0, 5);
+    if ($scheduleChanged && $existing['doctor_id'] !== null && appointmentDoctorUnavailable($conn, (int) $existing['doctor_id'], $date, $time, (int) $existing['duration_minutes'])) {
+        appointmentResponse(false, 'The doctor is unavailable on the selected date and time.', null, 409);
     }
     $databaseAppointmentId = (int) $existing['appointment_id'];
     $stmt = $conn->prepare('UPDATE tbl_patient_appointments SET appointment_date = ?, appointment_time = ?, status = ?, metadata = ?, updated_at = NOW() WHERE appointment_id = ? LIMIT 1');
@@ -248,7 +252,6 @@ if (isset($input['reschedule']) && is_array($input['reschedule'])) {
     $stmt->close();
     appointmentResponse(true, 'Appointment rescheduled.', loadAppointments($conn, $patientId));
 }
-
 if (isset($input['reschedule_requests'])) {
     $requests = is_array($input['reschedule_requests']) ? $input['reschedule_requests'] : [];
     foreach ($requests as $request) {
@@ -296,12 +299,10 @@ if (isset($input['reschedule_requests'])) {
     }
     appointmentResponse(true, 'Reschedule requests saved.');
 }
-
 $records = $input['appointments'] ?? [$input['appointment'] ?? $input];
 if (!is_array($records) || isset($records['id']) || isset($records['appointmentId'])) {
     $records = [$records];
 }
-
 $conn->begin_transaction();
 try {
     foreach ($records as $appointment) {
@@ -324,6 +325,17 @@ try {
         $service = (string) ($appointment['type'] ?? $appointment['service'] ?? $appointment['service_type'] ?? 'Dental Appointment');
         $duration = (int) ($appointment['duration'] ?? $appointment['duration_minutes'] ?? 30);
         $status = strtolower(str_replace(' ', '_', (string) ($appointment['status'] ?? 'scheduled')));
+        if (!in_array($status, ['cancelled', 'completed', 'no_show'], true) && $date !== '' && $time !== '') {
+            $existingStmt = $conn->prepare('SELECT doctor_id, appointment_date, appointment_time FROM tbl_patient_appointments WHERE appointment_uid = ? LIMIT 1');
+            $existingStmt->bind_param('s', $appointmentId);
+            $existingStmt->execute();
+            $existingRow = $existingStmt->get_result()->fetch_assoc();
+            $existingStmt->close();
+            $scheduleChanged = !$existingRow || (int) $existingRow['doctor_id'] !== $doctorUserId || (string) $existingRow['appointment_date'] !== $date || substr((string) $existingRow['appointment_time'], 0, 5) !== substr($time, 0, 5);
+            if ($scheduleChanged && appointmentDoctorUnavailable($conn, $doctorUserId, $date, $time, $duration)) {
+                throw new RuntimeException('The selected doctor is unavailable on this date and time.');
+            }
+        }
         $metadata = json_encode($appointment, JSON_UNESCAPED_UNICODE);
         $checkedIn = !empty($appointment['checkedIn']) || !empty($appointment['checked_in']) ? 1 : 0;
         $checkedInAt = (string) ($appointment['checkedInAt'] ?? $appointment['checked_in_at'] ?? '');
@@ -349,7 +361,6 @@ try {
     $conn->rollback();
     appointmentResponse(false, $exception->getMessage(), null, 500);
 }
-
 $savedPatientId = '';
 foreach ($records as $record) {
     if (is_array($record)) {

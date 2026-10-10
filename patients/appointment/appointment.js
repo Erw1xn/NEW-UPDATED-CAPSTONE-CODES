@@ -1,5 +1,6 @@
 const PATIENT_RECORD_API = "../../api/patient_records.php";
 const DOCTORS_API = "../../api/doctors.php";
+const UNAVAILABILITY_API = "../../api/doctor_unavailability.php";
 const SERVICES = [
   { id: "consultation", name: "Consultation", duration: 30 },
   { id: "dental_cleaning", name: "Dental Cleaning", duration: 45 },
@@ -31,6 +32,8 @@ let patients = [];
 let appointments = [];
 let rescheduleRequests = [];
 let doctorScheduleAppointments = [];
+let doctorUnavailability = [];
+let calendarUnavailability = [];
 let currentPatient = null;
 let currentUser = null;
 let selectedDate = new Date();
@@ -45,7 +48,17 @@ let bookingStep = 1;
 let calendarDate = new Date();
 let currentUserFromDatabase = null;
 document.addEventListener("DOMContentLoaded", initializePage);
+function setupUnavailabilityStyles() {
+  if (document.getElementById("dentaNuevaPatientUnavailabilityStyles")) {
+    return;
+  }
+  const style = document.createElement("style");
+  style.id = "dentaNuevaPatientUnavailabilityStyles";
+  style.textContent = `.day.has-unavailable:not(.selected){background:#fff0f0;color:#dc3838}.day.selected.has-unavailable{background:#dc3838!important;color:#fff!important;box-shadow:0 4px 10px rgba(220,56,56,.25)}.time-picker-unavailable-note{display:flex;align-items:flex-start;gap:6px;margin:0 0 8px;padding:8px 10px;background:#fff0f0;border:1px solid #f2caca;border-radius:8px;color:#dc3838;font-size:9px;font-weight:600;line-height:1.4}.time-picker-unavailable-note i{margin-top:2px;font-size:9px}#dateSelect.date-unavailable{border-color:#dc3838!important;background:#fff0f0!important;color:#dc3838!important}.time-picker-option.doctor-unavailable,.time-picker-option.doctor-unavailable.selected,.time-option.doctor-unavailable{background:#fff0f0!important;color:#dc3838!important;border-color:#f2caca!important;cursor:not-allowed;text-decoration:line-through}`;
+  document.head.appendChild(style);
+}
 async function initializePage() {
+  setupUnavailabilityStyles();
   await hydrateCurrentUser();
   currentUser = getCurrentUser();
   loadPatients();
@@ -53,6 +66,7 @@ async function initializePage() {
   normalizeCalendarDate();
   setupEvents();
   await loadDoctors();
+  await loadCalendarUnavailability();
   await loadAppointments();
   await hydrateRescheduleRequestsFromDatabase();
   resolveCurrentPatient();
@@ -63,6 +77,7 @@ async function initializePage() {
     currentUser = getCurrentUser();
     loadPatients();
     await loadDoctors();
+    await loadCalendarUnavailability();
     await loadAppointments();
     await hydrateRescheduleRequestsFromDatabase();
     resolveCurrentPatient();
@@ -193,11 +208,15 @@ function setupEvents() {
     updateAvailableTimeSlots();
     updateBookingButton();
   });
-  document.getElementById("dentistSelect")?.addEventListener("change", () => {
-    selectedTime = "";
-    updateAvailableTimeSlots();
-    updateBookingButton();
-  });
+  document
+    .getElementById("dentistSelect")
+    ?.addEventListener("change", async () => {
+      selectedTime = "";
+      await loadCalendarUnavailability();
+      renderCalendar();
+      updateAvailableTimeSlots();
+      updateBookingButton();
+    });
   document
     .getElementById("timeTrigger")
     ?.addEventListener("click", toggleTimePicker);
@@ -281,7 +300,6 @@ function setInitialAppointmentDate() {
   calendarDate = new Date(selectedDate);
   calendarDate.setDate(1);
 }
-
 function normalizeCalendarDate() {
   if (!(calendarDate instanceof Date) || Number.isNaN(calendarDate.getTime())) {
     calendarDate = new Date();
@@ -308,6 +326,11 @@ function isTodayDate(value) {
   const date = value instanceof Date ? new Date(value) : keyToDate(value);
   return dateToKey(date) === dateToKey(new Date());
 }
+function isClinicClosedDate(value) {
+  if (!value) return false;
+  const date = value instanceof Date ? new Date(value) : keyToDate(value);
+  return date.getDay() === 0;
+}
 function formatDate(dateValue) {
   const date =
     dateValue instanceof Date ? dateValue : keyToDate(String(dateValue));
@@ -333,16 +356,13 @@ function formatTime(timeValue) {
   const text = String(timeValue).trim();
   const match = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
   if (!match) return String(timeValue);
-
   let hour = Number(match[1]);
   const minute = Number(match[2]);
   const suffix = (match[4] || (hour >= 12 ? "PM" : "AM")).toUpperCase();
-
   if (match[4]) {
     if (suffix === "AM" && hour === 12) hour = 0;
     if (suffix === "PM" && hour < 12) hour += 12;
   }
-
   return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`;
 }
 function getAppointmentEndTime(appointment) {
@@ -685,7 +705,6 @@ function resolveCurrentPatient() {
       "",
   ).trim();
   currentPatient = null;
-
   if (patientId && /^PN-/i.test(patientId)) {
     currentPatient = findPatientByIdentifier(patientId) || {
       patientId,
@@ -696,7 +715,6 @@ function resolveCurrentPatient() {
       userId: userId || currentUser?.userId || currentUser?.user_id || "",
     };
   }
-
   if (!currentPatient && userId) {
     currentPatient =
       patients.find((patient) => {
@@ -729,7 +747,6 @@ function resolveCurrentPatient() {
       userId: userId || currentUser?.userId || currentUser?.user_id || "",
     };
   }
-
   if (currentPatient && currentUser) {
     const resolvedPatientId = getCanonicalPatientId(currentPatient);
     if (resolvedPatientId) {
@@ -747,7 +764,6 @@ async function hydrateCurrentPatientFromDatabase() {
     });
     const result = await response.json();
     if (!response.ok || !result.success || !result.data) return;
-
     const remotePatient = result.data;
     const remotePatientId = getCanonicalPatientId(remotePatient);
     const localIndex = patients.findIndex(
@@ -777,7 +793,6 @@ async function savePatientRecordToDatabase() {
   if (!currentPatient) {
     return false;
   }
-
   try {
     const response = await fetch(PATIENT_RECORD_API, {
       method: "POST",
@@ -791,28 +806,22 @@ async function savePatientRecordToDatabase() {
         medicalForm: currentPatient.medicalForm || null,
       }),
     });
-
     const result = await response.json();
-
     if (!response.ok || !result.success) {
       throw new Error(result.message || "Patient record was not saved.");
     }
-
     if (result.data) {
       const savedPatient = result.data;
       const savedPatientId = getCanonicalPatientId(savedPatient);
-
       currentPatient = {
         ...currentPatient,
         ...savedPatient,
         patientId: savedPatientId,
         id: savedPatientId,
       };
-
       const patientIndex = patients.findIndex(
         (patient) => getCanonicalPatientId(patient) === savedPatientId,
       );
-
       if (patientIndex !== -1) {
         patients[patientIndex] = {
           ...patients[patientIndex],
@@ -821,13 +830,11 @@ async function savePatientRecordToDatabase() {
       } else {
         patients.push(currentPatient);
       }
-
       if (currentUser) {
         currentUser.patientId = savedPatientId;
         currentUser.patient_id = savedPatientId;
       }
     }
-
     return true;
   } catch (error) {
     console.error("Unable to save patient record to database:", error);
@@ -843,7 +850,6 @@ function getCurrentPatientId() {
     const patientId = getCanonicalPatientId(currentPatient);
     if (patientId) return patientId;
   }
-
   const currentUserPatientId = String(
     currentUser?.patientId ||
       currentUser?.patient_id ||
@@ -854,7 +860,6 @@ function getCurrentPatientId() {
     const patient = findPatientByIdentifier(currentUserPatientId);
     return getCanonicalPatientId(patient) || currentUserPatientId;
   }
-
   const fallbackUserId = String(
     currentUser?.id || currentUser?.userId || currentUser?.user_id || "",
   ).trim();
@@ -872,7 +877,6 @@ function getCurrentPatientId() {
       return getCanonicalPatientId(patient);
     }
   }
-
   return "";
 }
 function getCurrentPatientName() {
@@ -931,6 +935,55 @@ function getDateAppointments(dateKey) {
     (appointment) =>
       dateToKey(keyToDate(getAppointmentDate(appointment))) === dateKey,
   );
+}
+function getCalendarDentistId() {
+  return (
+    document.getElementById("dentistSelect")?.value || doctors[0]?.id || ""
+  );
+}
+async function loadCalendarUnavailability() {
+  const dentist = getCalendarDentistId();
+  if (!dentist) {
+    calendarUnavailability = [];
+    return;
+  }
+  try {
+    const response = await fetch(
+      `${UNAVAILABILITY_API}?doctor_id=${encodeURIComponent(dentist)}`,
+      { credentials: "same-origin", cache: "no-store" },
+    );
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.data)) {
+      throw new Error(result.message || "Unavailability unavailable.");
+    }
+    calendarUnavailability = result.data.map(normalizeUnavailabilityBlock);
+  } catch (error) {
+    console.warn("Unable to load calendar unavailability.", error);
+    calendarUnavailability = [];
+  }
+}
+function getCalendarUnavailabilityForDate(dateKey) {
+  const dentist = getCalendarDentistId();
+  if (!dentist || !dateKey) return [];
+  return calendarUnavailability
+    .filter(
+      (block) => block.date === dateKey && sameDentist(block.dentist, dentist),
+    )
+    .sort((a, b) => unavTimeToMinutes(a.start) - unavTimeToMinutes(b.start));
+}
+function updateDateUnavailableState() {
+  const dateInput = document.getElementById("dateSelect");
+  if (!dateInput) return;
+  const dentist = document.getElementById("dentistSelect")?.value || "";
+  const block = findAllDayUnavailability(dateInput.value, dentist);
+  if (block) {
+    const name = DENTISTS[dentist]?.name || "The dentist";
+    dateInput.classList.add("date-unavailable");
+    dateInput.title = `This day is not available. ${name} is unavailable all day.`;
+  } else {
+    dateInput.classList.remove("date-unavailable");
+    dateInput.title = "";
+  }
 }
 function renderCalendar() {
   const grid = document.getElementById("calGrid");
@@ -1015,7 +1068,6 @@ function shiftCalendarMonth(direction) {
 function renderUpcomingAppointment() {
   const container = document.getElementById("upcomingAppointment");
   if (!container) return;
-
   const selectedKey = dateToKey(selectedDate);
   const selectedDateAppointments = getPatientAppointments()
     .filter((appointment) => {
@@ -1032,12 +1084,21 @@ function renderUpcomingAppointment() {
       const timeB = String(getAppointmentTime(b));
       return timeA.localeCompare(timeB);
     });
-
   const appointment =
     selectedDateAppointments.find((item) => isActiveAppointment(item)) ||
     selectedDateAppointments[0];
-
   if (!appointment) {
+    if (isClinicClosedDate(selectedKey)) {
+      container.innerHTML = `
+    <div class="empty-upcoming">
+    <div class="empty-upcoming-icon">
+    <i class="fa-solid fa-door-closed"></i>
+    </div>
+    <p><strong>Clinic is closed</strong><br>The clinic is closed on Sundays. Open Monday to Saturday, 10:00 AM to 6:00 PM.</p>
+    </div>
+    `;
+      return;
+    }
     container.innerHTML = `
     <div class="empty-upcoming">
     <div class="empty-upcoming-icon">
@@ -1161,6 +1222,7 @@ async function openBookingModal(date = null, dentist = null) {
   closeTimePicker();
   renderServiceDropdown("");
   updateServiceDurationInfo();
+  await loadCalendarUnavailability();
   renderCalendar();
   updateAvailableTimeSlots();
   updateBookingButton();
@@ -1413,6 +1475,106 @@ function classifyBookingPeriod(minutes) {
   if (minutes < 18 * 60) return "Afternoon";
   return "Evening";
 }
+function unavTimeToMinutes(time) {
+  const [h, m] = String(time || "")
+    .split(":")
+    .map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+function normalizeUnavailabilityBlock(block) {
+  const start = String(block.start || block.start_time || "").slice(0, 5);
+  const end = String(block.end || block.end_time || "").slice(0, 5);
+  const flag = block.allDay ?? block.all_day;
+  const flagged =
+    flag === true || flag === 1 || flag === "1" || flag === "true";
+  const coversDay =
+    !!start &&
+    !!end &&
+    unavTimeToMinutes(start) <= CLINIC_SCHEDULE.startHour * 60 &&
+    unavTimeToMinutes(end) >= 18 * 60;
+  return {
+    ...block,
+    date: String(block.date || block.unavailable_date || "").slice(0, 10),
+    start,
+    end,
+    allDay: flagged || coversDay,
+    reason: block.reason ?? "",
+    dentist: block.doctorId || block.doctor_id || "",
+  };
+}
+async function loadDoctorUnavailabilityForDate(date, dentist) {
+  if (!date || !dentist) {
+    doctorUnavailability = [];
+    return;
+  }
+  try {
+    const response = await fetch(
+      `${UNAVAILABILITY_API}?doctor_id=${encodeURIComponent(dentist)}&date=${encodeURIComponent(date)}`,
+      { credentials: "same-origin", cache: "no-store" },
+    );
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.data)) {
+      throw new Error(result.message || "Unavailability unavailable.");
+    }
+    doctorUnavailability = result.data.map(normalizeUnavailabilityBlock);
+  } catch (error) {
+    console.warn("Unable to load doctor unavailability.", error);
+    doctorUnavailability = [];
+  }
+}
+function getUnavailabilityBlocks(date, dentist) {
+  return doctorUnavailability.filter(
+    (block) => block.date === date && sameDentist(block.dentist, dentist),
+  );
+}
+function findAllDayUnavailability(date, dentist) {
+  return (
+    getUnavailabilityBlocks(date, dentist).find((block) => block.allDay) || null
+  );
+}
+function findUnavailabilityConflict(date, dentist, time, duration) {
+  if (!date || !dentist || !time) return null;
+  const start = unavTimeToMinutes(time);
+  const end = start + (Number(duration) || CLINIC_SCHEDULE.slotMinutes);
+  return (
+    getUnavailabilityBlocks(date, dentist).find(
+      (block) =>
+        block.allDay ||
+        (unavTimeToMinutes(block.start) < end &&
+          unavTimeToMinutes(block.end) > start),
+    ) || null
+  );
+}
+function formatUnavailabilityRange(block) {
+  return block.allDay
+    ? "all day"
+    : `from ${formatTime(block.start)} to ${formatTime(block.end)}`;
+}
+function getUnavailabilityMessage(date, dentist, time, duration) {
+  const name = DENTISTS[dentist]?.name || "The dentist";
+  const allDay = findAllDayUnavailability(date, dentist);
+  if (allDay) {
+    return `${name} is unavailable all day on ${formatDate(date)}${allDay.reason ? ` (${allDay.reason})` : ""}.`;
+  }
+  const block = findUnavailabilityConflict(date, dentist, time, duration);
+  return block
+    ? `${name} is unavailable ${formatUnavailabilityRange(block)} on ${formatDate(date)}.`
+    : "";
+}
+function appendUnavailabilityGridNote(grid, date, dentist, dentistName) {
+  const blocks = getUnavailabilityBlocks(date, dentist);
+  if (!blocks.length) return;
+  const note = document.createElement("div");
+  note.className = "time-empty warning";
+  note.style.gridColumn = "1 / -1";
+  note.innerHTML = `<i class="fa-solid fa-user-slash"></i><span>${blocks
+    .map(
+      (block) =>
+        `${escapeHtml(dentistName)} is unavailable ${escapeHtml(formatUnavailabilityRange(block))}${block.reason ? ` · ${escapeHtml(block.reason)}` : ""}`,
+    )
+    .join("<br>")}</span>`;
+  grid.appendChild(note);
+}
 function getDoctorScheduleAppointmentsForDate(date, dentist) {
   const combined = [...appointments, ...doctorScheduleAppointments];
   return combined.filter((appointment) => {
@@ -1489,12 +1651,19 @@ function generateBookingSlotStatuses(
       );
       return slotStart < appointmentEnd && slotEnd > appointmentStart;
     });
+    const isUnavailable = !!findUnavailabilityConflict(
+      date,
+      dentist,
+      value,
+      duration,
+    );
     result.push({
       value,
       label: formatTime(value),
       period: classifyBookingPeriod(hour * 60 + minute),
       isPast,
-      isScheduled,
+      isScheduled: isScheduled || isUnavailable,
+      isUnavailable,
     });
   }
   return result;
@@ -1514,8 +1683,17 @@ function appendBookingTimeGroup(container, label, slots) {
     if (slot.isScheduled) {
       button.classList.add("scheduled");
       button.disabled = true;
-      button.title = "This time is already scheduled.";
-      button.innerHTML = `<i class="fa-solid fa-ban time-unavailable-icon"></i><span>${slot.label}</span>`;
+      if (slot.isUnavailable) {
+        const unavailableDentistName =
+          DENTISTS[document.getElementById("dentistSelect")?.value]?.name ||
+          "The dentist";
+        button.classList.add("doctor-unavailable");
+        button.title = `Not available because ${unavailableDentistName} is unavailable at this time.`;
+        button.innerHTML = `<i class="fa-solid fa-user-slash time-unavailable-icon"></i><span>${slot.label}</span>`;
+      } else {
+        button.title = "This time is already scheduled.";
+        button.innerHTML = `<i class="fa-solid fa-ban time-unavailable-icon"></i><span>${slot.label}</span>`;
+      }
     } else if (slot.isPast) {
       button.classList.add("disabled");
       button.disabled = true;
@@ -1537,11 +1715,11 @@ function appendBookingTimeGroup(container, label, slots) {
   container.appendChild(grid);
 }
 async function loadDoctorScheduleForSelectedDate(date, dentist) {
+  await loadDoctorUnavailabilityForDate(date, dentist);
   if (!date || !dentist || !window.DentaNuevaAppointmentDatabase) {
     doctorScheduleAppointments = [];
     return;
   }
-
   try {
     const schedule = await window.DentaNuevaAppointmentDatabase.load({
       scope: "doctor_schedule",
@@ -1554,7 +1732,6 @@ async function loadDoctorScheduleForSelectedDate(date, dentist) {
     doctorScheduleAppointments = [];
   }
 }
-
 async function updateAvailableTimeSlots() {
   const dropdown = document.getElementById("timeDropdown");
   const trigger = document.getElementById("timeTrigger");
@@ -1568,6 +1745,7 @@ async function updateAvailableTimeSlots() {
     document.getElementById("dentistSelect")?.value || doctors[0]?.id || "";
   const duration = Number(document.getElementById("durationInput")?.value || 0);
   await loadDoctorScheduleForSelectedDate(date, dentist);
+  updateDateUnavailableState();
   dropdown.innerHTML = "";
   if (!date || isPastDate(date)) {
     trigger.disabled = true;
@@ -1578,6 +1756,19 @@ async function updateAvailableTimeSlots() {
     }
     return;
   }
+  if (isClinicClosedDate(date)) {
+    selectedTime = "";
+    trigger.disabled = true;
+    closeTimePicker();
+    triggerLabel.textContent = "Clinic closed";
+    if (summary) {
+      summary.textContent =
+        "The clinic is closed on Sundays. Please choose Monday to Saturday.";
+      summary.classList.add("warning");
+    }
+    updateBookingButton();
+    return;
+  }
   if (!duration || duration < 5) {
     trigger.disabled = true;
     triggerLabel.textContent = "Enter duration first";
@@ -1585,6 +1776,24 @@ async function updateAvailableTimeSlots() {
       summary.textContent = "";
       summary.classList.remove("warning");
     }
+    return;
+  }
+  const allDayBlock = findAllDayUnavailability(date, dentist);
+  if (allDayBlock) {
+    selectedTime = "";
+    trigger.disabled = true;
+    closeTimePicker();
+    triggerLabel.textContent = "Dentist unavailable all day";
+    if (summary) {
+      summary.textContent = getUnavailabilityMessage(
+        date,
+        dentist,
+        "",
+        duration,
+      );
+      summary.classList.add("warning");
+    }
+    updateBookingButton();
     return;
   }
   const slots = generateBookingSlotStatuses(date, dentist, duration);
@@ -1626,6 +1835,19 @@ async function updateAvailableTimeSlots() {
   const morning = slots.filter((slot) => slot.period === "Morning");
   const afternoon = slots.filter((slot) => slot.period === "Afternoon");
   const evening = slots.filter((slot) => slot.period === "Evening");
+  const dayBlocks = getUnavailabilityBlocks(date, dentist);
+  if (dayBlocks.length) {
+    const noteDentistName = DENTISTS[dentist]?.name || "The dentist";
+    const note = document.createElement("div");
+    note.className = "time-picker-unavailable-note";
+    note.innerHTML = `<i class="fa-solid fa-user-slash"></i><span>${dayBlocks
+      .map(
+        (block) =>
+          `${escapeHtml(noteDentistName)} is unavailable ${escapeHtml(formatUnavailabilityRange(block))}${block.reason ? ` · ${escapeHtml(block.reason)}` : ""}`,
+      )
+      .join("<br>")}</span>`;
+    dropdown.appendChild(note);
+  }
   if (morning.length) appendBookingTimeGroup(dropdown, "Morning", morning);
   if (afternoon.length)
     appendBookingTimeGroup(dropdown, "Afternoon", afternoon);
@@ -1708,17 +1930,14 @@ function getPatientBookingBlockMessage(
 ) {
   const normalizedPatientId = String(patientId || "").trim();
   if (!normalizedPatientId) return "";
-
   const restriction = getPatientBookingRestriction();
   if (restriction.isRestricted) {
     return getBookingRestrictionMessage(restriction);
   }
-
   const existingAppointment = appointments.find((appointment) => {
     if (String(getAppointmentId(appointment)) === String(ignoreAppointmentId)) {
       return false;
     }
-
     const appointmentPatientId = String(
       appointment?.patientId ||
         appointment?.patient_id ||
@@ -1727,13 +1946,10 @@ function getPatientBookingBlockMessage(
     )
       .trim()
       .toLowerCase();
-
     if (appointmentPatientId !== normalizedPatientId.toLowerCase()) {
       return false;
     }
-
     const status = normalizeStatus(getAppointmentStatus(appointment));
-
     if (
       status === "completed" ||
       status === "cancelled" ||
@@ -1742,20 +1958,15 @@ function getPatientBookingBlockMessage(
     ) {
       return false;
     }
-
     const appointmentDate = getAppointmentDate(appointment);
     if (!appointmentDate) {
       return false;
     }
-
     return true;
   });
-
   if (!existingAppointment) return "";
-
   const dateLabel = formatDate(existingAppointment.date);
   const timeLabel = formatTime(getAppointmentTime(existingAppointment));
-
   return `You already have an active appointment scheduled on ${dateLabel} at ${timeLabel}. Please complete your existing appointment before booking a new one.`;
 }
 function getPatientBookingRestriction() {
@@ -1803,17 +2014,33 @@ function updateBookingButton() {
   const conflict = selectedTime
     ? hasScheduleConflict(date, dentist, selectedTime, duration)
     : false;
+  const allDayUnavailable = !!findAllDayUnavailability(date, dentist);
+  const clinicClosed = isClinicClosedDate(date);
   button.disabled =
     !service ||
     !date ||
     isPastDate(date) ||
+    clinicClosed ||
     !dentist ||
     !duration ||
     duration < 5 ||
     !selectedTime ||
     !!conflict ||
+    allDayUnavailable ||
     !!patientBlockMessage;
-  updateConflictNotice(conflict, patientBlockMessage);
+  const unavailableMessage = getUnavailabilityMessage(
+    date,
+    dentist,
+    selectedTime,
+    duration,
+  );
+  const closedMessage = clinicClosed
+    ? "The clinic is closed on Sundays. Please choose Monday to Saturday."
+    : "";
+  updateConflictNotice(
+    conflict || !!unavailableMessage || clinicClosed,
+    patientBlockMessage || closedMessage || unavailableMessage,
+  );
 }
 function hasScheduleConflict(
   date,
@@ -1823,6 +2050,7 @@ function hasScheduleConflict(
   ignoredAppointmentId = null,
 ) {
   if (!date || !dentist || !time || !duration) return false;
+  if (findUnavailabilityConflict(date, dentist, time, duration)) return true;
   const dateObject = keyToDate(date);
   const [hour, minute] = time.split(":").map(Number);
   const start = new Date(
@@ -1890,6 +2118,10 @@ function validateAppointmentDetails() {
   const selectedService = SERVICES.find(
     (item) => item.name.toLowerCase() === service.toLowerCase(),
   );
+  if (date && isClinicClosedDate(date)) {
+    showToast("The clinic is closed on Sundays.");
+    return false;
+  }
   if (
     !selectedService ||
     duration !== selectedService.duration ||
@@ -1994,28 +2226,20 @@ function populateMedicalRecordEditor() {
   const medical = currentPatient?.medicalForm || {};
   document.getElementById("recordEditFirstName").value =
     currentPatient?.firstName || "";
-
   document.getElementById("recordEditLastName").value =
     currentPatient?.lastName || "";
-
   document.getElementById("recordEditDateOfBirth").value =
     currentPatient?.dateOfBirth || "";
-
   document.getElementById("recordEditGender").value =
     currentPatient?.gender || currentPatient?.patientGender || "";
-
   document.getElementById("recordEditPhone").value =
     currentPatient?.phone || "";
-
   document.getElementById("recordEditEmail").value =
     currentPatient?.email || "";
-
   document.getElementById("recordEditAddress").value =
     currentPatient?.address || "";
-
   document.getElementById("recordEditEmergencyName").value =
     currentPatient?.emergencyName || "";
-
   document.getElementById("recordEditEmergencyContact").value =
     currentPatient?.emergencyContact || "";
   setRecordEditorValues("recordEditDentalConcern", medical.dentalConcern);
@@ -2060,37 +2284,26 @@ function populateMedicalRecordEditor() {
 }
 async function saveMedicalRecordEditor() {
   if (!currentPatient) return;
-
   const consent = document.getElementById("recordEditConsent")?.checked;
-
   if (!consent) {
     showToast("Please confirm that your medical information is accurate.");
     return;
   }
   const firstName =
     document.getElementById("recordEditFirstName")?.value.trim() || "";
-
   const lastName =
     document.getElementById("recordEditLastName")?.value.trim() || "";
-
   const dateOfBirth =
     document.getElementById("recordEditDateOfBirth")?.value || "";
-
   const gender = document.getElementById("recordEditGender")?.value || "";
-
   const phone = document.getElementById("recordEditPhone")?.value.trim() || "";
-
   const email = document.getElementById("recordEditEmail")?.value.trim() || "";
-
   const address =
     document.getElementById("recordEditAddress")?.value.trim() || "";
-
   const emergencyName =
     document.getElementById("recordEditEmergencyName")?.value.trim() || "";
-
   const emergencyContact =
     document.getElementById("recordEditEmergencyContact")?.value.trim() || "";
-
   if (
     !firstName ||
     !lastName ||
@@ -2105,7 +2318,6 @@ async function saveMedicalRecordEditor() {
     showToast("Please complete all personal information.");
     return;
   }
-
   currentPatient.firstName = firstName;
   currentPatient.lastName = lastName;
   currentPatient.fullName = `${firstName} ${lastName}`.trim();
@@ -2117,12 +2329,9 @@ async function saveMedicalRecordEditor() {
   currentPatient.address = address;
   currentPatient.emergencyName = emergencyName;
   currentPatient.emergencyContact = emergencyContact;
-
   const allergies = getRecordEditorValues("recordEditAllergies");
-
   const otherAllergy =
     document.getElementById("recordEditAllergyOther")?.value.trim() || "";
-
   if (
     allergies.includes("No Known Allergies") &&
     (allergies.length > 1 || otherAllergy)
@@ -2130,81 +2339,50 @@ async function saveMedicalRecordEditor() {
     showToast("No Known Allergies cannot be selected with another allergy.");
     return;
   }
-
-  /* ================================
-      MEDICAL INFORMATION
-    ================================= */
-
   const now = new Date().toISOString();
   const existingMedical = currentPatient.medicalForm || {};
-
   const updatedMedicalForm = {
     ...existingMedical,
-
     dentalConcern: getRecordEditorValues("recordEditDentalConcern"),
-
     dentalConcernOther:
       document.getElementById("recordEditDentalConcernOther")?.value.trim() ||
       "",
-
     negativeExperience:
       document.querySelector(
         'input[name="recordEditNegativeExperience"]:checked',
       )?.value || "No",
-
     negativeExperienceNote:
       document
         .getElementById("recordEditNegativeExperienceNote")
         ?.value.trim() || "",
-
     medLastVisit:
       document.getElementById("recordEditLastDentalVisit")?.value || "",
-
     medLastTreatment:
       document.getElementById("recordEditLastDentalTreatment")?.value.trim() ||
       "",
-
     currentMedications:
       document.querySelector(
         'input[name="recordEditCurrentMedications"]:checked',
       )?.value || "No",
-
     currentMedicationsList:
       document.getElementById("recordEditMedicationList")?.value.trim() || "",
-
     medicalHistory: getRecordEditorValues("recordEditMedicalHistory"),
-
     medicalOther:
       document.getElementById("recordEditMedicalOther")?.value.trim() || "",
-
     allergies,
-
     allergyOther: otherAllergy,
-
     consent: true,
-
     completed: true,
-
     submittedBy: existingMedical.submittedBy || "patient",
-
     createdAt: existingMedical.createdAt || now,
-
     updatedAt: now,
   };
-
-  /* ================================
-      UPDATE PATIENT RECORD
-    ================================= */
-
   currentPatient.medicalForm = updatedMedicalForm;
   currentPatient.updatedAt = now;
-
   const patientId = getCanonicalPatientId(currentPatient);
-
   const patientIndex = patients.findIndex(
     (patient) => getCanonicalPatientId(patient) === patientId,
   );
-
   if (patientIndex !== -1) {
     patients[patientIndex] = {
       ...patients[patientIndex],
@@ -2214,21 +2392,15 @@ async function saveMedicalRecordEditor() {
     patients.push(currentPatient);
   }
   const saved = await savePatientRecordToDatabase();
-
   if (!saved) {
     showToast("The medical record could not be saved. Please try again.");
     return;
   }
-
   updateMedicalRecordSummary();
-
   loadBookingMedicalInformation();
-
   closeMedicalRecordEditor();
-
   showToast("Medical record updated successfully.");
 }
-
 function updateMedicalRecordSummary() {
   const summary = document.getElementById("medicalRecordSummary");
   if (!summary) return;
@@ -2415,18 +2587,14 @@ async function confirmBooking() {
     paymentAmount: 0,
   };
   appointments.push(appointment);
-
   const saved = await saveAppointments();
-
   if (!saved) {
     appointments = appointments.filter(
       (item) => getAppointmentId(item) !== getAppointmentId(appointment),
     );
-
     showToast("Appointment could not be saved. Please try again.");
     return;
   }
-
   syncAppointmentToPatient(appointment);
   selectedDate = keyToDate(date);
   calendarDate = new Date(selectedDate);
@@ -2616,7 +2784,6 @@ function confirmCancelAppointment() {
     if (getAppointmentId(item) !== appointmentId) {
       return item;
     }
-
     return {
       ...item,
       status: "cancelled",
@@ -2633,7 +2800,6 @@ function confirmCancelAppointment() {
           if (getAppointmentId(item) !== appointmentId) {
             return item;
           }
-
           return {
             ...item,
             status: "cancelled",
@@ -2658,7 +2824,6 @@ function confirmCancelAppointment() {
       String(request?.appointment_id || request?.appointmentId || "") !==
       appointmentId,
   );
-
   detailAppointmentId = null;
   closeCancelAppointmentConfirmation();
   closeAppointmentDetail();
@@ -2681,7 +2846,6 @@ function deleteAppointment() {
     `Delete this appointment permanently?\n\n${appointmentLabel}\n\nThis removes it from the appointment history for testing.`,
   );
   if (!confirmed) return;
-
   appointments = appointments.filter(
     (item) => getAppointmentId(item) !== appointmentId,
   );
@@ -2691,7 +2855,6 @@ function deleteAppointment() {
       console.error("Unable to delete appointment from database:", error);
     },
   );
-
   if (currentPatient) {
     currentPatient.appointments = Array.isArray(currentPatient.appointments)
       ? currentPatient.appointments.filter(
@@ -2706,13 +2869,11 @@ function deleteAppointment() {
         : patient;
     });
   }
-
   const remainingRequests = loadRescheduleRequests().filter(
     (request) =>
       String(request?.appointment_id || request?.appointmentId || "") !==
       appointmentId,
   );
-
   detailAppointmentId = null;
   closeAppointmentDetail();
   renderAll();
@@ -2786,6 +2947,12 @@ async function renderRequestTimeGrid(date) {
     if (count) count.textContent = "Invalid date";
     return;
   }
+  if (isClinicClosedDate(date)) {
+    requestTime = "";
+    grid.innerHTML = `<div class="time-empty warning"><i class="fa-solid fa-door-closed"></i><span>The clinic is closed on Sundays. Please choose Monday to Saturday.</span></div>`;
+    if (count) count.textContent = "Clinic closed";
+    return;
+  }
   const appointment = findAppointmentById(requestAppointmentId);
   if (!appointment) return;
   const dentist = getDentistId(appointment);
@@ -2796,6 +2963,13 @@ async function renderRequestTimeGrid(date) {
       30,
   );
   await loadDoctorScheduleForSelectedDate(date, dentist);
+  const allDayBlock = findAllDayUnavailability(date, dentist);
+  if (allDayBlock) {
+    requestTime = "";
+    grid.innerHTML = `<div class="time-empty warning"><i class="fa-solid fa-user-slash"></i><span>${escapeHtml(getDentistName(appointment))} is unavailable all day on ${escapeHtml(formatDate(date))}${allDayBlock.reason ? ` (${escapeHtml(allDayBlock.reason)})` : ""}.</span></div>`;
+    if (count) count.textContent = "Dentist unavailable";
+    return;
+  }
   const slots = generateBookingSlotStatuses(
     date,
     dentist,
@@ -2812,6 +2986,12 @@ async function renderRequestTimeGrid(date) {
     return;
   }
   grid.innerHTML = "";
+  appendUnavailabilityGridNote(
+    grid,
+    date,
+    dentist,
+    getDentistName(appointment),
+  );
   slots.forEach((slot) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -2820,10 +3000,13 @@ async function renderRequestTimeGrid(date) {
     if (slot.isScheduled || slot.isPast) {
       button.disabled = true;
       button.classList.add(slot.isScheduled ? "scheduled" : "disabled");
-      button.dataset.tooltip = slot.isScheduled
-        ? "This time is already booked."
-        : "This time has already passed.";
-      button.innerHTML = `<i class="fa-solid ${slot.isScheduled ? "fa-ban time-unavailable-icon" : "fa-clock time-past-icon"}"></i><span>${slot.label}</span>`;
+      if (slot.isUnavailable) button.classList.add("doctor-unavailable");
+      button.dataset.tooltip = slot.isUnavailable
+        ? "The dentist is unavailable at this time."
+        : slot.isScheduled
+          ? "This time is already booked."
+          : "This time has already passed.";
+      button.innerHTML = `<i class="fa-solid ${slot.isUnavailable ? "fa-user-slash time-unavailable-icon" : slot.isScheduled ? "fa-ban time-unavailable-icon" : "fa-clock time-past-icon"}"></i><span>${slot.label}</span>`;
     } else {
       button.textContent = slot.label;
       button.addEventListener("click", () => {
@@ -2853,6 +3036,10 @@ async function sendRescheduleRequest() {
   const preferredDate = document.getElementById("requestDate")?.value || "";
   if (!preferredDate) {
     showToast("Please select a preferred new date.");
+    return;
+  }
+  if (isClinicClosedDate(preferredDate)) {
+    showToast("The clinic is closed on Sundays.");
     return;
   }
   if (!requestTime) {
@@ -2901,7 +3088,6 @@ async function sendRescheduleRequest() {
   const history = Array.isArray(refreshedAppointment.rescheduleHistory)
     ? refreshedAppointment.rescheduleHistory
     : [];
-
   history.push({
     oldDate: getAppointmentDate(refreshedAppointment),
     oldTime: getAppointmentTime(refreshedAppointment),
@@ -2910,7 +3096,6 @@ async function sendRescheduleRequest() {
     requestedBy: "patient",
     changedAt: now,
   });
-
   refreshedAppointment.date = preferredDate;
   refreshedAppointment.appointment_date = preferredDate;
   refreshedAppointment.appointmentDate = preferredDate;
@@ -2924,9 +3109,7 @@ async function sendRescheduleRequest() {
   refreshedAppointment.approvedRescheduleCount = nextCount;
   refreshedAppointment.rescheduleHistory = history;
   refreshedAppointment.reschedule_history = history;
-
   let savedAppointments;
-
   try {
     savedAppointments =
       await window.DentaNuevaAppointmentDatabase.reschedule(
@@ -2937,15 +3120,11 @@ async function sendRescheduleRequest() {
     showToast("Unable to reschedule the appointment. Please try again.");
     return;
   }
-
   if (Array.isArray(savedAppointments)) {
     appointments = savedAppointments;
   }
-
   await hydrateAppointmentsFromDatabase();
-
   const persistedAppointment = findAppointmentById(requestAppointmentId);
-
   if (
     !persistedAppointment ||
     getAppointmentDate(persistedAppointment) !== preferredDate ||
@@ -2955,13 +3134,10 @@ async function sendRescheduleRequest() {
     showToast("The new schedule was not confirmed by the database.");
     return;
   }
-
   closeRescheduleRequestModal();
-
   selectedDate = keyToDate(preferredDate);
   calendarDate = new Date(selectedDate);
   calendarDate.setDate(1);
-
   renderAll();
 }
 function openStaffRescheduleModal(request) {
@@ -3050,6 +3226,13 @@ async function renderStaffRequestTimeGrid(date) {
     if (count) count.textContent = "Invalid date";
     return;
   }
+  if (isClinicClosedDate(date)) {
+    staffRequestTime = "";
+    grid.innerHTML = `<div class="time-empty warning"><i class="fa-solid fa-door-closed"></i><span>The clinic is closed on Sundays. Please choose Monday to Saturday.</span></div>`;
+    if (count) count.textContent = "Clinic closed";
+    updateStaffRescheduleConfirmState();
+    return;
+  }
   const request = loadRescheduleRequests().find(
     (item) =>
       String(item?.id || item?.request_id) === String(staffRequestTargetId),
@@ -3067,6 +3250,14 @@ async function renderStaffRequestTimeGrid(date) {
       30,
   );
   await loadDoctorScheduleForSelectedDate(date, dentist);
+  const allDayBlock = findAllDayUnavailability(date, dentist);
+  if (allDayBlock) {
+    staffRequestTime = "";
+    grid.innerHTML = `<div class="time-empty warning"><i class="fa-solid fa-user-slash"></i><span>${escapeHtml(getDentistName(appointment))} is unavailable all day on ${escapeHtml(formatDate(date))}${allDayBlock.reason ? ` (${escapeHtml(allDayBlock.reason)})` : ""}.</span></div>`;
+    if (count) count.textContent = "Dentist unavailable";
+    updateStaffRescheduleConfirmState();
+    return;
+  }
   const appointmentId = getAppointmentId(appointment);
   const slots = generateBookingSlotStatuses(
     date,
@@ -3084,6 +3275,12 @@ async function renderStaffRequestTimeGrid(date) {
     return;
   }
   grid.innerHTML = "";
+  appendUnavailabilityGridNote(
+    grid,
+    date,
+    dentist,
+    getDentistName(appointment),
+  );
   slots.forEach((slot) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -3092,10 +3289,13 @@ async function renderStaffRequestTimeGrid(date) {
     if (slot.isScheduled || slot.isPast) {
       button.disabled = true;
       button.classList.add(slot.isScheduled ? "scheduled" : "disabled");
-      button.dataset.tooltip = slot.isScheduled
-        ? "This time is already booked."
-        : "This time has already passed.";
-      button.innerHTML = `<i class="fa-solid ${slot.isScheduled ? "fa-ban time-unavailable-icon" : "fa-clock time-past-icon"}"></i><span>${slot.label}</span>`;
+      if (slot.isUnavailable) button.classList.add("doctor-unavailable");
+      button.dataset.tooltip = slot.isUnavailable
+        ? "The dentist is unavailable at this time."
+        : slot.isScheduled
+          ? "This time is already booked."
+          : "This time has already passed.";
+      button.innerHTML = `<i class="fa-solid ${slot.isUnavailable ? "fa-user-slash time-unavailable-icon" : slot.isScheduled ? "fa-ban time-unavailable-icon" : "fa-clock time-past-icon"}"></i><span>${slot.label}</span>`;
     } else {
       button.textContent = slot.label;
       button.addEventListener("click", () => {
@@ -3122,6 +3322,10 @@ async function confirmStaffRescheduleResponse() {
   const newDate = dateInput?.value || "";
   if (!newDate || !staffRequestTime) {
     showToast("Please select a new date and time.");
+    return;
+  }
+  if (isClinicClosedDate(newDate)) {
+    showToast("The clinic is closed on Sundays.");
     return;
   }
   let appointment = findAppointmentById(
@@ -3174,7 +3378,6 @@ async function confirmStaffRescheduleResponse() {
   const updatedAt = new Date().toISOString();
   const nextApprovedCount =
     getApprovedRescheduleCountForAppointment(appointment.id) + 1;
-
   appointment.id = appointment.id;
   appointment.appointment_id = appointment.id;
   appointment.appointmentId = appointment.id;
@@ -3190,7 +3393,6 @@ async function confirmStaffRescheduleResponse() {
   appointment.rescheduleCount = nextApprovedCount;
   appointment.reschedule_count = nextApprovedCount;
   appointment.rescheduleRequest = null;
-
   requests[index] = {
     ...requests[index],
     id:
@@ -3234,7 +3436,6 @@ async function confirmStaffRescheduleResponse() {
     status: "Approved",
     approved_reschedule_count: nextApprovedCount,
   };
-
   await saveRescheduleRequests(requests);
   let savedAppointments;
   try {
@@ -3676,21 +3877,15 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
 let toastTimer = null;
-
 function showToast(message) {
   const toast = document.getElementById("toast");
-
   if (!toast) {
     return;
   }
-
   toast.textContent = message;
   toast.classList.add("show");
-
   clearTimeout(toastTimer);
-
   toastTimer = setTimeout(() => {
     toast.classList.remove("show");
   }, 3200);

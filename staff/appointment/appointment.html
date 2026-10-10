@@ -22,107 +22,111 @@
     <div class="dashboard-wrapper">
       <aside id="sidebar-container"></aside>
       <main class="main-content">
-        <header class="appointments-page-header">
-          <div class="appointments-page-header-content">
-            <div class="appointments-page-heading">
-              <h1>Appointments</h1>
-              <p>
-                Manage and organize today's patient appointments and schedules.
-              </p>
-            </div>
-            <div class="appointments-page-actions">
-              <button
-                class="btn-new-appointment page-header-new-appointment"
-                type="button"
-                onclick="openNewModal()"
-              >
-                <i class="fa-solid fa-plus"></i>
-                <span>New Appointment</span>
-              </button>
-            </div>
-          </div>
-        </header>
-        <div class="appointments-layout">
-          <div class="left-col-stack">
-            <section class="panel schedule-panel">
-              <div class="schedule-main-header">
-                <div class="schedule-heading-group">
-                  <h3 id="scheduleTitle">Today's Schedule</h3>
-                  <span
-                    id="scheduleDateLabel"
-                    class="schedule-date-label"
-                  ></span>
-                </div>
-                <div class="schedule-header-actions">
-                  <div class="dentist-filter-wrapper">
-                    <i class="fa-solid fa-user-doctor dentist-filter-icon"></i>
-                    <select
-                      id="dentistFilter"
-                      class="dentist-filter"
-                      aria-label="Filter appointments by dentist"
-                    ></select>
-                  </div>
-                  <div class="search-box-wrapper">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input
-                      id="searchInput"
-                      class="patient-search-input"
-                      type="text"
-                      placeholder="Search patient..."
-                      autocomplete="off"
-                    />
-                  </div>
-                </div>
+        <div class="appointments-shell">
+          <header class="appointments-page-header">
+            <div class="appointments-page-header-content">
+              <div class="appointments-page-heading">
+                <h1>Appointments</h1>
+                <p>
+                  Manage and organize today's patient appointments and
+                  schedules.
+                </p>
               </div>
-              <div
-                class="time-slots-container"
-                id="timeline"
-                data-view="single"
-              ></div>
-            </section>
-          </div>
-          <div class="right-col-stack">
-            <section class="panel calendar-panel">
-              <div class="calendar-header">
-                <h4 id="calMonthLabel">—</h4>
-                <div class="calendar-nav-btns">
-                  <button
-                    type="button"
-                    onclick="shiftMonth(-1)"
-                    aria-label="Previous month"
-                  >
-                    <i class="fa-solid fa-chevron-left"></i>
-                  </button>
-                  <button
-                    type="button"
-                    onclick="shiftMonth(1)"
-                    aria-label="Next month"
-                  >
-                    <i class="fa-solid fa-chevron-right"></i>
-                  </button>
+              <div class="appointments-page-actions">
+                <div class="dentist-filter-wrapper">
+                  <i class="fa-solid fa-user-doctor dentist-filter-icon"></i>
+                  <select
+                    id="dentistFilter"
+                    class="dentist-filter"
+                    aria-label="Filter appointments by dentist"
+                  ></select>
                 </div>
+                <div class="search-box-wrapper">
+                  <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                  <input
+                    id="searchInput"
+                    class="patient-search-input"
+                    type="text"
+                    placeholder="Search patient..."
+                    autocomplete="off"
+                  />
+                </div>
+                <button
+                  class="btn-new-appointment page-header-new-appointment"
+                  type="button"
+                  onclick="openNewModal()"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  <span>New Appointment</span>
+                </button>
               </div>
-              <div class="calendar-grid-days" id="calGrid"></div>
-            </section>
-            <section class="panel side-content-panel">
-              <div class="side-content-header">
-                <div class="side-section-header active" id="waitingQueueHeader">
-                  <div class="side-section-title">
-                    <div class="side-section-text">
-                      <div class="side-section-title-line">
-                        <h3>Today's Appointments</h3>
+            </div>
+          </header>
+          <div class="appointments-layout">
+            <div class="side-col-stack">
+              <section class="panel calendar-panel">
+                <div class="calendar-header">
+                  <h4 id="calMonthLabel">—</h4>
+                  <div class="calendar-nav-btns">
+                    <button
+                      type="button"
+                      onclick="shiftMonth(-1)"
+                      aria-label="Previous month"
+                    >
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button
+                      type="button"
+                      onclick="shiftMonth(1)"
+                      aria-label="Next month"
+                    >
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="calendar-grid-days" id="calGrid"></div>
+              </section>
+              <section class="panel side-content-panel">
+                <div class="side-content-header">
+                  <div
+                    class="side-section-header active"
+                    id="waitingQueueHeader"
+                  >
+                    <div class="side-section-title">
+                      <div class="side-section-text">
+                        <div class="side-section-title-line">
+                          <h3>Today's Appointments</h3>
+                        </div>
+                        <span class="side-section-description"
+                          >Today's appointments and current status</span
+                        >
                       </div>
-                      <span class="side-section-description"
-                        >Today's appointments and current status</span
-                      >
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="side-content-body active" id="waitingQueuePage">
-                <div class="waiting-queue-list" id="waitingQueueList"></div>
-              </div>
-            </section>
+                <div class="side-content-body active" id="waitingQueuePage">
+                  <div class="waiting-queue-list" id="waitingQueueList"></div>
+                </div>
+              </section>
+            </div>
+            <div class="main-col-stack">
+              <section class="panel schedule-panel">
+                <div class="schedule-main-header">
+                  <div class="schedule-heading-group">
+                    <h3 id="scheduleTitle">Today's Schedule</h3>
+                    <span
+                      id="scheduleDateLabel"
+                      class="schedule-date-label"
+                    ></span>
+                  </div>
+                </div>
+                <div
+                  class="time-slots-container"
+                  id="timeline"
+                  data-view="single"
+                ></div>
+              </section>
+            </div>
           </div>
         </div>
       </main>
