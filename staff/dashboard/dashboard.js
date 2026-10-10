@@ -925,49 +925,121 @@ function getInventoryPriority(status) {
     className: "status-normal",
   };
 }
+
 function getDashboardPaymentHistory(transaction) {
-  const amount = Number(transaction.amount);
-  if (Number.isFinite(amount) && amount > 0) {
-    return [
-      {
-        amount,
-        date: normalizeAppointmentDate(transaction.date || ""),
-        method: String(transaction.method || ""),
-        status: String(transaction.status || ""),
-      },
-    ];
+  if (!transaction || typeof transaction !== "object") {
+    return [];
   }
-  return [];
+
+  let paymentHistory =
+    transaction.paymentHistory || transaction.payment_history || [];
+
+  if (typeof paymentHistory === "string") {
+    try {
+      paymentHistory = JSON.parse(paymentHistory);
+    } catch (error) {
+      paymentHistory = [];
+    }
+  }
+
+  if (Array.isArray(paymentHistory) && paymentHistory.length > 0) {
+    return paymentHistory
+      .map((payment) => ({
+        amount: Number(payment.amount ?? payment.payment_amount ?? 0),
+        date: normalizeAppointmentDate(
+          payment.paid_at ||
+            payment.created_at ||
+            payment.date ||
+            transaction.created_at ||
+            transaction.date ||
+            "",
+        ),
+        status: String(
+          payment.status ||
+            payment.payment_status ||
+            payment.paymentStatus ||
+            "",
+        )
+          .trim()
+          .toLowerCase(),
+      }))
+      .filter((payment) => payment.amount > 0);
+  }
+
+  const hasDatabasePaidAmount =
+    transaction.paid_amount !== undefined && transaction.paid_amount !== null;
+
+  const amount = Number(
+    transaction.paid_amount ??
+      transaction.paidAmount ??
+      transaction.paid ??
+      transaction.amount ??
+      0,
+  );
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return [];
+  }
+
+  const isDatabasePaidAmount =
+    hasDatabasePaidAmount ||
+    transaction.paidAmount !== undefined ||
+    transaction.paid !== undefined;
+
+  const status = isDatabasePaidAmount
+    ? "paid"
+    : String(
+        transaction.payment_status ||
+          transaction.paymentStatus ||
+          transaction.status ||
+          "",
+      )
+        .trim()
+        .toLowerCase();
+
+  return [
+    {
+      amount,
+      date: normalizeAppointmentDate(
+        transaction.paid_at ||
+          transaction.payment_date ||
+          transaction.updated_at ||
+          transaction.created_at ||
+          transaction.date ||
+          "",
+      ),
+      status,
+    },
+  ];
 }
+
 function getTodayPaidTransactions() {
   const today = getTodayDate();
+
   return getStoredTransactions()
     .flatMap((transaction) => getDashboardPaymentHistory(transaction))
-    .filter((payment) => {
-      return (
-        normalizeAppointmentDate(payment.date) === today &&
-        String(payment.status || "").toLowerCase() === "paid"
-      );
-    });
+    .filter((payment) => payment.date === today && payment.status === "paid");
 }
+
 function getTodayRevenue() {
   return getTodayPaidTransactions().reduce(
-    (total, payment) => total + Number(payment.amount || 0),
+    (total, payment) => total + payment.amount,
     0,
   );
 }
+
 function getMonthlyRevenue() {
   const currentMonth = getCurrentMonth();
+
   return getStoredTransactions()
     .flatMap((transaction) => getDashboardPaymentHistory(transaction))
-    .filter((payment) => {
-      return (
-        normalizeAppointmentDate(payment.date).slice(0, 7) === currentMonth &&
-        String(payment.status || "").toLowerCase() === "paid"
-      );
-    })
-    .reduce((total, payment) => total + Number(payment.amount || 0), 0);
+    .filter(
+      (payment) =>
+        payment.date.slice(0, 7) === currentMonth && payment.status === "paid",
+    )
+    .reduce((total, payment) => total + payment.amount, 0);
 }
+
 function updateTodayRevenueTrend() {
   setText("statTodayRevenue", formatCurrency(getTodayRevenue()));
   setText("statTodayRevenueTrend", "Today's collection");

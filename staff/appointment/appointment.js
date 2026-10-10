@@ -2697,25 +2697,98 @@ function startConsultation(id) {
   renderAll();
   showToast(`${appt.patient}'s consultation has started.`);
 }
-function recordPaymentForAppointment(id) {
-  const appt = appointments.find((item) => String(item.id) === String(id));
+
+async function recordPaymentForAppointment(id) {
+  let appt = appointments.find((item) => String(item.id) === String(id));
+
   if (!appt || appt.status !== APPOINTMENT_STATUS.COMPLETED) {
     return;
   }
 
-  const databaseAppointmentId = Number(
-    appt.databaseAppointmentId ??
-      appt.database_appointment_id ??
-      appt.appointment_id ??
-      0,
-  );
+  const getDatabaseAppointmentId = (appointment) =>
+    Number(
+      appointment?.databaseAppointmentId ??
+        appointment?.database_appointment_id ??
+        appointment?.appointment_id ??
+        0,
+    );
+
+  let databaseAppointmentId = getDatabaseAppointmentId(appt);
 
   if (!databaseAppointmentId) {
-    showToast("Unable to link this payment to the appointment.");
+    try {
+      if (!window.DentaNuevaAppointmentDatabase) {
+        throw new Error("Appointment database API is unavailable.");
+      }
+
+      const latestAppointments =
+        await window.DentaNuevaAppointmentDatabase.load();
+
+      if (!Array.isArray(latestAppointments)) {
+        throw new Error("Unable to reload appointments.");
+      }
+
+      const freshAppointment = latestAppointments.find((item) => {
+        const identifiers = [
+          item.id,
+          item.appointmentId,
+          item.appointment_uid,
+          item.appointmentUid,
+          item.appointment_id,
+          item.databaseAppointmentId,
+          item.database_appointment_id,
+        ];
+
+        return identifiers.some(
+          (value) =>
+            value !== undefined &&
+            value !== null &&
+            String(value) === String(id),
+        );
+      });
+
+      if (!freshAppointment) {
+        throw new Error("Appointment record was not found.");
+      }
+
+      const normalizedAppointment = normalizeAppointment(freshAppointment);
+
+      databaseAppointmentId = getDatabaseAppointmentId(normalizedAppointment);
+
+      if (!databaseAppointmentId) {
+        throw new Error("Database appointment ID is missing.");
+      }
+
+      appt = {
+        ...normalizedAppointment,
+        status: normalizedAppointment.status,
+      };
+
+      const appointmentIndex = appointments.findIndex(
+        (item) =>
+          String(item.id) === String(id) ||
+          String(item.appointment_uid || item.appointmentUid || "") ===
+            String(id),
+      );
+
+      if (appointmentIndex !== -1) {
+        appointments[appointmentIndex] = appt;
+      }
+    } catch (error) {
+      console.error("Unable to link appointment payment:", error);
+      showToast("Unable to load the appointment record. Please try again.");
+      return;
+    }
+  }
+
+  if (appt.status !== APPOINTMENT_STATUS.COMPLETED) {
+    showToast("Only completed appointments can be paid.");
     return;
   }
 
-  const dentist = getDentistRecord(appt.dentist) || {
+  const dentist = getDentistRecord(
+    appt.dentist || appt.dentistId || appt.dentist_id,
+  ) || {
     name: "Unassigned",
   };
 
@@ -2728,11 +2801,7 @@ function recordPaymentForAppointment(id) {
     patientName: appt.patient || appt.patientName || "",
     dentistId: appt.dentist || appt.dentistId || appt.dentist_id || "",
     dentistName:
-      dentist.name ||
-      appt.dentistName ||
-      appt.dentist_name ||
-      appt.dentist ||
-      "Unassigned",
+      dentist.name || appt.dentistName || appt.dentist_name || "Unassigned",
     service:
       appt.type || appt.service || appt.serviceType || appt.service_type || "",
     appointmentDate:
@@ -2750,6 +2819,11 @@ function recordPaymentForAppointment(id) {
     paymentStatus: appt.paymentStatus || "unpaid",
   };
 
+  if (!pendingPayment.patientId) {
+    showToast("Unable to identify the patient for this appointment.");
+    return;
+  }
+
   const params = new URLSearchParams();
 
   Object.entries(pendingPayment).forEach(([key, value]) => {
@@ -2760,6 +2834,7 @@ function recordPaymentForAppointment(id) {
 
   window.location.href = `../finance/finance.html?${params.toString()}`;
 }
+
 function openStatusConfirmation(id, actionType) {
   const appt = appointments.find((item) => item.id === id);
   if (!appt) return;
