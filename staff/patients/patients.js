@@ -2810,9 +2810,7 @@ function buildStaffDentalChart(patient) {
 
         <button
           type="button"
-          class="staff-dental-tooth-button${hasRecord ? " has-record" : ""}${
-            number === firstRecordedTooth ? " is-selected" : ""
-          }"
+          class="staff-dental-tooth-button${hasRecord ? " has-record" : ""}"
           data-staff-dental-tooth="${escapeHTML(number)}"
           aria-label="Tooth ${escapeHTML(number)}"
           ${hasRecord ? "" : "disabled"}
@@ -2911,6 +2909,7 @@ function buildStaffDentalChart(patient) {
     (total, toothNumber) => total + getHistory(toothNumber).length,
     0,
   );
+  const procedureRows = buildStaffDentalProcedureRows(teeth);
 
   if (!recordedTeeth.length) {
     return `
@@ -2963,7 +2962,6 @@ function buildStaffDentalChart(patient) {
     <div
       class="staff-dental-chart"
       data-staff-dental-chart
-      data-initial-tooth="${escapeHTML(firstRecordedTooth)}"
     >
 
       <div class="staff-dental-chart-header">
@@ -3033,36 +3031,22 @@ function buildStaffDentalChart(patient) {
 
       </div>
 
-      <div
+            <div
         class="staff-dental-procedure-history"
         data-staff-dental-history
       >
-
         <div class="staff-dental-history-header">
-
           <div>
-            <span>
-              PROCEDURE HISTORY
-            </span>
-
-            <h3>
-              Tooth ${escapeHTML(firstRecordedTooth)}
-            </h3>
+            <span>PROCEDURE HISTORY</span>
           </div>
-
           <span class="staff-dental-record-count">
-            ${getHistory(firstRecordedTooth).length}
-            ${
-              getHistory(firstRecordedTooth).length === 1 ? "record" : "records"
-            }
+            ${procedureRows.count}
+            ${procedureRows.count === 1 ? "record" : "records"}
           </span>
-
         </div>
-
         <div data-staff-dental-history-content>
-          ${buildHistory(firstRecordedTooth)}
+          ${procedureRows.html}
         </div>
-
       </div>
 
       <div class="staff-dental-view-only">
@@ -3581,8 +3565,12 @@ function buildStaffAppointments(appointments) {
               appointment.type || appointment.service_type || "Appointment";
 
             const dentist =
-              appointment.dentist ||
               appointment.dentist_name ||
+              appointment.doctor_name ||
+              appointment.dentistName ||
+              appointment.doctorName ||
+              appointment.dentist_full_name ||
+              appointment.dentist ||
               appointment.dentist_id ||
               "Not assigned";
 
@@ -3750,136 +3738,44 @@ function bindStaffPatientRecordTabs() {
     const historyContent = dentalChart.querySelector(
       "[data-staff-dental-history-content]",
     );
-
-    const historyHeader = dentalChart.querySelector(
-      ".staff-dental-history-header h3",
-    );
-
     const historyCount = dentalChart.querySelector(
       ".staff-dental-record-count",
     );
-
     dentalChart
       .querySelectorAll("[data-staff-dental-tooth]")
       .forEach((button) => {
         button.onclick = () => {
           const toothNumber = button.dataset.staffDentalTooth;
-
           if (!toothNumber || !currentPatientRecord) {
             return;
           }
-
           const dentalChartData =
             currentPatientRecord.dentalChart &&
             typeof currentPatientRecord.dentalChart === "object"
               ? currentPatientRecord.dentalChart
               : {};
-
           const teeth =
             dentalChartData.teeth && typeof dentalChartData.teeth === "object"
               ? dentalChartData.teeth
               : {};
-
-          const record = teeth[toothNumber] || {};
-
-          const history =
-            Array.isArray(record.history) && record.history.length
-              ? record.history.filter(
-                  (item) => item && String(item.procedure || "").trim(),
-                )
-              : String(record.procedure || "").trim()
-                ? [
-                    {
-                      procedure: record.procedure,
-                      updatedAt: record.updatedAt || "",
-                    },
-                  ]
-                : [];
-
+          const alreadySelected = button.classList.contains("is-selected");
           dentalChart
             .querySelectorAll("[data-staff-dental-tooth]")
-            .forEach((item) => {
-              item.classList.toggle("is-selected", item === button);
-            });
-
-          const orderedHistory = [...history].sort(
-            (a, b) =>
-              new Date(b.updatedAt || 0).getTime() -
-              new Date(a.updatedAt || 0).getTime(),
-          );
-
-          if (historyHeader) {
-            historyHeader.textContent = `Tooth ${toothNumber}`;
+            .forEach((item) => item.classList.remove("is-selected"));
+          if (!alreadySelected) {
+            button.classList.add("is-selected");
           }
-
+          const rows = buildStaffDentalProcedureRows(
+            teeth,
+            alreadySelected ? "" : toothNumber,
+          );
           if (historyCount) {
-            historyCount.textContent = `${orderedHistory.length} ${
-              orderedHistory.length === 1 ? "record" : "records"
+            historyCount.textContent = `${rows.count} ${
+              rows.count === 1 ? "record" : "records"
             }`;
           }
-
           if (historyContent) {
-            historyContent.innerHTML = orderedHistory.length
-              ? `
-                  <div class="staff-dental-procedure-list">
-                    ${orderedHistory
-                      .map(
-                        (item, index) => `
-                          <div class="staff-dental-procedure-item">
-
-                            <div class="staff-dental-procedure-marker">
-                              <span></span>
-                            </div>
-
-                            <div class="staff-dental-procedure-content">
-
-                              <div class="staff-dental-procedure-title">
-                                <strong>
-                                  ${escapeHTML(item.procedure || "Procedure")}
-                                </strong>
-
-                                ${
-                                  index === 0
-                                    ? `
-                                      <span class="staff-dental-latest">
-                                        LATEST
-                                      </span>
-                                    `
-                                    : ""
-                                }
-                              </div>
-
-                              ${
-                                item.updatedAt
-                                  ? `
-                                    <span class="staff-dental-procedure-date">
-                                      ${escapeHTML(formatDate(item.updatedAt))}
-                                    </span>
-                                  `
-                                  : ""
-                              }
-
-                            </div>
-
-                          </div>
-                        `,
-                      )
-                      .join("")}
-                  </div>
-                `
-              : `
-                  <div class="staff-dental-procedure-empty">
-                    <i class="fa-solid fa-tooth"></i>
-
-                    <strong>
-                      No procedure records
-                    </strong>
-
-                    <span>
-                      No dental procedure has been recorded for this tooth.
-                    </span>
-                  </div>
-                `;
+            historyContent.innerHTML = rows.html;
           }
         };
       });
@@ -4594,4 +4490,75 @@ function staffOverviewStat(icon, label, value, caption) {
 
 function staffOverviewRecord(icon, label, caption) {
   return `<div class="patient-overview-record-item"><div class="patient-overview-record-icon"><i class="${icon}"></i></div><div><strong>${label}</strong><span>${caption}</span></div></div>`;
+}
+function buildStaffDentalProcedureRows(teeth, filterTooth = "") {
+  const entries = [];
+  Object.keys(teeth).forEach((number) => {
+    if (filterTooth && number !== filterTooth) {
+      return;
+    }
+    const record = teeth[number] || {};
+    let history =
+      Array.isArray(record.history) && record.history.length
+        ? record.history.filter(
+            (item) => item && String(item.procedure || "").trim(),
+          )
+        : String(record.procedure || "").trim()
+          ? [{ procedure: record.procedure, updatedAt: record.updatedAt || "" }]
+          : [];
+    history = [...history].sort(
+      (a, b) =>
+        new Date(b.updatedAt || 0).getTime() -
+        new Date(a.updatedAt || 0).getTime(),
+    );
+    history.forEach((item, index) => {
+      entries.push({ number, item, latest: index === 0 });
+    });
+  });
+  entries.sort((a, b) => {
+    const diff =
+      new Date(b.item.updatedAt || 0).getTime() -
+      new Date(a.item.updatedAt || 0).getTime();
+    return diff || Number(a.number) - Number(b.number);
+  });
+  if (!entries.length) {
+    return {
+      count: 0,
+      html: `
+        <div class="staff-dental-procedure-empty">
+          <i class="fa-solid fa-tooth"></i>
+          <strong>No procedure records</strong>
+          <span>No dental procedure has been recorded.</span>
+        </div>
+      `,
+    };
+  }
+  return {
+    count: entries.length,
+    html: `
+      <div class="staff-dental-procedure-list">
+        ${entries
+          .map(
+            ({ number, item, latest }) => `
+              <div class="staff-dental-procedure-item">
+                <div class="staff-dental-procedure-marker"><span></span></div>
+                <div class="staff-dental-procedure-content">
+                  <div class="staff-dental-procedure-title">
+                    <span class="staff-dental-procedure-tooth">Tooth ${escapeHTML(number)}</span>
+                    <strong>${escapeHTML(item.procedure || "Procedure")}</strong>
+                    ${latest ? `<span class="staff-dental-latest">LATEST</span>` : ""}
+                  </div>
+                  ${
+                    item.updatedAt
+                      ? `<span class="staff-dental-procedure-date">${escapeHTML(formatDate(String(item.updatedAt).slice(0, 10)))}</span>`
+                      : ""
+                  }
+                </div>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+    `,
+  };
 }

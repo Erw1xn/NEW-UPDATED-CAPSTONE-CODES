@@ -70,7 +70,6 @@ async function hydrateCurrentUser() {
     return null;
   }
 }
-
 async function hydratePatientAppointmentsFromDatabase() {
   if (!currentPatient) return;
   try {
@@ -85,7 +84,6 @@ async function hydratePatientAppointmentsFromDatabase() {
     console.warn("Database appointments unavailable.", error);
   }
 }
-
 async function hydratePatientRecordFromDatabase() {
   if (!currentUser) {
     return;
@@ -121,7 +119,6 @@ async function hydratePatientRecordFromDatabase() {
     );
   }
 }
-
 async function savePatientRecordToDatabase() {
   if (!currentPatient) {
     return false;
@@ -147,7 +144,6 @@ async function savePatientRecordToDatabase() {
     return false;
   }
 }
-
 function bindClinicalImageViewer() {
   const imagePanel = $("patientPageImages");
   if (!imagePanel) {
@@ -173,7 +169,6 @@ function bindClinicalImageViewer() {
     );
   });
 }
-
 function openClinicalImageViewer(title, beforeImage, afterImage) {
   const modal = document.createElement("div");
   modal.className = "clinical-image-viewer";
@@ -215,21 +210,17 @@ function openClinicalImageViewer(title, beforeImage, afterImage) {
     }
   });
 }
-
 function getCurrentUser() {
   return currentUser;
 }
-
 function getPatients() {
   return currentPatient ? [currentPatient] : [];
 }
-
 function savePatients(patients) {
   if (Array.isArray(patients) && patients[0]) {
     currentPatient = patients[0];
   }
 }
-
 function loadOrCreatePatientRecord() {
   const patients = getPatients();
   if (!currentUser) {
@@ -337,42 +328,33 @@ function loadOrCreatePatientRecord() {
   currentPatient = newPatient;
   currentUser.patientId = patientId;
 }
-
 function normalizePatient(patient) {
   const normalized = {
     ...patient,
   };
-
   if (!normalized.patientId) {
     normalized.patientId = normalized.id || generatePatientId();
   }
-
   if (!normalized.id) {
     normalized.id = normalized.patientId;
   }
-
   if (!normalized.userId && currentUser) {
     normalized.userId =
       currentUser.id || currentUser.userId || currentUser.user_id || "";
   }
-
   if (!normalized.firstName && currentUser) {
     normalized.firstName = currentUser.firstName || currentUser.firstname || "";
   }
-
   if (!normalized.lastName && currentUser) {
     normalized.lastName = currentUser.lastName || currentUser.lastname || "";
   }
-
   if (!normalized.fullName && currentUser) {
     normalized.fullName =
       currentUser.fullName || currentUser.full_name || currentUser.name || "";
   }
-
   if (!normalized.email && currentUser) {
     normalized.email = currentUser.email || currentUser.emailAddress || "";
   }
-
   if (!normalized.phone && currentUser) {
     normalized.phone =
       currentUser.phone ||
@@ -380,73 +362,52 @@ function normalizePatient(patient) {
       currentUser.contact ||
       "";
   }
-
   if (!normalized.dateOfBirth && currentUser) {
     normalized.dateOfBirth = currentUser.dateOfBirth || "";
   }
-
   if (!normalized.gender && currentUser) {
     normalized.gender = currentUser.gender || currentUser.patientGender || "";
   }
-
   if (!normalized.patientGender) {
     normalized.patientGender = normalized.gender || "";
   }
-
   if (!normalized.address && currentUser) {
     normalized.address = currentUser.address || "";
   }
-
   if (!normalized.emergencyName && currentUser) {
     normalized.emergencyName = currentUser.emergencyName || "";
   }
-
   if (!normalized.emergencyContact && currentUser) {
     normalized.emergencyContact = currentUser.emergencyContact || "";
   }
-
   if (!Array.isArray(normalized.appointments)) {
     normalized.appointments = [];
   }
-
   if (!Object.prototype.hasOwnProperty.call(normalized, "medicalForm")) {
     normalized.medicalForm = null;
   }
-
   return normalized;
 }
-
 function generatePatientId() {
   const patients = getPatients();
-
   let highestNumber = 0;
-
   patients.forEach((patient) => {
     const value = String(patient.patientId || patient.id || "");
-
     const match = value.match(/PN-(\d+)/i);
-
     if (match) {
       highestNumber = Math.max(highestNumber, Number(match[1]));
     }
   });
-
   const nextNumber = highestNumber + 1;
-
   return `PN-${String(nextNumber).padStart(4, "0")}`;
 }
-
 function getPatientFullName(patient) {
   if (!patient) {
     return "Patient";
   }
-
   const firstName = patient.firstName || patient.firstname || "";
-
   const lastName = patient.lastName || patient.lastname || "";
-
   const combined = `${firstName} ${lastName}`.trim();
-
   return (
     combined ||
     patient.fullName ||
@@ -455,23 +416,17 @@ function getPatientFullName(patient) {
     "Patient"
   );
 }
-
 function getInitials(name) {
   const cleanName = String(name || "").trim();
-
   if (!cleanName) {
     return "PT";
   }
-
   const parts = cleanName.split(/\s+/);
-
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }
-
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
-
 function bindEvents() {
   $("startRecordBtn")?.addEventListener("click", openMedicalModal);
   document.addEventListener("click", (event) => {
@@ -479,40 +434,30 @@ function bindEvents() {
       openProfileEditModal();
     }
   });
-
   document.querySelectorAll(".patient-record-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       openPatientRecordTab(tab.dataset.tab);
     });
   });
-
   $("closeMedicalModal")?.addEventListener("click", closeMedicalModal);
   $("closeProfileEditModal")?.addEventListener("click", closeProfileEditModal);
-
   $("cancelMedicalBtn")?.addEventListener("click", closeMedicalModal);
   $("cancelProfileEdit")?.addEventListener("click", closeProfileEditModal);
-
   $("nextMedicalBtn")?.addEventListener("click", nextStep);
-
   $("backMedicalBtn")?.addEventListener("click", previousStep);
-
   $("medicalRecordForm")?.addEventListener("submit", saveMedicalRecord);
   $("profileEditForm")?.addEventListener("submit", saveProfileEdit);
-
   $("successCloseBtn")?.addEventListener("click", closeSuccessModal);
-
   $("medicalModalBackdrop")?.addEventListener("mousedown", (event) => {
     if (event.target === $("medicalModalBackdrop")) {
       closeMedicalModal();
     }
   });
-
   $("successModalBackdrop")?.addEventListener("mousedown", (event) => {
     if (event.target === $("successModalBackdrop")) {
       closeSuccessModal();
     }
   });
-
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") {
       return;
@@ -521,21 +466,16 @@ function bindEvents() {
     closeProfileEditModal();
     closeSuccessModal();
   });
-
   $("dentalConcernOtherCheck")?.addEventListener(
     "change",
     updateOtherFieldState,
   );
-
   $("medicalOtherCheck")?.addEventListener("change", updateOtherFieldState);
-
   $("allergyOtherCheck")?.addEventListener("change", updateOtherFieldState);
-
-  $("phone")?.addEventListener("input", sanitizePhone);
-
-  $("emergencyContact")?.addEventListener("input", sanitizePhone);
+  ["phone", "emergencyContact", "editPhone", "editEmergencyContact"].forEach(
+    bindPhoneField,
+  );
 }
-
 function populatePatientProfile() {
   if (!currentPatient) {
     $("profileName").textContent = "Patient";
@@ -544,64 +484,47 @@ function populatePatientProfile() {
     $("profilePhone").textContent = "—";
     $("profileBirthDate").textContent = "—";
     $("profileGender").textContent = "—";
-
     if ($("profileAvatar")) {
       $("profileAvatar").textContent = "PT";
     }
-
     return;
   }
-
   const fullName = getPatientFullName(currentPatient);
-
   const patientId = currentPatient.patientId || currentPatient.id || "—";
-
   const email =
     currentPatient.email ||
     currentUser?.email ||
     currentUser?.emailAddress ||
     "—";
-
   const phone =
     currentPatient.phone ||
     currentUser?.phone ||
     currentUser?.contactNumber ||
     currentUser?.contact ||
     "—";
-
   const dateOfBirth =
     currentPatient.dateOfBirth || currentUser?.dateOfBirth || "";
-
   const gender =
     currentPatient.gender ||
     currentPatient.patientGender ||
     currentUser?.gender ||
     currentUser?.patientGender ||
     "—";
-
   $("profileName").textContent = fullName;
-
   $("profilePatientId").textContent = `Patient ID: ${patientId}`;
-
   $("profileEmail").textContent = email;
-
   $("profilePhone").textContent = phone;
-
   $("profileBirthDate").textContent = formatDate(dateOfBirth);
-
   $("profileGender").textContent = gender;
-
   if ($("profileAvatar")) {
     $("profileAvatar").textContent = getInitials(fullName);
   }
 }
-
 function openProfileEditModal() {
   if (!currentPatient) {
     alert("Patient record could not be found. Please log in again.");
     return;
   }
-
   $("editFirstName").value = currentPatient.firstName || "";
   $("editLastName").value = currentPatient.lastName || "";
   $("editDateOfBirth").value = currentPatient.dateOfBirth || "";
@@ -612,28 +535,22 @@ function openProfileEditModal() {
   $("editAddress").value = currentPatient.address || "";
   $("editEmergencyName").value = currentPatient.emergencyName || "";
   $("editEmergencyContact").value = currentPatient.emergencyContact || "";
-
   $("profileEditModalBackdrop").classList.add("open");
   $("profileEditModalBackdrop").setAttribute("aria-hidden", "false");
 }
-
 function closeProfileEditModal() {
   $("profileEditModalBackdrop")?.classList.remove("open");
   $("profileEditModalBackdrop")?.setAttribute("aria-hidden", "true");
 }
-
 function saveProfileEdit(event) {
   event.preventDefault();
-
   const form = $("profileEditForm");
   if (!currentPatient || !form?.checkValidity()) {
     form?.reportValidity();
     return;
   }
-
   const phone = $("editPhone").value.trim();
   const emergencyContact = $("editEmergencyContact").value.trim();
-
   if (!/^\+639\d{9}$/.test(phone)) {
     $("editPhone").setCustomValidity(
       "Please enter a valid Philippine phone number.",
@@ -642,7 +559,6 @@ function saveProfileEdit(event) {
     $("editPhone").setCustomValidity("");
     return;
   }
-
   if (!/^\+639\d{9}$/.test(emergencyContact)) {
     $("editEmergencyContact").setCustomValidity(
       "Please enter a valid Philippine emergency contact number.",
@@ -651,11 +567,9 @@ function saveProfileEdit(event) {
     $("editEmergencyContact").setCustomValidity("");
     return;
   }
-
   const now = new Date().toISOString();
   const firstName = $("editFirstName").value.trim();
   const lastName = $("editLastName").value.trim();
-
   currentPatient = {
     ...currentPatient,
     firstName,
@@ -671,7 +585,6 @@ function saveProfileEdit(event) {
     emergencyContact,
     updatedAt: now,
   };
-
   const patients = getPatients();
   const currentId = String(
     currentPatient.patientId || currentPatient.id || "",
@@ -680,12 +593,10 @@ function saveProfileEdit(event) {
     (patient) =>
       String(patient.patientId || patient.id || "").trim() === currentId,
   );
-
   if (index === -1) {
     alert("Patient record could not be saved. Please try again.");
     return;
   }
-
   patients[index] = {
     ...patients[index],
     ...currentPatient,
@@ -698,7 +609,6 @@ function saveProfileEdit(event) {
   patients[index] = currentPatient;
   savePatients(patients);
   void savePatientRecordToDatabase();
-
   if (currentUser) {
     currentUser.patientId = currentPatient.patientId || currentPatient.id;
     currentUser.firstName = currentPatient.firstName;
@@ -712,7 +622,6 @@ function saveProfileEdit(event) {
     currentUser.emergencyName = currentPatient.emergencyName;
     currentUser.emergencyContact = currentPatient.emergencyContact;
   }
-
   closeProfileEditModal();
   populatePatientProfile();
   renderPatientOverview();
@@ -741,37 +650,30 @@ function openPatientRecordTab(tabName) {
     renderPatientRecordTab(activeTabName);
   }
 }
-
 function renderPatientRecordTab(tabName) {
   if (!currentPatient) {
     return;
   }
-
   if (tabName === "overview") {
     renderPatientOverview();
     return;
   }
-
   if (tabName === "medical") {
     renderPatientMedicalRecord();
     return;
   }
-
   if (tabName === "dental") {
     renderPatientDentalChart();
     return;
   }
-
   if (tabName === "images") {
     renderPatientClinicalImages();
     return;
   }
-
   if (tabName === "treatments") {
     renderPatientTreatments();
     return;
   }
-
   if (tabName === "appointments") {
     renderPatientAppointments();
     void hydratePatientAppointmentsFromDatabase().then(() =>
@@ -779,19 +681,15 @@ function renderPatientRecordTab(tabName) {
     );
   }
 }
-
 function renderPatientOverview() {
   const container = $("patientPageOverview");
-
   if (!container) {
     return;
   }
-
   const name = getPatientFullName(currentPatient);
   const patientId = currentPatient.patientId || currentPatient.id || "—";
   const gender =
     currentPatient.gender || currentPatient.patientGender || "Not specified";
-
   container.innerHTML = `
       <div class="patient-overview-card">
         <div class="patient-overview-card-header">
@@ -804,7 +702,6 @@ function renderPatientOverview() {
             Edit Record
           </button>
         </div>
-
         <div class="patient-overview-information-grid">
           ${patientOverviewItem("Patient Name", name)}
           ${patientOverviewItem("Patient ID", patientId)}
@@ -819,7 +716,6 @@ function renderPatientOverview() {
       </div>
     `;
 }
-
 function patientOverviewItem(label, value, fullWidth = false) {
   return `
       <div class="patient-overview-information-item${fullWidth ? " full-width" : ""}">
@@ -830,16 +726,12 @@ function patientOverviewItem(label, value, fullWidth = false) {
       </div>
     `;
 }
-
 function renderPatientMedicalRecord() {
   const container = $("patientPageMedical");
-
   if (!container) {
     return;
   }
-
   const medical = currentPatient.medicalForm;
-
   if (!medical?.completed) {
     container.innerHTML = `
         <div class="patient-record-empty">
@@ -850,31 +742,24 @@ function renderPatientMedicalRecord() {
       `;
     return;
   }
-
   const dentalConcerns = [
     ...(Array.isArray(medical.dentalConcern) ? medical.dentalConcern : []),
   ];
-
   if (medical.dentalConcernOther) {
     dentalConcerns.push(medical.dentalConcernOther);
   }
-
   const medicalHistory = [
     ...(Array.isArray(medical.medicalHistory) ? medical.medicalHistory : []),
   ];
-
   if (medical.medicalOther) {
     medicalHistory.push(medical.medicalOther);
   }
-
   const allergies = [
     ...(Array.isArray(medical.allergies) ? medical.allergies : []),
   ];
-
   if (medical.allergyOther) {
     allergies.push(medical.allergyOther);
   }
-
   container.innerHTML = `
       <div class="patient-medical-record-grid">
         <div class="patient-record-info-card">
@@ -883,7 +768,6 @@ function renderPatientMedicalRecord() {
           ${patientRecordInfo("Negative Dental Experience", medical.negativeExperience || "No")}
           ${patientRecordInfo("Explanation", medical.negativeExperienceNote || "Not provided")}
         </div>
-
         <div class="patient-record-info-card">
           <h3>Dental History</h3>
           ${patientRecordInfo("Last Dental Visit", formatDate(medical.medLastVisit))}
@@ -891,12 +775,10 @@ function renderPatientMedicalRecord() {
           ${patientRecordInfo("Current Medications", medical.currentMedications || "No")}
           ${patientRecordInfo("Medication / Supplement List", medical.currentMedicationsList || "Not provided")}
         </div>
-
         <div class="patient-record-info-card">
           <h3>Medical History</h3>
           ${patientRecordInfo("Medical Conditions", medicalHistory.join(", ") || "None provided")}
         </div>
-
         <div class="patient-record-info-card">
           <h3>Allergies</h3>
           ${patientRecordInfo("Allergies", allergies.join(", ") || "None provided")}
@@ -904,7 +786,6 @@ function renderPatientMedicalRecord() {
       </div>
     `;
 }
-
 function patientRecordInfo(label, value) {
   return `
       <div class="patient-record-info-row">
@@ -913,24 +794,19 @@ function patientRecordInfo(label, value) {
       </div>
     `;
 }
-
 function renderPatientDentalChart() {
   const container = $("patientPageDental");
-
   if (!container || !currentPatient) {
     return;
   }
-
   const dentalChart =
     currentPatient.dentalChart && typeof currentPatient.dentalChart === "object"
       ? currentPatient.dentalChart
       : {};
-
   const teeth =
     dentalChart.teeth && typeof dentalChart.teeth === "object"
       ? dentalChart.teeth
       : {};
-
   const recordedTeeth = Object.keys(teeth)
     .filter((toothNumber) => {
       const record = teeth[toothNumber];
@@ -941,18 +817,15 @@ function renderPatientDentalChart() {
       );
     })
     .sort((a, b) => Number(a) - Number(b));
-
   const upperLeft = ["18", "17", "16", "15", "14", "13", "12", "11"];
   const upperRight = ["21", "22", "23", "24", "25", "26", "27", "28"];
   const lowerLeft = ["48", "47", "46", "45", "44", "43", "42", "41"];
   const lowerRight = ["31", "32", "33", "34", "35", "36", "37", "38"];
-
   const toothButton = (number) => {
     const record = teeth[number] || {};
     const hasRecord =
       String(record.procedure || "").trim() ||
       (Array.isArray(record.history) && record.history.length);
-
     return `
         <div class="patient-dental-tooth-item">
           <span class="patient-dental-tooth-number">${escapeHTML(number)}</span>
@@ -962,12 +835,9 @@ function renderPatientDentalChart() {
         </div>
       `;
   };
-
   const buildHistory = (number) => {
     const record = teeth[number] || {};
-
     let history = Array.isArray(record.history) ? [...record.history] : [];
-
     if (!history.length && record.procedure) {
       history = [
         {
@@ -977,14 +847,12 @@ function renderPatientDentalChart() {
         },
       ];
     }
-
     history.sort((a, b) => {
       return (
         new Date(b.updatedAt || 0).getTime() -
         new Date(a.updatedAt || 0).getTime()
       );
     });
-
     return history
       .map(
         (item, index) => `
@@ -999,7 +867,6 @@ function renderPatientDentalChart() {
                     : ""
                 }
               </div>
-
               ${
                 item.updatedAt
                   ? `
@@ -1011,7 +878,6 @@ function renderPatientDentalChart() {
                   `
                   : ""
               }
-
               ${
                 item.note
                   ? `
@@ -1027,7 +893,6 @@ function renderPatientDentalChart() {
       )
       .join("");
   };
-
   const historyRecords = recordedTeeth
     .map(
       (number) => `
@@ -1041,7 +906,6 @@ function renderPatientDentalChart() {
               <strong>${escapeHTML(number)}</strong>
             </div>
           </div>
-
           <div class="patient-dental-history-content">
             ${buildHistory(number)}
           </div>
@@ -1049,7 +913,6 @@ function renderPatientDentalChart() {
       `,
     )
     .join("");
-
   container.innerHTML = `
       <div class="patient-record-section">
         <div class="patient-record-section-header">
@@ -1057,58 +920,44 @@ function renderPatientDentalChart() {
             <span class="patient-record-section-eyebrow">
               ODONTOGRAM
             </span>
-
             <h3>Dental Chart</h3>
-
             <p>
               Patient-specific dental procedures recorded by the Doctor.
             </p>
           </div>
-
           <span class="patient-record-count">
             ${recordedTeeth.length}
             ${recordedTeeth.length === 1 ? "tooth" : "teeth"} recorded
           </span>
         </div>
-
         <div class="patient-dental-chart-view">
           <div class="patient-dental-arch-label">
             UPPER ARCH
           </div>
-
           <div class="patient-dental-arch-row">
             ${upperLeft.map(toothButton).join("")}
-
             <div class="patient-dental-midline">
               MIDLINE
             </div>
-
             ${upperRight.map(toothButton).join("")}
           </div>
-
           <div class="patient-dental-divider"></div>
-
           <div class="patient-dental-arch-row">
             ${lowerLeft.map(toothButton).join("")}
-
             <div class="patient-dental-midline"></div>
-
             ${lowerRight.map(toothButton).join("")}
           </div>
-
           <div class="patient-dental-arch-label">
             LOWER ARCH
           </div>
         </div>
       </div>
-
       <div class="patient-record-section">
         <div class="patient-record-section-header">
           <div>
             <span class="patient-record-section-eyebrow">
               PROCEDURE HISTORY
             </span>
-
             <h3>
               ${
                 recordedTeeth.length
@@ -1116,13 +965,11 @@ function renderPatientDentalChart() {
                   : "No Dental Procedures Yet"
               }
             </h3>
-
             <p>
               Dental procedures recorded by the Doctor.
             </p>
           </div>
         </div>
-
         ${
           historyRecords
             ? `
@@ -1141,7 +988,6 @@ function renderPatientDentalChart() {
             `
         }
       </div>
-
       <div class="patient-record-view-only">
         <i class="fa-solid fa-eye"></i>
         <div>
@@ -1153,25 +999,20 @@ function renderPatientDentalChart() {
       </div>
     `;
 }
-
 function renderPatientClinicalImages() {
   const container = $("patientPageImages");
-
   if (!container || !currentPatient) {
     return;
   }
-
   const clinicalImages = Array.isArray(currentPatient.clinicalImages)
     ? [...currentPatient.clinicalImages]
     : [];
-
   clinicalImages.sort((a, b) => {
     return (
       new Date(b.date || b.createdAt || 0).getTime() -
       new Date(a.date || a.createdAt || 0).getTime()
     );
   });
-
   if (!clinicalImages.length) {
     container.innerHTML = `
         <div class="patient-record-section">
@@ -1186,7 +1027,6 @@ function renderPatientClinicalImages() {
               </p>
             </div>
           </div>
-
           <div class="patient-record-empty">
             <i class="fa-regular fa-images"></i>
             <strong>No clinical images yet</strong>
@@ -1196,10 +1036,8 @@ function renderPatientClinicalImages() {
           </div>
         </div>
       `;
-
     return;
   }
-
   container.innerHTML = `
       <div class="patient-record-section">
         <div class="patient-record-section-header">
@@ -1207,41 +1045,33 @@ function renderPatientClinicalImages() {
             <span class="patient-record-section-eyebrow">
               CLINICAL DOCUMENTATION
             </span>
-
             <h3>Clinical Images</h3>
-
             <p>
               Before and after clinical photographs recorded by the Doctor.
             </p>
           </div>
-
           <span class="patient-record-count">
             ${clinicalImages.length}
             ${clinicalImages.length === 1 ? "record" : "records"}
           </span>
         </div>
-
         <div class="staff-clinical-images-list">
           ${clinicalImages
             .map((image) => {
               const title = image.title || "Clinical Image";
               const description = image.description || "";
               const date = image.date || image.createdAt || "";
-
               const beforeImage =
                 image.beforeImageData ||
                 image.beforeImage ||
                 image.imageData ||
                 "";
-
               const afterImage = image.afterImageData || image.afterImage || "";
-
               return `
                 <div class="staff-clinical-image-card patient-clinical-image-readonly">
                   <div class="staff-clinical-image-header">
                     <div>
                       <h4>${escapeHTML(title)}</h4>
-
                       ${
                         date
                           ? `
@@ -1253,13 +1083,11 @@ function renderPatientClinicalImages() {
                           : ""
                       }
                     </div>
-
                     <span class="patient-record-view-only-mini">
                       <i class="fa-solid fa-eye"></i>
                       View Only
                     </span>
                   </div>
-
                   ${
                     description
                       ? `
@@ -1269,7 +1097,6 @@ function renderPatientClinicalImages() {
                       `
                       : ""
                   }
-
                   <div class="patient-clinical-image-pair">
                     ${
                       beforeImage
@@ -1284,7 +1111,6 @@ function renderPatientClinicalImages() {
                         `
                         : ""
                     }
-
                     ${
                       afterImage
                         ? `
@@ -1305,7 +1131,6 @@ function renderPatientClinicalImages() {
             .join("")}
         </div>
       </div>
-
       <div class="patient-record-view-only">
         <i class="fa-solid fa-eye"></i>
         <div>
@@ -1317,25 +1142,20 @@ function renderPatientClinicalImages() {
       </div>
     `;
 }
-
 function renderPatientTreatments() {
   const container = $("patientPageTreatments");
-
   if (!container || !currentPatient) {
     return;
   }
-
   const treatments = Array.isArray(currentPatient.treatments)
     ? [...currentPatient.treatments]
     : [];
-
   treatments.sort((a, b) => {
     return (
       new Date(b.date || b.createdAt || 0).getTime() -
       new Date(a.date || a.createdAt || 0).getTime()
     );
   });
-
   if (!treatments.length) {
     container.innerHTML = `
         <div class="patient-record-section">
@@ -1344,19 +1164,15 @@ function renderPatientTreatments() {
               <span class="patient-record-section-eyebrow">
                 TREATMENTS
               </span>
-
               <h3>Actual Treatment</h3>
-
               <p>
                 Actual dental procedures performed and recorded by the Doctor.
               </p>
             </div>
-
             <span class="patient-record-count">
               0 treatments
             </span>
           </div>
-
           <div class="patient-record-empty">
             <i class="fa-solid fa-tooth"></i>
             <strong>No treatments recorded yet</strong>
@@ -1366,10 +1182,8 @@ function renderPatientTreatments() {
           </div>
         </div>
       `;
-
     return;
   }
-
   container.innerHTML = `
       <div class="patient-record-section">
         <div class="patient-record-section-header">
@@ -1377,20 +1191,16 @@ function renderPatientTreatments() {
             <span class="patient-record-section-eyebrow">
               TREATMENTS
             </span>
-
             <h3>Actual Treatment</h3>
-
             <p>
               Actual dental procedures performed and recorded by the Doctor.
             </p>
           </div>
-
           <span class="patient-record-count">
             ${treatments.length}
             ${treatments.length === 1 ? "treatment" : "treatments"}
           </span>
         </div>
-
         <div class="staff-treatment-list">
           ${treatments
             .map((treatment) => {
@@ -1398,13 +1208,9 @@ function renderPatientTreatments() {
                 treatment.procedure ||
                 treatment.treatment ||
                 "Dental Treatment";
-
               const tooth = treatment.toothNumber || treatment.tooth || "";
-
               const date = treatment.date || treatment.createdAt || "";
-
               const note = treatment.note || treatment.notes || "";
-
               const consumedMaterials = Array.isArray(
                 treatment.consumedMaterials,
               )
@@ -1412,9 +1218,7 @@ function renderPatientTreatments() {
                     (item) => Number(item.quantity) > 0,
                   )
                 : [];
-
               const appointmentId = treatment.appointmentId || "";
-
               return `
                 <div class="staff-treatment-card patient-treatment-readonly">
                   <div class="patient-treatment-date">
@@ -1429,23 +1233,19 @@ function renderPatientTreatments() {
                           <strong>Date not provided</strong>
                         `
                     }
-
                     <span>
                       <i class="fa-regular fa-clock"></i>
                       Actual Treatment
                     </span>
                   </div>
-
                   <div class="patient-treatment-main">
                     <div class="patient-treatment-title-row">
                       <h4>${escapeHTML(procedure)}</h4>
-
                       <span class="patient-record-view-only-mini">
                         <i class="fa-solid fa-eye"></i>
                         View Only
                       </span>
                     </div>
-
                     ${
                       tooth
                         ? `
@@ -1456,7 +1256,6 @@ function renderPatientTreatments() {
                         `
                         : ""
                     }
-
                     ${
                       appointmentId
                         ? `
@@ -1467,7 +1266,6 @@ function renderPatientTreatments() {
                         `
                         : ""
                     }
-
                     ${
                       note
                         ? `
@@ -1478,7 +1276,6 @@ function renderPatientTreatments() {
                         `
                         : ""
                     }
-
                     ${
                       consumedMaterials.length
                         ? `
@@ -1501,7 +1298,6 @@ function renderPatientTreatments() {
             .join("")}
         </div>
       </div>
-
       <div class="patient-record-view-only">
         <i class="fa-solid fa-eye"></i>
         <div>
@@ -1513,18 +1309,14 @@ function renderPatientTreatments() {
       </div>
     `;
 }
-
 function renderPatientAppointments() {
   const container = $("patientPageAppointments");
-
   if (!container) {
     return;
   }
-
   const appointments = Array.isArray(currentPatient.appointments)
     ? [...currentPatient.appointments]
     : [];
-
   if (!appointments.length) {
     container.innerHTML = `
         <div class="patient-record-empty">
@@ -1535,23 +1327,19 @@ function renderPatientAppointments() {
       `;
     return;
   }
-
   appointments.sort((a, b) => {
     const dateA = new Date(
       `${a.appointment_date || a.date || ""}T${
         a.appointment_time || a.start || "00:00"
       }`,
     ).getTime();
-
     const dateB = new Date(
       `${b.appointment_date || b.date || ""}T${
         b.appointment_time || b.start || "00:00"
       }`,
     ).getTime();
-
     return dateB - dateA;
   });
-
   container.innerHTML = `
       <div class="patient-record-table-card">
         <div class="patient-record-table-header">
@@ -1560,7 +1348,6 @@ function renderPatientAppointments() {
             <h3>Appointments</h3>
           </div>
         </div>
-
         <div class="patient-record-table-wrapper">
           <table class="patient-record-table">
             <thead>
@@ -1572,7 +1359,6 @@ function renderPatientAppointments() {
                 <th>Status</th>
               </tr>
             </thead>
-
             <tbody>
               ${appointments
                 .map(
@@ -1599,57 +1385,43 @@ function renderPatientAppointments() {
       </div>
     `;
 }
-
 function updatePageState() {
   const hasProfile = currentPatient && isProfileComplete(currentPatient);
   const medical = currentPatient?.medicalForm || null;
   const hasMedical = medical?.completed === true;
-
   const percentage = hasMedical ? 100 : 0;
-
   if ($("overallProgressFill")) {
     $("overallProgressFill").style.width = `${percentage}%`;
   }
-
   if ($("progressPercentage")) {
     $("progressPercentage").textContent = hasMedical
       ? "Completed"
       : "Incomplete";
-
     $("progressPercentage").classList.toggle("status-completed", hasMedical);
-
     $("progressPercentage").classList.toggle("status-incomplete", !hasMedical);
   }
-
   setChecklistState("checkProfile", hasMedical && hasProfile);
-
   setChecklistState(
     "checkDentalConcern",
     hasMedical && hasDentalConcern(medical),
   );
-
   setChecklistState(
     "checkDentalHistory",
     hasMedical && hasDentalHistory(medical),
   );
-
   setChecklistState(
     "checkMedicalHistory",
     hasMedical && hasMedicalHistory(medical),
   );
-
   setChecklistState("checkConsent", hasMedical && medical.consent === true);
-
   if (hasMedical) {
     if ($("recordDescription")) {
       $("recordDescription").textContent =
         "Your medical record has been submitted and is available for viewing.";
     }
-
     if ($("startRecordBtnText")) {
       $("startRecordBtnText").textContent = "Medical Record Completed";
     }
-
     if ($("startRecordBtn")) {
       $("startRecordBtn").disabled = false;
       $("startRecordBtn").removeAttribute("aria-disabled");
@@ -1659,23 +1431,19 @@ function updatePageState() {
       $("recordDescription").textContent =
         "Your medical record has not been completed yet.";
     }
-
     if ($("startRecordBtnText")) {
       $("startRecordBtnText").textContent = "Complete Medical Record";
     }
-
     if ($("startRecordBtn")) {
       $("startRecordBtn").disabled = false;
       $("startRecordBtn").removeAttribute("aria-disabled");
     }
   }
 }
-
 function isProfileComplete(patient) {
   if (!patient) {
     return false;
   }
-
   const requiredFields = [
     patient.firstName,
     patient.lastName,
@@ -1687,72 +1455,54 @@ function isProfileComplete(patient) {
     patient.emergencyName,
     patient.emergencyContact,
   ];
-
   return requiredFields.every((value) => String(value || "").trim() !== "");
 }
-
 function setChecklistState(elementId, complete) {
   const element = $(elementId);
-
   if (!element) {
     return;
   }
-
   element.classList.toggle("complete", Boolean(complete));
 }
-
 function getCompletedSections() {
   if (!currentPatient) {
     return 0;
   }
-
   const medical = currentPatient.medicalForm;
-
   let completed = 0;
-
   if (isProfileComplete(currentPatient)) {
     completed++;
   }
-
   if (medical && hasDentalConcern(medical)) {
     completed++;
   }
-
   if (medical && hasDentalHistory(medical)) {
     completed++;
   }
-
   if (medical && hasMedicalHistory(medical)) {
     completed++;
   }
-
   if (medical && medical.consent === true) {
     completed++;
   }
-
   return completed;
 }
-
 function hasDentalConcern(medical) {
   if (!medical) {
     return false;
   }
-
   const concerns = Array.isArray(medical.dentalConcern)
     ? medical.dentalConcern
     : [];
-
   return (
     concerns.length > 0 ||
     Boolean(String(medical.dentalConcernOther || "").trim())
   );
 }
-
 function hasDentalHistory(medical) {
   if (!medical) {
     return false;
   }
-
   return (
     Boolean(String(medical.medLastVisit || "").trim()) ||
     Boolean(String(medical.medLastTreatment || "").trim()) ||
@@ -1760,18 +1510,14 @@ function hasDentalHistory(medical) {
     Boolean(String(medical.currentMedicationsList || "").trim())
   );
 }
-
 function hasMedicalHistory(medical) {
   if (!medical) {
     return false;
   }
-
   const conditions = Array.isArray(medical.medicalHistory)
     ? medical.medicalHistory
     : [];
-
   const allergies = Array.isArray(medical.allergies) ? medical.allergies : [];
-
   return (
     conditions.length > 0 ||
     allergies.length > 0 ||
@@ -1779,58 +1525,43 @@ function hasMedicalHistory(medical) {
     Boolean(String(medical.allergyOther || "").trim())
   );
 }
-
 function getAge(dateValue) {
   if (!dateValue) {
     return "—";
   }
-
   const birthDate = new Date(`${dateValue}T00:00:00`);
-
   if (Number.isNaN(birthDate.getTime())) {
     return "—";
   }
-
   const today = new Date();
-
   let age = today.getFullYear() - birthDate.getFullYear();
-
   const monthDifference = today.getMonth() - birthDate.getMonth();
-
   if (
     monthDifference < 0 ||
     (monthDifference === 0 && today.getDate() < birthDate.getDate())
   ) {
     age--;
   }
-
   if (age < 0) {
     return "—";
   }
-
   return `${age} years old`;
 }
-
 function openMedicalModal() {
   if (!currentPatient) {
     alert("Your patient profile could not be loaded. Please log in again.");
     return;
   }
-
   currentStep =
     currentPatient?.medicalForm?.completed === true ? TOTAL_STEPS : 1;
-
   loadExistingPatientData();
   loadExistingMedicalData();
   updateOtherFieldState();
   updateModalStep();
-
   $("medicalModalBackdrop")?.classList.add("open");
   $("medicalModalBackdrop")?.setAttribute("aria-hidden", "false");
-
   document.body.style.overflow = "hidden";
 }
-
 function closeMedicalModal() {
   $("medicalModalBackdrop")?.classList.remove("open");
   $("medicalModalBackdrop")?.setAttribute("aria-hidden", "true");
@@ -1838,225 +1569,153 @@ function closeMedicalModal() {
     document.body.style.overflow = "";
   }
 }
-
 function loadExistingPatientData() {
   if (!currentPatient) {
     return;
   }
-
   $("recordPatientId").value =
     currentPatient.patientId || currentPatient.id || "";
-
   $("firstName").value = currentPatient.firstName || "";
-
   $("lastName").value = currentPatient.lastName || "";
-
   $("dateOfBirth").value = currentPatient.dateOfBirth || "";
-
   $("gender").value =
     currentPatient.gender || currentPatient.patientGender || "";
-
   $("phone").value = currentPatient.phone || "";
-
   $("email").value = currentPatient.email || currentUser?.email || "";
-
   $("address").value = currentPatient.address || "";
-
   $("emergencyName").value = currentPatient.emergencyName || "";
-
   $("emergencyContact").value = currentPatient.emergencyContact || "";
 }
-
 function loadExistingMedicalData() {
   clearMedicalFields();
-
   const medical = currentPatient?.medicalForm;
-
   if (!medical) {
     return;
   }
-
   const concerns = Array.isArray(medical.dentalConcern)
     ? medical.dentalConcern
     : [];
-
   document
     .querySelectorAll('input[name="dentalConcern"]')
     .forEach((checkbox) => {
       checkbox.checked = concerns.includes(checkbox.value);
     });
-
   $("dentalConcernOther").value = medical.dentalConcernOther || "";
-
   $("dentalConcernOtherCheck").checked = Boolean(medical.dentalConcernOther);
-
   const negativeExperience = medical.negativeExperience || "No";
-
   const negativeRadio = document.querySelector(
     `input[name="negativeExperience"][value="${escapeSelectorValue(
       negativeExperience,
     )}"]`,
   );
-
   if (negativeRadio) {
     negativeRadio.checked = true;
   }
-
   $("negativeExperienceNote").value = medical.negativeExperienceNote || "";
-
   $("lastDentalVisit").value = medical.medLastVisit || "";
-
   $("lastDentalTreatment").value = medical.medLastTreatment || "";
-
   const currentMedications = medical.currentMedications || "No";
-
   const medicationRadio = document.querySelector(
     `input[name="currentMedications"][value="${escapeSelectorValue(
       currentMedications,
     )}"]`,
   );
-
   if (medicationRadio) {
     medicationRadio.checked = true;
   }
-
   $("medicationList").value = medical.currentMedicationsList || "";
-
   const medicalHistory = Array.isArray(medical.medicalHistory)
     ? medical.medicalHistory
     : [];
-
   document
     .querySelectorAll('input[name="medicalHistory"]')
     .forEach((checkbox) => {
       checkbox.checked = medicalHistory.includes(checkbox.value);
     });
-
   $("medicalOther").value = medical.medicalOther || "";
-
   $("medicalOtherCheck").checked = Boolean(medical.medicalOther);
-
   const allergies = Array.isArray(medical.allergies) ? medical.allergies : [];
-
   document.querySelectorAll('input[name="allergies"]').forEach((checkbox) => {
     checkbox.checked = allergies.includes(checkbox.value);
   });
-
   $("allergyOther").value = medical.allergyOther || "";
-
   $("allergyOtherCheck").checked = Boolean(medical.allergyOther);
-
   $("consentCheckbox").checked = medical.consent === true;
 }
-
 function clearMedicalFields() {
   document
     .querySelectorAll('input[name="dentalConcern"]')
     .forEach((checkbox) => (checkbox.checked = false));
-
   document
     .querySelectorAll('input[name="medicalHistory"]')
     .forEach((checkbox) => (checkbox.checked = false));
-
   document
     .querySelectorAll('input[name="allergies"]')
     .forEach((checkbox) => (checkbox.checked = false));
-
   $("dentalConcernOther").value = "";
   $("dentalConcernOtherCheck").checked = false;
-
   $("negativeExperienceNote").value = "";
-
   $("lastDentalVisit").value = "";
-
   $("lastDentalTreatment").value = "";
-
   $("medicationList").value = "";
-
   $("medicalOther").value = "";
   $("medicalOtherCheck").checked = false;
-
   $("allergyOther").value = "";
   $("allergyOtherCheck").checked = false;
-
   $("consentCheckbox").checked = false;
-
   const noExperience = document.querySelector(
     'input[name="negativeExperience"][value="No"]',
   );
-
   if (noExperience) {
     noExperience.checked = true;
   }
-
   const noMedication = document.querySelector(
     'input[name="currentMedications"][value="No"]',
   );
-
   if (noMedication) {
     noMedication.checked = true;
   }
 }
-
 function nextStep() {
   if (!validateCurrentStep()) {
     return;
   }
-
   if (currentStep >= TOTAL_STEPS) {
     return;
   }
-
   currentStep++;
-
   updateModalStep();
 }
-
 function previousStep() {
   if (currentStep <= 1) {
     return;
   }
-
   currentStep--;
-
   updateModalStep();
 }
-
 function updateModalStep() {
   document.querySelectorAll(".medical-step").forEach((step) => {
     const stepNumber = Number(step.dataset.step);
-
     step.classList.toggle("active", stepNumber === currentStep);
   });
-
   const percentage = (currentStep / TOTAL_STEPS) * 100;
-
   $("medicalProgressFill").style.width = `${percentage}%`;
-
   document.querySelectorAll(".medical-progress-step").forEach((step) => {
     const stepNumber = Number(step.dataset.step);
-
     step.classList.toggle("active", stepNumber === currentStep);
-
     step.classList.toggle("completed", stepNumber < currentStep);
   });
-
   $("backMedicalBtn").hidden = currentStep === 1;
-
   $("nextMedicalBtn").hidden = currentStep === TOTAL_STEPS;
-
   $("saveMedicalBtn").hidden = currentStep !== TOTAL_STEPS;
-
   if (currentStep === TOTAL_STEPS) {
     buildReview();
   }
-
   $("medicalStepViewport").scrollTo({
     top: 0,
     behavior: "smooth",
   });
 }
-
 function validateCurrentStep() {
   if (currentStep === 1) {
     const fields = [
@@ -2070,68 +1729,48 @@ function validateCurrentStep() {
       $("emergencyName"),
       $("emergencyContact"),
     ];
-
     for (const field of fields) {
       if (!field.checkValidity()) {
         field.reportValidity();
         return false;
       }
     }
-
     if (!isValidPhilippinePhone($("phone").value)) {
       $("phone").setCustomValidity(
         "Please enter a valid Philippine mobile number in +639XXXXXXXXX format. Example: +639123456789.",
       );
-
       $("phone").reportValidity();
-
       $("phone").setCustomValidity("");
-
       return false;
     }
-
     if (!isValidPhilippinePhone($("emergencyContact").value)) {
       $("emergencyContact").setCustomValidity(
         "Please enter a valid Philippine emergency contact number in +639XXXXXXXXX format. Example: +639123456789.",
       );
-
       $("emergencyContact").reportValidity();
-
       $("emergencyContact").setCustomValidity("");
-
       return false;
     }
-
     return true;
   }
-
   if (currentStep === 2) {
     const concerns = getCheckedValues("dentalConcern");
-
     const other = $("dentalConcernOther").value.trim();
-
     if (concerns.length === 0 && !other) {
       alert("Please select at least one dental concern.");
-
       return false;
     }
-
     return true;
   }
-
   if (currentStep === 3) {
     return true;
   }
-
   if (currentStep === 4) {
     const noKnownAllergies = document.querySelector(
       'input[name="allergies"][value="No Known Allergies"]',
     );
-
     const otherAllergy = $("allergyOther").value.trim();
-
     const allergyValues = getCheckedValues("allergies");
-
     if (
       noKnownAllergies?.checked &&
       (allergyValues.length > 1 || otherAllergy)
@@ -2139,83 +1778,51 @@ function validateCurrentStep() {
       alert(
         "No Known Allergies cannot be selected together with another allergy.",
       );
-
       return false;
     }
-
     return true;
   }
-
   if (currentStep === 5) {
     if (!$("consentCheckbox").checked) {
       alert("Please confirm the consent before saving your medical record.");
-
       $("consentCheckbox").focus();
-
       return false;
     }
-
     return true;
   }
-
   return true;
 }
-
 async function saveMedicalRecord(event) {
   event.preventDefault();
-
   if (!currentPatient) {
     alert("Patient record could not be found. Please log in again.");
     return;
   }
-
   if (!validateCurrentStep()) {
     return;
   }
-
   const dentalConcern = getCheckedValues("dentalConcern");
-
   const medicalHistory = getCheckedValues("medicalHistory");
-
   const allergies = getCheckedValues("allergies");
-
   const dentalConcernOther = $("dentalConcernOther").value.trim();
-
   const medicalOther = $("medicalOther").value.trim();
-
   const allergyOther = $("allergyOther").value.trim();
-
   const cleanedAllergies = normalizeAllergies(allergies, allergyOther);
-
   const negativeExperience = getRadioValue("negativeExperience") || "No";
-
   const currentMedications = getRadioValue("currentMedications") || "No";
-
   const now = new Date().toISOString();
-
   currentPatient.firstName = $("firstName").value.trim();
-
   currentPatient.lastName = $("lastName").value.trim();
-
   currentPatient.fullName =
     `${currentPatient.firstName} ${currentPatient.lastName}`.trim();
-
   currentPatient.dateOfBirth = $("dateOfBirth").value;
-
   currentPatient.gender = $("gender").value;
-
   currentPatient.patientGender = $("gender").value;
-
   currentPatient.phone = $("phone").value.trim();
-
   currentPatient.email = $("email").value.trim();
-
   currentPatient.address = $("address").value.trim();
-
   currentPatient.emergencyName = $("emergencyName").value.trim();
-
   currentPatient.emergencyContact = $("emergencyContact").value.trim();
-
   currentPatient.medicalForm = {
     dentalConcern,
     dentalConcernOther,
@@ -2235,23 +1842,17 @@ async function saveMedicalRecord(event) {
     createdAt: currentPatient.medicalForm?.createdAt || now,
     updatedAt: now,
   };
-
   currentPatient.updatedAt = now;
-
   const patients = getPatients();
-
   const currentId = String(
     currentPatient.patientId || currentPatient.id || "",
   ).trim();
-
   const index = patients.findIndex(
     (patient) =>
       String(patient.patientId || patient.id || "").trim() === currentId,
   );
-
   if (index !== -1) {
     const existingPatient = patients[index];
-
     patients[index] = {
       ...existingPatient,
       ...currentPatient,
@@ -2272,14 +1873,11 @@ async function saveMedicalRecord(event) {
       medicalForm: currentPatient.medicalForm,
       updatedAt: now,
     };
-
     currentPatient = normalizePatient(patients[index]);
-
     patients[index] = currentPatient;
   } else {
     patients.push(currentPatient);
   }
-
   savePatients(patients);
   const saved = await savePatientRecordToDatabase();
   if (!saved) {
@@ -2288,7 +1886,6 @@ async function saveMedicalRecord(event) {
     );
     return;
   }
-
   if (currentUser) {
     currentUser.patientId = currentPatient.patientId || currentPatient.id;
     currentUser.firstName = currentPatient.firstName;
@@ -2302,7 +1899,6 @@ async function saveMedicalRecord(event) {
     currentUser.emergencyName = currentPatient.emergencyName;
     currentUser.emergencyContact = currentPatient.emergencyContact;
   }
-
   closeMedicalModal();
   populatePatientProfile();
   updatePageState();
@@ -2312,58 +1908,45 @@ async function saveMedicalRecord(event) {
     block: "start",
   });
 }
-
 function getCheckedValues(fieldName) {
   return Array.from(
     document.querySelectorAll(`input[name="${fieldName}"]:checked`),
   ).map((input) => input.value);
 }
-
 function getRadioValue(fieldName) {
   const selected = document.querySelector(`input[name="${fieldName}"]:checked`);
-
   return selected ? selected.value : "";
 }
-
 function normalizeAllergies(allergies, otherAllergy) {
   let values = [...allergies];
-
   if (
     values.includes("No Known Allergies") &&
     (values.length > 1 || otherAllergy)
   ) {
     values = values.filter((value) => value !== "No Known Allergies");
   }
-
   return values;
 }
-
 function handleAllergySelection(event) {
   const selected = event.target;
-
   if (selected.value === "No Known Allergies" && selected.checked) {
     document.querySelectorAll('input[name="allergies"]').forEach((checkbox) => {
       if (checkbox !== selected) {
         checkbox.checked = false;
       }
     });
-
     $("allergyOther").value = "";
-
     $("allergyOtherCheck").checked = false;
-
     updateOtherFieldState();
   } else if (selected.checked) {
     const noKnown = document.querySelector(
       'input[name="allergies"][value="No Known Allergies"]',
     );
-
     if (noKnown) {
       noKnown.checked = false;
     }
   }
 }
-
 function updateOtherFieldState() {
   const otherFields = [
     {
@@ -2379,74 +1962,81 @@ function updateOtherFieldState() {
       input: $("allergyOther"),
     },
   ];
-
   otherFields.forEach(({ check, input }) => {
     if (!check || !input) {
       return;
     }
-
     input.disabled = !check.checked;
-
     if (!check.checked) {
       input.value = "";
     }
   });
 }
-
-function sanitizePhone(event) {
-  let value = event.target.value.replace(/[^\d+]/g, "");
-  value = value.replace(/(?!^)\+/g, "");
-  event.target.value = value.slice(0, 13);
+const PHONE_FORMAT_MESSAGE =
+  "Please use the format +639XXXXXXXXX (example: +639123456789).";
+function formatPhoneInput(raw) {
+  let digits = String(raw || "").replace(/\D/g, "");
+  if (digits.startsWith("63")) {
+    digits = digits.slice(2);
+  } else if (digits.startsWith("0")) {
+    digits = digits.slice(1);
+  }
+  return "+63" + digits.slice(0, 10);
 }
-
+function bindPhoneField(id) {
+  const input = $(id);
+  if (!input) return;
+  input.addEventListener("focus", () => {
+    if (!input.value.trim()) {
+      input.value = "+63";
+    }
+  });
+  input.addEventListener("input", () => {
+    input.value = formatPhoneInput(input.value);
+    input.setCustomValidity("");
+  });
+  input.addEventListener("blur", () => {
+    if (input.value === "+63") {
+      input.value = "";
+    }
+  });
+  input.addEventListener("invalid", () => {
+    input.setCustomValidity(
+      isValidPhilippinePhone(input.value) ? "" : PHONE_FORMAT_MESSAGE,
+    );
+  });
+}
 function isValidPhilippinePhone(value) {
   return /^\+639\d{9}$/.test(String(value || "").trim());
 }
-
 function buildReview() {
   const container = $("medicalReview");
-
   if (!container) {
     return;
   }
-
   const concerns = getCheckedValues("dentalConcern");
-
   const dentalConcernOther = $("dentalConcernOther").value.trim();
-
   const medicalHistory = getCheckedValues("medicalHistory");
-
   const medicalOther = $("medicalOther").value.trim();
-
   const allergies = normalizeAllergies(
     getCheckedValues("allergies"),
     $("allergyOther").value.trim(),
   );
-
   const allergyOther = $("allergyOther").value.trim();
-
   const negativeExperience = getRadioValue("negativeExperience") || "No";
-
   const currentMedications = getRadioValue("currentMedications") || "No";
-
   const concernValues = [...concerns];
-
   if (dentalConcernOther) {
     concernValues.push(dentalConcernOther);
   }
-
   const medicalValues = [...medicalHistory];
-
   if (medicalOther) {
     medicalValues.push(medicalOther);
   }
-
   const allergyValues = [...allergies];
-
   if (allergyOther && !allergyValues.includes(allergyOther)) {
     allergyValues.push(allergyOther);
   }
-
   container.innerHTML = `
       <div class="review-card">
         <h4>Dental Concern</h4>
@@ -2483,10 +2073,8 @@ function buildReview() {
       </div>
     `;
 }
-
 function reviewRow(label, value) {
   const cleanValue = String(value || "").trim();
-
   return `
       <div class="review-row">
         <span class="review-label">
@@ -2498,20 +2086,14 @@ function reviewRow(label, value) {
       </div>
     `;
 }
-
 function openSuccessModal() {
   $("successModalBackdrop")?.classList.add("open");
-
   $("successModalBackdrop")?.setAttribute("aria-hidden", "false");
-
   document.body.style.overflow = "hidden";
 }
-
 function closeSuccessModal() {
   $("successModalBackdrop")?.classList.remove("open");
-
   $("successModalBackdrop")?.setAttribute("aria-hidden", "true");
-
   if (
     !$("medicalModalBackdrop")?.classList.contains("open") &&
     !$("patientInformationModalBackdrop")?.classList.contains("open")
@@ -2519,25 +2101,20 @@ function closeSuccessModal() {
     document.body.style.overflow = "";
   }
 }
-
 function formatDate(dateValue) {
   if (!dateValue) {
     return "Not provided";
   }
-
   const date = new Date(`${dateValue}T00:00:00`);
-
   if (Number.isNaN(date.getTime())) {
     return "Not provided";
   }
-
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
-
 function escapeHTML(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -2546,28 +2123,22 @@ function escapeHTML(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-
 function escapeSelectorValue(value) {
   return String(value || "").replace(/"/g, '\\"');
 }
-
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     currentUser = getCurrentUser();
-
     loadOrCreatePatientRecord();
     populatePatientProfile();
     updatePageState();
   }
 });
-
 setInterval(() => {
   if (document.visibilityState !== "visible") {
     return;
   }
-
   currentUser = getCurrentUser();
-
   loadOrCreatePatientRecord();
   populatePatientProfile();
   updatePageState();

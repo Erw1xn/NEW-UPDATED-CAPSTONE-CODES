@@ -2876,3 +2876,252 @@ textarea:focus-visible {
     white-space: nowrap;
   }
 }
+@media (max-width: 800px) {
+  /* "i" icon: nasa kanan ng avatar/pangalan, walang hiwalay na row */
+  .record-profile-top {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .profile-info-actions {
+    width: auto;
+    margin-left: auto;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+
+  /* Record Status: isang column, laging pantay ang check sa kanan */
+  .record-checklist {
+    grid-template-columns: 1fr;
+  }
+  .record-check-item,
+  .record-check-item:nth-child(odd),
+  .record-check-item:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    margin: 0;
+    border-left: 0;
+    border-top: 1px solid #edf1ee;
+  }
+  .record-check-item:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .record-check-item:last-child {
+    padding-bottom: 0;
+  }
+  .record-check-item strong {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+  }
+  .check-complete,
+  .record-check-item:first-child .check-complete {
+    position: static;
+    flex: 0 0 auto;
+    font-size: 10px;
+  }
+}
+.patient-dental-history-list,
+.staff-treatment-list {
+  padding: 18px 22px 22px;
+  display: grid;
+  gap: 14px;
+  background: #fbfdfc;
+}
+.patient-dental-history-card,
+.patient-treatment-readonly {
+  grid-template-columns: 150px minmax(0, 1fr);
+  min-height: 0;
+  border: 1px solid #dfe9e2;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 57, 36, 0.03);
+  overflow: hidden;
+}
+.patient-dental-history-tooth,
+.patient-treatment-date {
+  padding: 18px 20px;
+  background: #f8fbf9;
+  border-right: 1px solid #e7ece9;
+}
+.patient-dental-history-tooth {
+  align-items: center;
+  gap: 12px;
+}
+.patient-treatment-date {
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+}
+.patient-treatment-date strong {
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+.patient-treatment-date span {
+  margin: 0;
+  padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  background: #eaf7ef;
+  font-size: 7.5px;
+  line-height: 1.2;
+}
+.patient-treatment-date span i {
+  margin: 0;
+}
+.patient-dental-history-content,
+.patient-treatment-main {
+  padding: 18px 22px;
+}
+.patient-dental-history-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+.patient-dental-history-entry {
+  align-items: flex-start;
+  gap: 12px;
+}
+.patient-dental-history-entry-dot {
+  margin-top: 7px;
+}
+.patient-dental-history-entry-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  row-gap: 6px;
+  align-items: center;
+}
+.patient-dental-history-entry-title {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+.patient-dental-latest {
+  margin: 0;
+}
+.patient-dental-history-entry-date {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 22px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+.patient-dental-history-entry-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #6b7a71;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.patient-treatment-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 14px 32px;
+}
+.patient-treatment-title-row,
+.patient-treatment-note,
+.patient-treatment-materials {
+  flex: 1 1 100%;
+  margin: 0;
+}
+.patient-treatment-title-row h4 {
+  font-size: 11.5px;
+}
+.patient-treatment-title-row .patient-record-view-only-mini {
+  display: none;
+}
+.patient-treatment-detail {
+  flex: 0 1 auto;
+  min-width: 110px;
+  margin: 0;
+}
+.patient-treatment-detail span,
+.patient-treatment-note > span {
+  margin-bottom: 5px;
+  display: block;
+}
+.patient-treatment-note {
+  padding-top: 14px;
+  border-top: 1px dashed #dfe9e2;
+}
+.patient-treatment-note p {
+  font-size: 9px;
+  line-height: 1.55;
+}
+.patient-treatment-materials {
+  padding: 11px 14px;
+}
+@media (max-width: 600px) {
+  .patient-dental-history-card,
+  .patient-treatment-readonly {
+    grid-template-columns: 1fr;
+  }
+  .patient-dental-history-tooth,
+  .patient-treatment-date {
+    padding: 13px 16px;
+    border-right: 0;
+    border-bottom: 1px solid #e7ece9;
+  }
+  .patient-treatment-date {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .patient-dental-history-content,
+  .patient-treatment-main {
+    padding: 15px 16px;
+  }
+  .patient-dental-history-entry-content {
+    grid-template-columns: 1fr;
+  }
+  .patient-dental-history-entry-date {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .patient-dental-history-entry-note {
+    grid-row: 3;
+  }
+}
+.patient-treatment-main {
+  gap: 12px 40px;
+  align-items: flex-start;
+}
+.patient-treatment-note {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding-top: 0;
+  padding-left: 40px;
+  border-top: 0;
+  border-left: 1px dashed #dfe9e2;
+}
+.patient-treatment-detail + .patient-treatment-note,
+.patient-treatment-detail ~ .patient-treatment-note {
+  align-self: stretch;
+}
+.patient-treatment-materials {
+  margin-top: 0;
+}
+@media (max-width: 600px) {
+  .patient-treatment-note {
+    flex: 1 1 100%;
+    padding-left: 0;
+    padding-top: 12px;
+    border-left: 0;
+    border-top: 1px dashed #dfe9e2;
+  }
+}

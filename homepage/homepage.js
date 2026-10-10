@@ -52,6 +52,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalCloseBtn = document.getElementById("modalCloseBtn");
   const loginIframe = document.getElementById("loginIframe");
   let lastFocusedElement = null;
+  const resetToken = new URLSearchParams(window.location.search).get(
+    "reset_token",
+  );
+  if (
+    resetToken &&
+    /^[a-f0-9]{64}$/i.test(resetToken) &&
+    loginModalOverlay &&
+    loginIframe
+  ) {
+    loginIframe.src =
+      "../login/reset-password.html?token=" + encodeURIComponent(resetToken);
+    loginIframe.title = "DentaNueva Reset Password";
+    loginModalOverlay.classList.add("active");
+    loginModalOverlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    history.replaceState(
+      {},
+      document.title,
+      window.location.pathname + window.location.hash,
+    );
+  }
 
   function openLoginModal(event) {
     event.preventDefault();
@@ -108,15 +129,21 @@ document.addEventListener("DOMContentLoaded", () => {
   loginIframe?.addEventListener("load", () => {
     const frameDocument = loginIframe.contentDocument;
     if (!frameDocument) return;
-    const isSignupPage = loginIframe.contentWindow.location.pathname.endsWith(
-      "/signup/signup.html",
-    );
-    loginIframe.title = isSignupPage
-      ? "DentaNueva Sign Up"
-      : "DentaNueva Login";
+    const framePath = loginIframe.contentWindow.location.pathname;
+    const isSignupPage = framePath.endsWith("/signup/signup.html");
+    const isResetPage = framePath.endsWith("/login/reset-password.html");
+    loginIframe.title = isResetPage
+      ? "DentaNueva Reset Password"
+      : isSignupPage
+        ? "DentaNueva Sign Up"
+        : "DentaNueva Login";
     modalCloseBtn?.setAttribute(
       "aria-label",
-      isSignupPage ? "Close sign up dialog" : "Close login dialog",
+      isResetPage
+        ? "Close reset password dialog"
+        : isSignupPage
+          ? "Close sign up dialog"
+          : "Close login dialog",
     );
     frameDocument.addEventListener("click", handleAuthFrameNavigation);
   });

@@ -5892,3 +5892,14 @@ textarea:focus-visible {
   justify-content: center;
   transform: translateY(2px);
 }
+.staff-dental-procedure-title {
+  gap: 10px;
+}
+.staff-dental-procedure-tooth {
+  flex: 0 0 auto;
+  min-width: 58px;
+  color: var(--green);
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 800;
+}

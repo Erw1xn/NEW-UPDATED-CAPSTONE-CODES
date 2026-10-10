@@ -2729,3 +2729,11 @@ textarea:focus-visible {
   color: #b82e2e;
   transform: translateY(-1px);
 }
+@media (max-width: 760px) {
+  .appointment-info-popover {
+    left: 0;
+    right: auto;
+    width: min(300px, calc(100vw - 56px));
+    max-width: none;
+  }
+}
