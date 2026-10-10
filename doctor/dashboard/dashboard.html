@@ -44,7 +44,7 @@
         <section class="stats-grid">
           <div
             class="stat-card"
-            title="Shows the total number of patients currently registered in the dental clinic system."
+            title="Shows the total number of patients currently registered under this doctor."
           >
             <div class="stat-icon green-icon">
               <i class="fa-solid fa-users"></i>
@@ -113,40 +113,59 @@
         <section class="charts-grid">
           <div
             class="dashboard-card chart-card"
-            title="Compares the clinic's actual production with the daily production goal for each day of the current week."
+            title="Compares the actual collection with the ₱25,000 weekly goal for each week of the selected month."
           >
             <div class="card-header">
               <div>
-                <h2>Weekly Production vs Goal</h2>
+                <h2>Weekly Service vs Goal</h2>
+                <p>
+                  Your weekly collection compared with the ₱25,000 weekly goal
+                </p>
+              </div>
+              <div class="week-nav">
+                <button
+                  type="button"
+                  class="week-nav-btn"
+                  id="weekPrevBtn"
+                  title="Show the previous month"
+                >
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <span class="week-nav-label" id="weekMonthLabel"></span>
+                <button
+                  type="button"
+                  class="week-nav-btn"
+                  id="weekNextBtn"
+                  title="Show the next month"
+                >
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
               </div>
             </div>
             <div class="bar-chart">
               <div class="chart-y-axis">
-                <span>5,000</span>
-                <span>3,000</span>
-                <span>1,000</span>
-                <span>500</span>
+                <span>25,000</span>
+                <span>18,750</span>
+                <span>12,500</span>
+                <span>6,250</span>
                 <span>0</span>
               </div>
               <div class="chart-area">
                 <div class="bars-container" id="weeklyBars"></div>
                 <div class="chart-days">
-                  <span>Mon</span>
-                  <span>Tues</span>
-                  <span>Wed</span>
-                  <span>Thur</span>
-                  <span>Fri</span>
-                  <span>Sat</span>
-                  <span>Sun</span>
+                  <span>Week 1</span>
+                  <span>Week 2</span>
+                  <span>Week 3</span>
+                  <span>Week 4</span>
                 </div>
               </div>
             </div>
             <div class="chart-legend">
-              <span title="Actual production or revenue recorded for the day.">
+              <span title="Actual production or revenue recorded for the week.">
                 <i class="legend-production"></i>
-                Production
+                Service
               </span>
-              <span title="Target production or revenue goal for the day.">
+              <span title="Target production or revenue goal for the week.">
                 <i class="legend-goal"></i>
                 Goal
               </span>
@@ -154,40 +173,23 @@
           </div>
           <div
             class="dashboard-card procedure-card"
-            title="Shows how the clinic's collected revenue is distributed across different dental procedure types."
+            title="Shows how your collected revenue is distributed across the dental services of your patients."
           >
             <div class="card-header">
-              <h2>Revenue by Service</h2>
+              <div>
+                <h2>Revenue by Service</h2>
+                <p>
+                  Share of your collected revenue per service. Click a slice to
+                  see its amount
+                </p>
+              </div>
             </div>
             <div class="procedure-chart-wrapper">
               <div class="donut-chart" id="procedureDonut">
                 <div class="donut-center" id="procedureTotal">₱0</div>
               </div>
-              <div
-                class="procedure-label filling"
-                id="fillingLabel"
-                title="Shows the percentage of total procedure revenue coming from dental fillings."
-              ></div>
-              <div
-                class="procedure-label cleaning"
-                id="cleaningLabel"
-                title="Shows the percentage of total procedure revenue coming from dental cleaning services."
-              ></div>
-              <div
-                class="procedure-label evaluation"
-                id="evaluationLabel"
-                title="Shows the percentage of total procedure revenue coming from consultation or evaluation services."
-              ></div>
-              <div
-                class="procedure-label extraction"
-                id="extractionLabel"
-                title="Shows the percentage of total procedure revenue coming from tooth extraction services."
-              ></div>
-              <div
-                class="procedure-label emergency"
-                id="emergencyLabel"
-                title="Shows the percentage of total procedure revenue coming from emergency dental services."
-              ></div>
+              <div class="procedure-legend" id="procedureLegend"></div>
+              <div class="procedure-detail" id="procedureDetail"></div>
             </div>
           </div>
         </section>

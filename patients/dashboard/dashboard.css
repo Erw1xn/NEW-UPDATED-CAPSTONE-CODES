@@ -344,6 +344,7 @@ a:focus-visible {
   top: calc(100% + 9px);
   right: 0;
   width: 285px;
+  max-width: calc(100vw - 48px);
   padding: 13px 14px;
   background: var(--white);
   border: 1px solid #dce7df;
@@ -719,6 +720,22 @@ a:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+@media (max-width: 768px) {
+  .main-content {
+    padding: 14px 14px 24px;
+  }
+  .dash-header {
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 12px;
+    gap: 12px;
+  }
+  .page-heading {
+    min-height: 40px;
+    padding-left: 52px;
+    justify-content: center;
+  }
+}
 @media (max-width: 700px) {
   .stats-grid {
     grid-template-columns: 1fr;
@@ -736,11 +753,6 @@ a:focus-visible {
     width: 100%;
     max-width: 700px;
     margin: 0 auto;
-    padding: 14px 14px 24px;
-  }
-  .dash-header {
-    margin-bottom: 10px;
-    padding: 12px 0;
   }
   .dashboard-title {
     font-size: 1.02rem;
@@ -759,6 +771,7 @@ a:focus-visible {
   }
   .datetime-pill-widget {
     width: 100%;
+    min-height: 40px;
     justify-content: center;
   }
   .header-quick-actions {
@@ -805,9 +818,6 @@ a:focus-visible {
   }
 }
 @media (max-width: 480px) {
-  .main-content {
-    padding: 11px 10px 21px;
-  }
   .dashboard-title {
     font-size: 0.96rem;
   }
@@ -849,6 +859,9 @@ a:focus-visible {
   }
   .panel-subtitle {
     font-size: 10px;
+  }
+  .appointment-info-popover {
+    width: min(285px, calc(100vw - 48px));
   }
   .appt-item {
     padding: 10px;
@@ -898,12 +911,10 @@ a:focus-visible {
     font-size: 18px;
   }
 }
-/* ===== Today's Appointments panel ===== */
 .appointments-panel {
   display: flex;
   flex-direction: column;
 }
-
 .appointments-panel-body {
   flex: 1;
   display: flex;
@@ -913,23 +924,17 @@ a:focus-visible {
   padding: 16px 18px;
   overflow-y: auto;
 }
-
-/* Empty state: eksaktong gitna ng box */
 .appointments-panel-body .empty-state {
   flex: 1;
   justify-content: center;
   align-items: center;
 }
-
-/* I-center ang mga card sa loob ng box kapag kaunti lang */
 .appointments-panel-body > .appt-item:first-child {
   margin-top: 50px;
 }
 .appointments-panel-body > .appt-item:last-child {
   margin-bottom: auto;
 }
-
-/* ---------- Appointment card ---------- */
 .appointments-panel-body .appt-item {
   flex-shrink: 0;
   gap: 16px;
@@ -939,18 +944,15 @@ a:focus-visible {
   border-radius: var(--radius-lg);
   box-shadow: none;
 }
-
 .appointments-panel-body .appt-item + .appt-item {
   margin-top: 10px;
 }
-
 .appointments-panel-body .appt-item:hover {
   background: var(--green-100);
   border-color: #c6e2cf;
   transform: translateY(-1px);
   box-shadow: var(--shadow-card);
 }
-
 .appointments-panel-body .appt-avatar {
   width: 56px;
   height: 56px;
@@ -958,40 +960,37 @@ a:focus-visible {
   background: var(--white);
   border: 2px solid #cfe6d6;
 }
-
 .appointments-panel-body .appt-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
 .appointments-panel-body .appt-name {
   font-size: 15px;
 }
-
 .appointments-panel-body .appt-meta {
   margin-top: 5px;
   font-size: 12px;
 }
-
 .appointments-panel-body .appt-service {
   margin-top: 3px;
   font-size: 11.5px;
   color: #26332d;
 }
-
 .appointments-panel-body .badge {
   align-self: center;
   min-height: 28px;
   padding: 6px 14px;
   font-size: 10.5px;
 }
-
-/* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .appointments-panel-body {
+    min-height: 140px;
     max-height: 320px;
     padding: 12px 14px;
+  }
+  .appointments-panel-body > .appt-item:first-child {
+    margin-top: 0;
   }
   .appointments-panel-body .appt-item {
     padding: 14px 15px;
@@ -1012,7 +1011,6 @@ a:focus-visible {
     font-size: 10.5px;
   }
 }
-
 @media (max-width: 480px) {
   .appointments-panel-body .appt-name {
     font-size: 12.5px;

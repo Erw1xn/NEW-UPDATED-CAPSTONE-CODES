@@ -3,6 +3,19 @@ const PATIENT_RECORDS_API = "../../api/patient_records.php";
 const FINANCE_API = "../../api/finance/transactions.php";
 const CURRENT_USER_API = "../profile/profile.php";
 const DAILY_GOAL = 5000;
+const WEEKLY_GOAL = 25000;
+const SERVICE_COLORS = [
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#06b6d4",
+  "#ec4899",
+  "#84cc16",
+  "#f97316",
+  "#14b8a6",
+];
 const STATUS = {
   SCHEDULED: "scheduled",
   IN_CONSULTATION: "in_consultation",
@@ -15,9 +28,20 @@ let patients = [];
 let transactions = [];
 let serviceTransactions = [];
 let currentUser = null;
+let doctorAppointmentIds = new Set();
+let doctorPatientIds = new Set();
+let weekView = {
+  year: new Date().getFullYear(),
+  month: new Date().getMonth(),
+};
+let selectedService = null;
+let procedureSlices = [];
+let lastWeeklySignature = "";
+let lastProcedureSignature = "";
 document.addEventListener("DOMContentLoaded", () => {
   updateDateTime();
   setInterval(updateDateTime, 1000);
+  bindDashboardControls();
   void refreshDashboardData();
   setInterval(() => void refreshDashboardData(), 2000);
 });
@@ -40,6 +64,147 @@ function updateDateTime() {
     });
   }
 }
+function bindDashboardControls() {
+  const prevButton = document.getElementById("weekPrevBtn");
+  const nextButton = document.getElementById("weekNextBtn");
+  const donut = document.getElementById("procedureDonut");
+  const legend = document.getElementById("procedureLegend");
+  const detail = document.getElementById("procedureDetail");
+  if (prevButton) {
+    prevButton.addEventListener("click", () => {
+      const date = new Date(weekView.year, weekView.month - 1, 1);
+      weekView = { year: date.getFullYear(), month: date.getMonth() };
+      renderWeeklyChart(loadFinanceTransactions());
+    });
+  }
+  if (nextButton) {
+    nextButton.addEventListener("click", () => {
+      const now = new Date();
+      const date = new Date(weekView.year, weekView.month + 1, 1);
+      if (
+        date.getFullYear() > now.getFullYear() ||
+        (date.getFullYear() === now.getFullYear() &&
+          date.getMonth() > now.getMonth())
+      ) {
+        return;
+      }
+      weekView = { year: date.getFullYear(), month: date.getMonth() };
+      renderWeeklyChart(loadFinanceTransactions());
+    });
+  }
+  if (donut) {
+    donut.addEventListener("click", (event) => {
+      const slice = getDonutSliceFromEvent(event);
+      if (!slice) {
+        return;
+      }
+      toggleSelectedService(slice.name);
+    });
+    donut.addEventListener("mousemove", (event) => {
+      const slice = getDonutSliceFromEvent(event);
+      if (!slice) {
+        donut.style.cursor = "default";
+        hideChartTooltip();
+        return;
+      }
+      donut.style.cursor = "pointer";
+      showChartTooltip(
+        event,
+        `<strong>${escapeHtml(slice.name)}</strong>
+<div class="tooltip-row"><span>Amount</span><span>${formatPeso(slice.amount)}</span></div>
+<div class="tooltip-row"><span>Share</span><span>${formatPercent(slice.percent)}%</span></div>
+<div class="tooltip-row"><span>Transactions</span><span>${slice.count}</span></div>`,
+      );
+    });
+    donut.addEventListener("mouseleave", hideChartTooltip);
+  }
+  if (legend) {
+    legend.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-service]");
+      if (!button) {
+        return;
+      }
+      toggleSelectedService(button.getAttribute("data-service"));
+    });
+  }
+  if (detail) {
+    detail.addEventListener("click", (event) => {
+      if (event.target.closest("[data-reset]")) {
+        selectedService = null;
+        renderProcedureChart(loadDashboardSampleTransactions());
+      }
+    });
+  }
+}
+function toggleSelectedService(name) {
+  selectedService = selectedService === name ? null : name;
+  renderProcedureChart(loadDashboardSampleTransactions());
+}
+function getChartTooltip() {
+  let tooltip = document.getElementById("chartTooltip");
+  if (!tooltip) {
+    tooltip = document.createElement("div");
+    tooltip.id = "chartTooltip";
+    tooltip.className = "chart-tooltip";
+    document.body.appendChild(tooltip);
+  }
+  return tooltip;
+}
+function showChartTooltip(event, html) {
+  const tooltip = getChartTooltip();
+  tooltip.innerHTML = html;
+  tooltip.classList.add("visible");
+  moveChartTooltip(event);
+}
+function moveChartTooltip(event) {
+  const tooltip = getChartTooltip();
+  const offset = 14;
+  let left = event.clientX + offset;
+  let top = event.clientY + offset;
+  const width = tooltip.offsetWidth;
+  const height = tooltip.offsetHeight;
+  if (left + width > window.innerWidth - 8) {
+    left = event.clientX - width - offset;
+  }
+  if (top + height > window.innerHeight - 8) {
+    top = event.clientY - height - offset;
+  }
+  tooltip.style.left = `${Math.max(left, 8)}px`;
+  tooltip.style.top = `${Math.max(top, 8)}px`;
+}
+function hideChartTooltip() {
+  const tooltip = document.getElementById("chartTooltip");
+  if (tooltip) {
+    tooltip.classList.remove("visible");
+  }
+}
+function getDonutSliceFromEvent(event) {
+  const donut = document.getElementById("procedureDonut");
+  if (!donut || procedureSlices.length === 0) {
+    return null;
+  }
+  const rect = donut.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const dx = event.clientX - centerX;
+  const dy = event.clientY - centerY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const outerRadius = rect.width / 2;
+  const innerRadius = outerRadius * 0.52;
+  if (distance > outerRadius || distance < innerRadius) {
+    return null;
+  }
+  let angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
+  if (angle < 0) {
+    angle += 360;
+  }
+  const percent = (angle / 360) * 100;
+  return (
+    procedureSlices.find(
+      (slice) => percent >= slice.start && percent < slice.end,
+    ) || procedureSlices[procedureSlices.length - 1]
+  );
+}
 function loadAppointments() {
   return appointments;
 }
@@ -51,6 +216,12 @@ function loadFinanceTransactions() {
 }
 function loadDashboardSampleTransactions() {
   return serviceTransactions;
+}
+function normalizeId(value) {
+  if (value === undefined || value === null) {
+    return "";
+  }
+  return String(value).trim().toLowerCase();
 }
 async function refreshDashboardData() {
   try {
@@ -102,6 +273,27 @@ async function refreshDashboardData() {
     appointments = allAppointments.filter((appointment) =>
       appointmentBelongsToCurrentDoctor(appointment),
     );
+    doctorAppointmentIds = new Set();
+    doctorPatientIds = new Set();
+    appointments.forEach((appointment) => {
+      [
+        appointment.appointment_id,
+        appointment.databaseAppointmentId,
+        appointment.appointmentId,
+        appointment.appointment_uid,
+      ].forEach((value) => {
+        const id = normalizeId(value);
+        if (id !== "") {
+          doctorAppointmentIds.add(id);
+        }
+      });
+      const patientId = normalizeId(
+        appointment.patient_id ?? appointment.patientId,
+      );
+      if (patientId !== "") {
+        doctorPatientIds.add(patientId);
+      }
+    });
     patients = Array.isArray(patientResult.data) ? patientResult.data : [];
     if (
       financeResponse.ok &&
@@ -109,8 +301,11 @@ async function refreshDashboardData() {
       financeResult.success &&
       Array.isArray(financeResult.data)
     ) {
-      transactions = flattenFinancePayments(financeResult.data);
-      serviceTransactions = financeResult.data.map((transaction) => ({
+      const doctorFinanceData = financeResult.data.filter((transaction) =>
+        transactionBelongsToCurrentDoctor(transaction),
+      );
+      transactions = flattenFinancePayments(doctorFinanceData);
+      serviceTransactions = doctorFinanceData.map((transaction) => ({
         service:
           String(transaction.service_name || "").trim() || "Consultation",
         paid: Math.max(Number(transaction.paid_amount) || 0, 0),
@@ -180,6 +375,27 @@ function appointmentBelongsToCurrentDoctor(appointment) {
     }
   }
   return false;
+}
+function patientBelongsToCurrentDoctor(patient) {
+  if (!currentUser || !patient) {
+    return false;
+  }
+  if (appointmentBelongsToCurrentDoctor(patient)) {
+    return true;
+  }
+  const patientId = normalizeId(
+    patient.patient_id ?? patient.patientId ?? patient.id,
+  );
+  return patientId !== "" && doctorPatientIds.has(patientId);
+}
+function transactionBelongsToCurrentDoctor(transaction) {
+  if (!currentUser || !transaction) {
+    return false;
+  }
+  const patientId = normalizeId(
+    transaction.patient_id ?? transaction.patientId,
+  );
+  return patientId !== "" && doctorPatientIds.has(patientId);
 }
 function flattenFinancePayments(financeData) {
   const result = [];
@@ -558,65 +774,124 @@ function formatPeso(value) {
     })
   );
 }
+function formatPercent(value) {
+  const number = Number(value) || 0;
+  return number >= 1 || number === 0
+    ? String(Math.round(number))
+    : number.toFixed(1);
+}
 function renderWeeklyChart(transactions) {
   const container = document.getElementById("weeklyBars");
   if (!container) {
     return;
   }
-  container.innerHTML = "";
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(today);
-  monday.setHours(0, 0, 0, 0);
-  monday.setDate(today.getDate() + mondayOffset);
-  const production = [];
-  const dayNames = ["Mon", "Tues", "Wed", "Thur", "Fri", "Sat", "Sun"];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + i);
-    const key = formatDateKey(date);
-    const total = transactions
-      .filter((transaction) => getTransactionDate(transaction) === key)
-      .reduce((sum, transaction) => sum + getTransactionAmount(transaction), 0);
-    production.push(total);
+  const year = weekView.year;
+  const month = weekView.month;
+  const now = new Date();
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth();
+  setText(
+    "weekMonthLabel",
+    new Date(year, month, 1).toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    }),
+  );
+  const nextButton = document.getElementById("weekNextBtn");
+  if (nextButton) {
+    nextButton.disabled = isCurrentMonth;
   }
-  const goal = [
-    DAILY_GOAL,
-    DAILY_GOAL,
-    DAILY_GOAL,
-    DAILY_GOAL,
-    DAILY_GOAL,
-    DAILY_GOAL,
-    DAILY_GOAL,
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const ranges = [
+    [1, 7],
+    [8, 14],
+    [15, 21],
+    [22, daysInMonth],
   ];
-  const max = Math.max(DAILY_GOAL, ...production);
+  const weeks = ranges.map(([startDay, endDay], index) => ({
+    label: `Week ${index + 1}`,
+    startDay,
+    endDay,
+    total: 0,
+    count: 0,
+  }));
+  transactions.forEach((transaction) => {
+    const parts = getTransactionDate(transaction).split("-");
+    if (parts.length < 3) {
+      return;
+    }
+    const transactionYear = Number(parts[0]);
+    const transactionMonth = Number(parts[1]) - 1;
+    const transactionDay = Number(parts[2]);
+    if (transactionYear !== year || transactionMonth !== month) {
+      return;
+    }
+    const week = weeks.find(
+      (item) =>
+        transactionDay >= item.startDay && transactionDay <= item.endDay,
+    );
+    if (!week) {
+      return;
+    }
+    week.total += getTransactionAmount(transaction);
+    week.count += 1;
+  });
+  const signature = JSON.stringify([
+    year,
+    month,
+    weeks.map((week) => [week.total, week.count]),
+  ]);
+  if (signature === lastWeeklySignature && container.children.length > 0) {
+    return;
+  }
+  lastWeeklySignature = signature;
+  hideChartTooltip();
+  container.innerHTML = "";
   const yAxisLabels = document.querySelectorAll(".chart-y-axis span");
   yAxisLabels.forEach((labelElement, index) => {
     const steps = Math.max(yAxisLabels.length - 1, 1);
     labelElement.textContent = Math.round(
-      max * (1 - index / steps),
+      WEEKLY_GOAL * (1 - index / steps),
     ).toLocaleString("en-PH");
   });
-  for (let i = 0; i < 7; i++) {
+  weeks.forEach((week) => {
     const day = document.createElement("div");
     day.className = "day-bar";
+    const percent = (week.total / WEEKLY_GOAL) * 100;
     const productionBar = document.createElement("div");
     productionBar.className = "bar production-bar";
-    productionBar.style.height = `${Math.min(100, (production[i] / max) * 100)}%`;
-    productionBar.title = `${dayNames[i]} Production: ${formatPeso(production[i])}`;
+    productionBar.style.height = `${Math.min(100, percent)}%`;
     const goalBar = document.createElement("div");
     goalBar.className = "bar goal-bar";
-    goalBar.style.height = `${Math.min(100, (goal[i] / max) * 100)}%`;
-    goalBar.title = `${dayNames[i]} Goal: ${formatPeso(goal[i])}`;
+    goalBar.style.height = "100%";
+    const startLabel = new Date(year, month, week.startDay).toLocaleDateString(
+      "en-US",
+      { month: "short", day: "numeric" },
+    );
+    const endLabel = new Date(year, month, week.endDay).toLocaleDateString(
+      "en-US",
+      { month: "short", day: "numeric" },
+    );
+    const tooltipHtml = `<strong>${week.label}</strong>
+<span class="tooltip-sub">${startLabel} - ${endLabel}</span>
+<div class="tooltip-row"><span>Service</span><span>${formatPeso(week.total)}</span></div>
+<div class="tooltip-row"><span>Goal</span><span>${formatPeso(WEEKLY_GOAL)}</span></div>
+<div class="tooltip-row"><span>Progress</span><span>${formatPercent(percent)}%</span></div>
+<div class="tooltip-row"><span>Payments</span><span>${week.count}</span></div>`;
+    day.addEventListener("mouseenter", (event) =>
+      showChartTooltip(event, tooltipHtml),
+    );
+    day.addEventListener("mousemove", moveChartTooltip);
+    day.addEventListener("mouseleave", hideChartTooltip);
     day.appendChild(productionBar);
     day.appendChild(goalBar);
     container.appendChild(day);
-  }
+  });
 }
 function renderProcedureChart(transactions) {
   const procedureDonut = document.getElementById("procedureDonut");
   const procedureTotal = document.getElementById("procedureTotal");
+  const legend = document.getElementById("procedureLegend");
+  const detail = document.getElementById("procedureDetail");
   if (!procedureDonut || !procedureTotal) {
     return;
   }
@@ -624,64 +899,88 @@ function renderProcedureChart(transactions) {
   transactions.forEach((transaction) => {
     const service = getTransactionService(transaction) || "Other";
     const amount = Math.max(getTransactionAmount(transaction), 0);
-    revenueByService.set(
-      service,
-      (revenueByService.get(service) || 0) + amount,
-    );
+    const existing = revenueByService.get(service) || { amount: 0, count: 0 };
+    existing.amount += amount;
+    if (amount > 0) {
+      existing.count += 1;
+    }
+    revenueByService.set(service, existing);
   });
   const data = Array.from(revenueByService.entries())
-    .map(([name, amount]) => ({ name, amount }))
+    .map(([name, value]) => ({
+      name,
+      amount: value.amount,
+      count: value.count,
+    }))
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
-  let slots = data.slice(0, 5);
-  if (data.length > 5) {
-    const othersAmount = data
-      .slice(4)
-      .reduce((sum, item) => sum + item.amount, 0);
-    slots = [...data.slice(0, 4), { name: "Others", amount: othersAmount }];
+  if (selectedService && !data.some((item) => item.name === selectedService)) {
+    selectedService = null;
   }
+  const signature = JSON.stringify([data, selectedService]);
+  if (signature === lastProcedureSignature) {
+    return;
+  }
+  lastProcedureSignature = signature;
+  hideChartTooltip();
   const total = data.reduce((sum, item) => sum + item.amount, 0);
-  procedureTotal.textContent = formatPeso(total).replace(".00", "");
+  let current = 0;
+  procedureSlices = data.map((item, index) => {
+    const percent = total > 0 ? (item.amount / total) * 100 : 0;
+    const slice = {
+      name: item.name,
+      amount: item.amount,
+      count: item.count,
+      percent,
+      start: current,
+      end: current + percent,
+      color: SERVICE_COLORS[index % SERVICE_COLORS.length],
+    };
+    current += percent;
+    return slice;
+  });
+  const activeSlice = selectedService
+    ? procedureSlices.find((slice) => slice.name === selectedService)
+    : null;
+  procedureTotal.textContent = formatPeso(
+    activeSlice ? activeSlice.amount : total,
+  ).replace(".00", "");
   if (total === 0) {
     procedureDonut.style.background = "conic-gradient(#dfe5e1 0 100%)";
   } else {
-    let current = 0;
-    const segments = [];
-    const segmentColors = [
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#8b5cf6",
-    ];
-    slots.forEach((item, index) => {
-      const percentage = (item.amount / total) * 100;
-      segments.push(
-        `${segmentColors[index]} ${current}% ${current + percentage}%`,
-      );
-      current += percentage;
+    const segments = procedureSlices.map((slice) => {
+      const color =
+        activeSlice && slice.name !== activeSlice.name
+          ? "#e3e8e5"
+          : slice.color;
+      return `${color} ${slice.start}% ${slice.end}%`;
     });
     procedureDonut.style.background = `conic-gradient(${segments.join(", ")})`;
   }
-  const labelIds = [
-    "fillingLabel",
-    "cleaningLabel",
-    "evaluationLabel",
-    "extractionLabel",
-    "emergencyLabel",
-  ];
-  labelIds.forEach((id, index) => {
-    const slot = slots[index];
-    if (slot) {
-      setProcedureLabel(id, shortenService(slot.name), slot.amount, total);
+  if (legend) {
+    legend.innerHTML = procedureSlices
+      .map((slice) => {
+        const stateClass = activeSlice
+          ? slice.name === activeSlice.name
+            ? " active"
+            : " dimmed"
+          : "";
+        return `<button type="button" class="procedure-legend-item${stateClass}" data-service="${escapeHtml(slice.name)}" title="${escapeHtml(slice.name)}: ${formatPeso(slice.amount)}"><i style="background:${slice.color}"></i>${escapeHtml(shortenService(slice.name))} ${formatPercent(slice.percent)}%</button>`;
+      })
+      .join("");
+  }
+  if (detail) {
+    if (activeSlice) {
+      detail.innerHTML = `<strong>${escapeHtml(activeSlice.name)}</strong>
+<span>${formatPeso(activeSlice.amount)} · ${formatPercent(activeSlice.percent)}% of total · ${activeSlice.count} transaction${activeSlice.count === 1 ? "" : "s"}</span>
+<button type="button" class="procedure-reset" data-reset="true">Show all</button>`;
+    } else if (total === 0) {
+      detail.textContent = "No service revenue recorded yet.";
     } else {
-      const element = document.getElementById(id);
-      if (element) {
-        element.textContent = "";
-        element.title = "";
-      }
+      detail.textContent =
+        "Click a slice of the chart or a service below to see its amount.";
     }
-  });
+  }
 }
 function shortenService(service) {
   const replacements = {
@@ -691,15 +990,6 @@ function shortenService(service) {
     "Braces Adjustment": "Braces",
   };
   return replacements[service] || service;
-}
-function setProcedureLabel(id, label, value, total) {
-  const element = document.getElementById(id);
-  if (!element) {
-    return;
-  }
-  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-  element.textContent = `${label} ${percentage}%`;
-  element.title = `${label}: ${formatPeso(value)}`;
 }
 function formatDateKey(date) {
   const year = date.getFullYear();

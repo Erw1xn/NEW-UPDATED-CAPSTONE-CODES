@@ -225,6 +225,7 @@ textarea:focus-visible {
   top: calc(100% + 9px);
   right: 0;
   width: 300px;
+  max-width: calc(100vw - 48px);
   padding: 13px 14px;
   background: var(--white);
   border: 1px solid #dce7df;
@@ -2161,10 +2162,25 @@ textarea:focus-visible {
     min-height: 155px;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .page-shell {
-    padding: 20px 18px 28px;
+    padding: 14px 14px 24px;
   }
+  .page-header {
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 12px;
+    gap: 12px;
+  }
+  .page-heading {
+    min-height: 40px;
+    padding-left: 52px;
+  }
+  .page-header h1 {
+    margin-top: 0;
+  }
+}
+@media (max-width: 760px) {
   .upcoming-schedule {
     grid-column: 1/-1;
     justify-content: flex-start;
@@ -2173,6 +2189,12 @@ textarea:focus-visible {
   .page-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .page-header-actions {
+    width: 100%;
+  }
+  .header-book-btn {
+    flex: 1;
   }
   .upcoming-panel-header {
     align-items: center;
@@ -2229,11 +2251,8 @@ textarea:focus-visible {
   }
 }
 @media (max-width: 480px) {
-  .page-shell {
-    padding: 16px 12px 24px;
-  }
   .page-header h1 {
-    font-size: 20px;
+    font-size: 18px;
   }
   .upcoming-panel-header {
     gap: 10px;

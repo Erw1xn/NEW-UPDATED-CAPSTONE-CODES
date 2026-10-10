@@ -512,7 +512,9 @@ function updateDashboardTooltips() {
     );
     appointmentsList.title =
       appointments.length === 0
-        ? "No appointments scheduled for today"
+        ? nextAppointment
+          ? "Next scheduled appointment"
+          : "No appointments scheduled for today"
         : "Today's Appointments • Today's scheduled patients";
   }
   const summaryTotalCard = document.getElementById("summaryTotalCard");
@@ -697,7 +699,7 @@ function renderTodayAppointments() {
     return;
   }
   const today = getTodayDate();
-  const appointments = patientDashboardData.appointments
+  let appointments = patientDashboardData.appointments
     .filter((appointment) => {
       const appointmentDate = normalizeAppointmentDate(appointment.date);
       return (
@@ -708,6 +710,12 @@ function renderTodayAppointments() {
     })
     .sort(compareAppointments)
     .slice(0, 5);
+  if (appointments.length === 0) {
+    const nextAppointment = getUpcomingAppointments()[0];
+    if (nextAppointment) {
+      appointments = [nextAppointment];
+    }
+  }
   if (appointments.length === 0) {
     container.innerHTML = createEmptyState(
       "fa-calendar-xmark",

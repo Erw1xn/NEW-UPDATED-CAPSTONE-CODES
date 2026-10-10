@@ -165,9 +165,14 @@ async function loadTransactions() {
     if (!response.ok || !result.success) {
       throw new Error(result.message || "Unable to load finance transactions.");
     }
-    transactions = (Array.isArray(result.data) ? result.data : []).map(
-      normalizeDatabaseTransaction,
+    const doctorPatientIds = new Set(
+      patients.map((patient) => getPatientId(patient)).filter(Boolean),
     );
+    transactions = (Array.isArray(result.data) ? result.data : [])
+      .map(normalizeDatabaseTransaction)
+      .filter((transaction) =>
+        doctorPatientIds.has(String(transaction.patientId || "").trim()),
+      );
     renderFinance();
   } catch (error) {
     console.error("Unable to load finance transactions:", error);

@@ -1628,3 +1628,13 @@ a:focus-visible {
     transform: none;
   }
 }
+.hero-text-content,
+.hero-image-content {
+  transform: translateY(-12px);
+}
+@media (max-width: 900px) {
+  .hero-text-content,
+  .hero-image-content {
+    transform: translateY(-8px);
+  }
+}

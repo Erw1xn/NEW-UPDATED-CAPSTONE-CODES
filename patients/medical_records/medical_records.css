@@ -167,6 +167,7 @@ textarea:focus-visible {
   right: 0;
   z-index: 100;
   width: 290px;
+  max-width: calc(100vw - 48px);
   padding: 13px 14px;
   border: 1px solid #dce7e0;
   border-radius: 10px;
@@ -2165,10 +2166,34 @@ textarea:focus-visible {
     font-size: 13px;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .medical-records-main {
-    padding: 18px 14px 28px;
+    padding: 14px 14px 24px;
   }
+  .medical-records-header {
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 12px;
+    gap: 12px;
+  }
+  .medical-records-heading {
+    min-height: 40px;
+    padding-left: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .medical-records-header-actions {
+    width: 100%;
+  }
+  .start-record-btn {
+    flex: 1;
+  }
+  .patient-record-table {
+    min-width: 560px;
+  }
+}
+@media (max-width: 600px) {
   .medical-records-heading h1 {
     font-size: 18px;
   }
@@ -2317,9 +2342,6 @@ textarea:focus-visible {
   }
 }
 @media (max-width: 420px) {
-  .medical-records-main {
-    padding: 14px 10px 24px;
-  }
   .record-profile-details {
     grid-template-columns: 1fr;
     gap: 13px;

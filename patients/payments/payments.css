@@ -1749,12 +1749,6 @@ button {
   height: 78px;
 }
 @media (max-width: 800px) {
-  .payments-main {
-    padding: 15px;
-  }
-  .payments-page-header {
-    padding: 15px;
-  }
   .payment-history-header {
     padding: 14px 16px;
   }
@@ -1762,8 +1756,23 @@ button {
     padding: 8px 16px;
   }
 }
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .payments-main {
-    padding: 10px;
+    padding: 14px 14px 24px;
+  }
+  .payments-page-header {
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+  .payments-heading {
+    min-height: 40px;
+    padding-left: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .payments-heading h1 {
+    margin-bottom: 3px;
   }
 }

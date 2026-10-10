@@ -23,6 +23,7 @@ $userId = (int)$_SESSION['user_id'];
 if ($role !== 'doctor' && $role !== 'staff') {
     expenseResponse(false, 'Only staff or doctors may access clinic expenses.', [], 403);
 }
+$expenseOwnerId = $role === 'doctor' ? $userId : null;
 $conn->query(
     "CREATE TABLE IF NOT EXISTS tbl_finance_expenses (
         expense_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -70,30 +71,45 @@ function fetchAll(mysqli $conn, string $sql, string $types = '', array $params =
     $stmt->close();
     return $rows;
 }
-function manualExpenseTotals(mysqli $conn, string $start, string $end): array
+function manualExpenseTotals(mysqli $conn, string $start, string $end, ?int $ownerId = null): array
 {
-    $rows = fetchAll(
-        $conn,
-        'SELECT category, SUM(amount) AS total
+    $sql = 'SELECT category, SUM(amount) AS total
          FROM tbl_finance_expenses
-         WHERE expense_date >= ? AND expense_date < ?
-         GROUP BY category',
-        'ss',
-        [$start, $end]
-    );
+         WHERE expense_date >= ? AND expense_date < ?';
+    $types = 'ss';
+    $params = [$start, $end];
+    if ($ownerId !== null) {
+        $sql .= ' AND created_by = ?';
+        $types .= 'i';
+        $params[] = $ownerId;
+    }
+    $sql .= ' GROUP BY category';
+    $rows = fetchAll($conn, $sql, $types, $params);
     $totals = [];
     foreach ($rows as $row) {
         $totals[(string)$row['category']] = (float)$row['total'];
     }
     return $totals;
 }
-function monthTotal(mysqli $conn, string $start, string $end): float
+function monthTotal(mysqli $conn, string $start, string $end, ?int $ownerId = null): float
 {
-    return round(array_sum(manualExpenseTotals($conn, $start, $end)), 2);
+    return round(array_sum(manualExpenseTotals($conn, $start, $end, $ownerId)), 2);
 }
-function buildAuditTrail(mysqli $conn, int $limit): array
+function buildAuditTrail(mysqli $conn, int $limit, ?int $ownerId = null): array
 {
     $events = [];
+    $paymentScope = '';
+    $chargeScope = '';
+    $expenseScope = '';
+    $scopeTypes = '';
+    $scopeParams = [];
+    if ($ownerId !== null) {
+        $paymentScope = ' AND fp.patient_id IN (SELECT a.patient_id FROM tbl_patient_appointments a WHERE a.doctor_id = ?)';
+        $chargeScope = ' WHERE ft.patient_id IN (SELECT a.patient_id FROM tbl_patient_appointments a WHERE a.doctor_id = ?)';
+        $expenseScope = ' WHERE e.created_by = ?';
+        $scopeTypes = 'i';
+        $scopeParams = [$ownerId];
+    }
     $payments = fetchAll(
         $conn,
         "SELECT fp.payment_uid, fp.amount, fp.payment_method, fp.payment_source,
@@ -105,8 +121,10 @@ function buildAuditTrail(mysqli $conn, int $limit): array
          LEFT JOIN tbl_finance_transactions ft ON ft.transaction_id = fp.transaction_id
          LEFT JOIN tbl_patients p ON p.patient_id = fp.patient_id
          LEFT JOIN tbl_users u ON u.user_id = fp.created_by
-         WHERE fp.status = 'paid'
-         ORDER BY happened_at DESC LIMIT " . $limit
+         WHERE fp.status = 'paid'" . $paymentScope . "
+         ORDER BY happened_at DESC LIMIT " . $limit,
+        $scopeTypes,
+        $scopeParams
     );
     foreach ($payments as $row) {
         $events[] = [
@@ -127,8 +145,10 @@ function buildAuditTrail(mysqli $conn, int $limit): array
                 u.name AS actor
          FROM tbl_finance_transactions ft
          LEFT JOIN tbl_patients p ON p.patient_id = ft.patient_id
-         LEFT JOIN tbl_users u ON u.user_id = ft.created_by
-         ORDER BY ft.created_at DESC LIMIT " . $limit
+         LEFT JOIN tbl_users u ON u.user_id = ft.created_by" . $chargeScope . "
+         ORDER BY ft.created_at DESC LIMIT " . $limit,
+        $scopeTypes,
+        $scopeParams
     );
     foreach ($charges as $row) {
         $discount = (float)$row['discount_amount'];
@@ -147,8 +167,10 @@ function buildAuditTrail(mysqli $conn, int $limit): array
         $conn,
         'SELECT e.expense_uid, e.category, e.description, e.amount, e.created_at, u.name AS actor
          FROM tbl_finance_expenses e
-         LEFT JOIN tbl_users u ON u.user_id = e.created_by
-         ORDER BY e.created_at DESC LIMIT ' . $limit
+         LEFT JOIN tbl_users u ON u.user_id = e.created_by' . $expenseScope . '
+         ORDER BY e.created_at DESC LIMIT ' . $limit,
+        $scopeTypes,
+        $scopeParams
     );
     foreach ($manual as $row) {
         $label = MANUAL_CATEGORIES[$row['category']] ?? ucfirst((string)$row['category']);
@@ -170,36 +192,39 @@ if ($method === 'GET') {
     $action = (string)($_GET['action'] ?? 'summary');
     if ($action === 'audit') {
         $limit = max(1, min(50, (int)($_GET['limit'] ?? 8)));
-        expenseResponse(true, 'Audit trail loaded.', buildAuditTrail($conn, $limit));
+        expenseResponse(true, 'Audit trail loaded.', buildAuditTrail($conn, $limit, $expenseOwnerId));
     }
     [$month, $start, $end, $year] = parseMonth((string)($_GET['month'] ?? ''));
-    $manualTotals = manualExpenseTotals($conn, $start, $end);
+    $manualTotals = manualExpenseTotals($conn, $start, $end, $expenseOwnerId);
     $categories = [];
     foreach (MANUAL_CATEGORIES as $key => $label) {
         $categories[] = ['key' => $key, 'label' => $label, 'amount' => round($manualTotals[$key] ?? 0, 2)];
     }
     $total = round(array_sum(array_column($categories, 'amount')), 2);
-    $manualEntries = fetchAll(
-        $conn,
-        'SELECT expense_uid, category, description, amount, expense_date
+    $manualEntriesSql = 'SELECT expense_uid, category, description, amount, expense_date
          FROM tbl_finance_expenses
-         WHERE expense_date >= ? AND expense_date < ?
-         ORDER BY expense_date DESC, expense_id DESC',
-        'ss',
-        [$start, $end]
-    );
+         WHERE expense_date >= ? AND expense_date < ?';
+    $manualEntriesTypes = 'ss';
+    $manualEntriesParams = [$start, $end];
+    if ($expenseOwnerId !== null) {
+        $manualEntriesSql .= ' AND created_by = ?';
+        $manualEntriesTypes .= 'i';
+        $manualEntriesParams[] = $expenseOwnerId;
+    }
+    $manualEntriesSql .= ' ORDER BY expense_date DESC, expense_id DESC';
+    $manualEntries = fetchAll($conn, $manualEntriesSql, $manualEntriesTypes, $manualEntriesParams);
     foreach ($manualEntries as &$entry) {
         $entry['amount'] = (float)$entry['amount'];
         $entry['category_label'] = MANUAL_CATEGORIES[$entry['category']] ?? ucfirst((string)$entry['category']);
     }
     unset($entry);
     $previousStart = date('Y-m-d', strtotime($start . ' -1 month'));
-    $previousTotal = monthTotal($conn, $previousStart, $start);
+    $previousTotal = monthTotal($conn, $previousStart, $start, $expenseOwnerId);
     $yearly = [];
     for ($m = 1; $m <= 12; $m++) {
         $monthStart = sprintf('%04d-%02d-01', $year, $m);
         $monthEnd = date('Y-m-d', strtotime($monthStart . ' +1 month'));
-        $yearly[] = monthTotal($conn, $monthStart, $monthEnd);
+        $yearly[] = monthTotal($conn, $monthStart, $monthEnd, $expenseOwnerId);
     }
     expenseResponse(true, 'Monthly expenses loaded.', [
         'month' => $month,
@@ -261,8 +286,8 @@ if ($method === 'DELETE') {
     if ($uid === '') {
         expenseResponse(false, 'Expense reference is required.', [], 422);
     }
-    $stmt = $conn->prepare('DELETE FROM tbl_finance_expenses WHERE expense_uid = ?');
-    $stmt->bind_param('s', $uid);
+    $stmt = $conn->prepare('DELETE FROM tbl_finance_expenses WHERE expense_uid = ? AND created_by = ?');
+    $stmt->bind_param('si', $uid, $userId);
     $stmt->execute();
     $deleted = $stmt->affected_rows;
     $stmt->close();
