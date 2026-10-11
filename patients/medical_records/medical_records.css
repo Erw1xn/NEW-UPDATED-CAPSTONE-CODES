@@ -3125,3 +3125,37 @@ textarea:focus-visible {
     border-top: 1px dashed #dfe9e2;
   }
 }
+/* ===== Mobile fix: clinical image viewer (Before/After) ===== */
+@media (max-width: 760px) {
+  .clinical-image-viewer {
+    padding: 12px;
+  }
+
+  .clinical-image-viewer-dialog {
+    max-height: calc(100vh - 24px);
+    padding: 16px;
+  }
+
+  /* stack: Before sa taas, After sa baba */
+  .clinical-image-viewer-pair {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .clinical-image-viewer-side {
+    background: transparent;
+  }
+
+  /* sundin ang natural na laki ng picture, walang blangko */
+  .clinical-image-viewer-side img {
+    width: 100%;
+    height: auto;
+    max-height: 45vh;
+    object-fit: contain;
+    background: transparent;
+  }
+
+  .clinical-image-viewer-header h3 {
+    font-size: 13px;
+  }
+}

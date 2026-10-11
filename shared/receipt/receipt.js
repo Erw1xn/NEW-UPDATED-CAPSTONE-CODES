@@ -470,16 +470,46 @@ body {
 }
 @media (max-width: 500px) {
   .receipt-page {
-    padding: 22px 18px;
+    padding: 22px 16px;
   }
   .clinic-name {
     font-size: 20px;
   }
+  .clinic-subtitle {
+    font-size: 12px;
+  }
+  .receipt-title {
+    font-size: 13px;
+  }
+  .receipt-info td {
+    font-size: 12px;
+    padding: 9px 0;
+  }
   .receipt-info .label {
-    width: 43%;
+    width: 42%;
+    font-size: 10px;
   }
   .receipt-info .value {
-    width: 57%;
+    width: 58%;
+  }
+  .status {
+    font-size: 10px;
+  }
+  .summary-row {
+    font-size: 12px;
+  }
+  .summary-row.paid strong {
+    font-size: 14px;
+  }
+  .summary-row.balance strong {
+    font-size: 13px;
+  }
+  .receipt-footer {
+    font-size: 10px;
+  }
+  .receipt-print-button {
+    font-size: 12px;
+    padding: 11px 20px;
   }
 }
 </style>
@@ -571,16 +601,28 @@ This receipt represents the recorded payment transaction for DentaNueva Dental C
       alert("Unable to generate the payment receipt.");
       return;
     }
-    const receiptWindow = window.open("", "_blank", "width=720,height=780");
+
+    const receiptHtml = buildReceipt(transaction);
+    const blob = new Blob([receiptHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const isMobile =
+      window.matchMedia("(max-width: 768px)").matches ||
+      /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+    const receiptWindow = isMobile
+      ? window.open(url, "_blank")
+      : window.open(url, "_blank", "width=720,height=780");
+
     if (!receiptWindow) {
+      URL.revokeObjectURL(url);
       alert("Please allow pop-ups to view the receipt.");
       return;
     }
-    const receiptHtml = buildReceipt(transaction);
-    receiptWindow.document.open();
-    receiptWindow.document.write(receiptHtml);
-    receiptWindow.document.close();
-    receiptWindow.focus();
+
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 60000);
   }
   window.openPaymentReceipt = openPaymentReceipt;
 })();

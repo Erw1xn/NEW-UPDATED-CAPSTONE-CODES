@@ -1025,3 +1025,17 @@ a:focus-visible {
     font-size: 9px;
   }
 }
+/* ===== Mobile fix: center appointment card in panel ===== */
+@media (max-width: 640px) {
+  .appointments-panel-body {
+    justify-content: center; /* gitna vertically */
+  }
+
+  .appointments-panel-body > .appt-item:first-child {
+    margin-top: 0;
+  }
+
+  .appointments-panel-body > .appt-item:last-child {
+    margin-bottom: 0; /* alisin ang auto na nagtutulak pataas */
+  }
+}
