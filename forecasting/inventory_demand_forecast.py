@@ -1109,61 +1109,61 @@ def save_forecast_to_database(db_config: Dict[str, Any], demand_df: pd.DataFrame
                     ),
                 )
 
-                for item in summary.get("items", []):
-                    cursor.execute(
-                        """
-                        INSERT INTO tbl_inventory_forecast_runs (
-                            item_name,
-                            forecast_date,
-                            model_name,
-                            sma_forecast,
-                            random_forest_forecast,
-                            selected_forecast,
-                            mape,
-                            rmse,
-                            accuracy,
-                            forecast_status,
-                            evaluation_available
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        """,
+            for item in summary.get("items", []):
+                cursor.execute(
+                    """
+                    INSERT INTO tbl_inventory_forecast_runs (
+                        item_name,
+                        forecast_date,
+                        model_name,
+                        sma_forecast,
+                        random_forest_forecast,
+                        selected_forecast,
+                        mape,
+                        rmse,
+                        accuracy,
+                        forecast_status,
+                        evaluation_available
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        item.get("item"),
+                        (latest_demand_date + pd.Timedelta(days=1)).date(),
+                        item.get("model_name", "SMA"),
+                        float(item.get("sma_forecast", 0) or 0),
                         (
-                            item.get("item"),
-                            (latest_demand_date + pd.Timedelta(days=1)).date(),
-                            item.get("model_name", "SMA"),
-                            float(item.get("sma_forecast", 0) or 0),
-                            (
-                                float(item["rf_forecast"])
-                                if item.get("rf_forecast") is not None
-                                else None
-                            ),
-                            float(
-                                item.get(
-                                    "forecast",
-                                    item.get("sma_forecast", 0),
-                                ) or 0
-                            ),
-                            (
-                                float(item["mape"])
-                                if item.get("mape") is not None
-                                else None
-                            ),
-                            (
-                                float(item["rmse"])
-                                if item.get("rmse") is not None
-                                else None
-                            ),
-                            (
-                                float(item["accuracy"])
-                                if item.get("accuracy") is not None
-                                else None
-                            ),
-                            item.get(
-                                "forecast_status",
-                                "insufficient_historical_data",
-                            ),
-                            1 if item.get("evaluation_available") is True else 0,
+                            float(item["rf_forecast"])
+                            if item.get("rf_forecast") is not None
+                            else None
                         ),
-                    )
+                        float(
+                            item.get(
+                                "forecast",
+                                item.get("sma_forecast", 0),
+                            ) or 0
+                        ),
+                        (
+                            float(item["mape"])
+                            if item.get("mape") is not None
+                            else None
+                        ),
+                        (
+                            float(item["rmse"])
+                            if item.get("rmse") is not None
+                            else None
+                        ),
+                        (
+                            float(item["accuracy"])
+                            if item.get("accuracy") is not None
+                            else None
+                        ),
+                        item.get(
+                            "forecast_status",
+                            "insufficient_historical_data",
+                        ),
+                        1 if item.get("evaluation_available") is True else 0,
+                    ),
+                )
 
         connection.commit()
     finally:

@@ -621,7 +621,6 @@ function renderDentistSelector() {
     : doctors[0].id;
 }
 async function loadAppointments() {
-  appointments = [];
   await hydrateAppointmentsFromDatabase();
   return appointments;
 }
@@ -633,11 +632,13 @@ async function hydrateAppointmentsFromDatabase() {
   try {
     const remoteAppointments =
       await window.DentaNuevaAppointmentDatabase.load();
-    appointments = Array.isArray(remoteAppointments) ? remoteAppointments : [];
+    if (!Array.isArray(remoteAppointments)) {
+      throw new Error("Invalid appointment data received from the database.");
+    }
+    appointments = remoteAppointments;
     renderAll();
   } catch (error) {
     console.error("Unable to load appointments from database.", error);
-    appointments = [];
   }
 }
 async function saveAppointments() {
@@ -1090,23 +1091,23 @@ function renderUpcomingAppointment() {
   if (!appointment) {
     if (isClinicClosedDate(selectedKey)) {
       container.innerHTML = `
-    <div class="empty-upcoming">
-    <div class="empty-upcoming-icon">
-    <i class="fa-solid fa-door-closed"></i>
-    </div>
-    <p><strong>Clinic is closed</strong><br>The clinic is closed on Sundays. Open Monday to Saturday, 10:00 AM to 6:00 PM.</p>
-    </div>
-    `;
+      <div class="empty-upcoming">
+      <div class="empty-upcoming-icon">
+      <i class="fa-solid fa-door-closed"></i>
+      </div>
+      <p><strong>Clinic is closed</strong><br>The clinic is closed on Sundays. Open Monday to Saturday, 10:00 AM to 6:00 PM.</p>
+      </div>
+      `;
       return;
     }
     container.innerHTML = `
-    <div class="empty-upcoming">
-    <div class="empty-upcoming-icon">
-    <i class="fa-regular fa-calendar-xmark"></i>
-    </div>
-    <p>No appointment recorded on this date.</p>
-    </div>
-    `;
+      <div class="empty-upcoming">
+      <div class="empty-upcoming-icon">
+      <i class="fa-regular fa-calendar-xmark"></i>
+      </div>
+      <p>No appointment recorded on this date.</p>
+      </div>
+      `;
     return;
   }
   const date = getAppointmentDate(appointment);
@@ -1124,42 +1125,42 @@ function renderUpcomingAppointment() {
   const statusLabel = getPatientStatusLabel(rawStatus, date);
   const statusClass = getStatusClass(rawStatus);
   container.innerHTML = `
-    <div class="upcoming-card-content">
-    <div>
-    <div class="upcoming-patient-avatar">${escapeHtml(initials.toUpperCase())}</div>
-    <div class="upcoming-patient-info">
-    <strong>${escapeHtml(patientName)}</strong>
-    <span>${escapeHtml(service)} • ${escapeHtml(dentist)}</span>
-    <span class="detail-status ${statusClass}">${escapeHtml(statusLabel)}</span>
-    </div>
-    </div>
-    <div class="upcoming-schedule">
-    <div class="upcoming-date">
-    <span class="upcoming-schedule-label">Appointment Date</span>
-    <strong>${escapeHtml(formatDate(date))}</strong>
-    </div>
-    <div class="upcoming-time-range">
-    <div>
-    <span class="upcoming-schedule-label">Start Time</span>
-    <strong>${escapeHtml(formatTime(time))}</strong>
-    </div>
-    <div class="upcoming-time-arrow">
-    <i class="fa-solid fa-arrow-right"></i>
-    </div>
-    <div>
-    <span class="upcoming-schedule-label">End Time</span>
-    <strong>${escapeHtml(endTime)}</strong>
-    </div>
-    </div>
-    </div>
-    <div class="upcoming-divider"></div>
-    <div class="upcoming-actions">
-    <button type="button" class="btn-secondary" data-appointment-action="details" data-appointment-id="${escapeHtml(getAppointmentId(appointment))}">
-    View Details
-    </button>
-    </div>
-    </div>
-    `;
+      <div class="upcoming-card-content">
+      <div>
+      <div class="upcoming-patient-avatar">${escapeHtml(initials.toUpperCase())}</div>
+      <div class="upcoming-patient-info">
+      <strong>${escapeHtml(patientName)}</strong>
+      <span>${escapeHtml(service)} • ${escapeHtml(dentist)}</span>
+      <span class="detail-status ${statusClass}">${escapeHtml(statusLabel)}</span>
+      </div>
+      </div>
+      <div class="upcoming-schedule">
+      <div class="upcoming-date">
+      <span class="upcoming-schedule-label">Appointment Date</span>
+      <strong>${escapeHtml(formatDate(date))}</strong>
+      </div>
+      <div class="upcoming-time-range">
+      <div>
+      <span class="upcoming-schedule-label">Start Time</span>
+      <strong>${escapeHtml(formatTime(time))}</strong>
+      </div>
+      <div class="upcoming-time-arrow">
+      <i class="fa-solid fa-arrow-right"></i>
+      </div>
+      <div>
+      <span class="upcoming-schedule-label">End Time</span>
+      <strong>${escapeHtml(endTime)}</strong>
+      </div>
+      </div>
+      </div>
+      <div class="upcoming-divider"></div>
+      <div class="upcoming-actions">
+      <button type="button" class="btn-secondary" data-appointment-action="details" data-appointment-id="${escapeHtml(getAppointmentId(appointment))}">
+      View Details
+      </button>
+      </div>
+      </div>
+      `;
 }
 function updateServiceDurationInfo() {
   const info = document.getElementById("serviceDurationInfo");
@@ -1869,7 +1870,7 @@ function generateAvailableSlots(
   );
   for (
     let minutes = CLINIC_SCHEDULE.startHour * 60;
-    minutes + duration <= CLINIC_SCHEDULE.endHour * 60;
+    minutes <= CLINIC_SCHEDULE.endHour * 60;
     minutes += CLINIC_SCHEDULE.slotMinutes
   ) {
     const hour = Math.floor(minutes / 60);
@@ -2672,35 +2673,35 @@ function openAppointmentDetail(appointmentId) {
   if (subtitle)
     subtitle.textContent = `${formatShortDate(date)} · ${formatTime(time)}`;
   body.innerHTML = `
-    <div class="detail-grid">
-    <div class="detail-card full">
-    <span>Service</span>
-    <strong>${escapeHtml(service)}</strong>
-    </div>
-    <div class="detail-card">
-    <span>Date</span>
-    <strong>${escapeHtml(formatDate(date))}</strong>
-    </div>
-    <div class="detail-card">
-    <span>Time</span>
-    <strong>${escapeHtml(formatTime(time))}</strong>
-    </div>
-    <div class="detail-card">
-    <span>Dentist</span>
-    <strong>${escapeHtml(dentist)}</strong>
-    </div>
-    <div class="detail-card">
-    <span>Duration</span>
-    <strong>${duration ? `${duration} minutes` : "Not specified"}</strong>
-    </div>
-    <div class="detail-card full">
-    <span>Status</span>
-    <strong>
-    <span class="detail-status ${getStatusClass(status)}">${escapeHtml(getPatientStatusLabel(status, date))}</span>
-    </strong>
-    </div>
-    </div>
-    `;
+      <div class="detail-grid">
+      <div class="detail-card full">
+      <span>Service</span>
+      <strong>${escapeHtml(service)}</strong>
+      </div>
+      <div class="detail-card">
+      <span>Date</span>
+      <strong>${escapeHtml(formatDate(date))}</strong>
+      </div>
+      <div class="detail-card">
+      <span>Time</span>
+      <strong>${escapeHtml(formatTime(time))}</strong>
+      </div>
+      <div class="detail-card">
+      <span>Dentist</span>
+      <strong>${escapeHtml(dentist)}</strong>
+      </div>
+      <div class="detail-card">
+      <span>Duration</span>
+      <strong>${duration ? `${duration} minutes` : "Not specified"}</strong>
+      </div>
+      <div class="detail-card full">
+      <span>Status</span>
+      <strong>
+      <span class="detail-status ${getStatusClass(status)}">${escapeHtml(getPatientStatusLabel(status, date))}</span>
+      </strong>
+      </div>
+      </div>
+      `;
   const requestButton = document.getElementById("requestRescheduleBtn");
   const cancelButton = document.getElementById("cancelAppointmentBtn");
   const deleteButton = document.getElementById("deleteAppointmentBtn");
@@ -2907,9 +2908,9 @@ function openRescheduleRequestModal() {
   const requestDate = document.getElementById("requestDate");
   if (!modal || !current) return;
   current.innerHTML = `
-    <strong>${escapeHtml(getAppointmentService(appointment))}</strong>
-    <span>${escapeHtml(formatDate(getAppointmentDate(appointment)))} · ${escapeHtml(formatTime(getAppointmentTime(appointment)))} · ${escapeHtml(getDentistName(appointment))}</span>
-    `;
+      <strong>${escapeHtml(getAppointmentService(appointment))}</strong>
+      <span>${escapeHtml(formatDate(getAppointmentDate(appointment)))} · ${escapeHtml(formatTime(getAppointmentTime(appointment)))} · ${escapeHtml(getDentistName(appointment))}</span>
+      `;
   if (requestDate) {
     requestDate.min = dateToKey(new Date());
     requestDate.value = "";
@@ -3165,9 +3166,9 @@ function openStaffRescheduleModal(request) {
     request?.currentTime ||
     (appointment ? getAppointmentTime(appointment) : "");
   current.innerHTML = `
-    <strong>${escapeHtml(serviceName)}</strong>
-    <span>${escapeHtml(formatDate(currentDate))} · ${escapeHtml(formatTime(currentTime))} · ${escapeHtml(dentistName)}</span>
-    `;
+      <strong>${escapeHtml(serviceName)}</strong>
+      <span>${escapeHtml(formatDate(currentDate))} · ${escapeHtml(formatTime(currentTime))} · ${escapeHtml(dentistName)}</span>
+      `;
   if (reasonInput)
     reasonInput.value = request?.reasonLabel || request?.reason || "";
   if (messageInput) messageInput.value = request?.message || "";
@@ -3699,37 +3700,37 @@ function handleRescheduleAlert() {
   statusElement.className = `reschedule-details-status ${status}`;
   statusElement.textContent = statusLabel;
   content.innerHTML = `
-        <div class="reschedule-detail-item">
-          <span>Reason</span>
-          <strong>${escapeHtml(latest?.reasonLabel || latest?.reason || "Reschedule Request")}</strong>
-        </div>
-        <div class="reschedule-detail-item">
-          <span>Service</span>
-          <strong>${escapeHtml(service)}</strong>
-        </div>
-        <div class="reschedule-detail-item full">
-          <span>Current Appointment</span>
-          <strong>${escapeHtml(formatDate(currentDate))} · ${escapeHtml(formatTime(currentTime))} · ${escapeHtml(dentist)}</strong>
-        </div>
-        <div class="reschedule-detail-item full">
-          <span>Requested New Schedule</span>
-          <strong>${preferredDate && preferredTime ? `${escapeHtml(formatDate(preferredDate))} · ${escapeHtml(formatTime(preferredTime))}` : "No preferred schedule provided"}</strong>
-        </div>
-        ${
-          status === "approved" && approvedDate && approvedTime
-            ? `
-        <div class="reschedule-detail-item full">
-          <span>Approved Schedule</span>
-          <strong>${escapeHtml(formatDate(approvedDate))} · ${escapeHtml(formatTime(approvedTime))}</strong>
-        </div>
-        `
-            : ""
-        }
-        <div class="reschedule-detail-item full">
-          <span>Message to Clinic</span>
-          <p>${escapeHtml(latest?.message || "No message provided.")}</p>
-        </div>
-      `;
+          <div class="reschedule-detail-item">
+            <span>Reason</span>
+            <strong>${escapeHtml(latest?.reasonLabel || latest?.reason || "Reschedule Request")}</strong>
+          </div>
+          <div class="reschedule-detail-item">
+            <span>Service</span>
+            <strong>${escapeHtml(service)}</strong>
+          </div>
+          <div class="reschedule-detail-item full">
+            <span>Current Appointment</span>
+            <strong>${escapeHtml(formatDate(currentDate))} · ${escapeHtml(formatTime(currentTime))} · ${escapeHtml(dentist)}</strong>
+          </div>
+          <div class="reschedule-detail-item full">
+            <span>Requested New Schedule</span>
+            <strong>${preferredDate && preferredTime ? `${escapeHtml(formatDate(preferredDate))} · ${escapeHtml(formatTime(preferredTime))}` : "No preferred schedule provided"}</strong>
+          </div>
+          ${
+            status === "approved" && approvedDate && approvedTime
+              ? `
+          <div class="reschedule-detail-item full">
+            <span>Approved Schedule</span>
+            <strong>${escapeHtml(formatDate(approvedDate))} · ${escapeHtml(formatTime(approvedTime))}</strong>
+          </div>
+          `
+              : ""
+          }
+          <div class="reschedule-detail-item full">
+            <span>Message to Clinic</span>
+            <p>${escapeHtml(latest?.message || "No message provided.")}</p>
+          </div>
+        `;
   rescheduleDetailsRequestId = latest?.id || latest?.request_id || null;
   const confirmButton = document.getElementById("confirmRescheduleDetails");
   if (confirmButton) {

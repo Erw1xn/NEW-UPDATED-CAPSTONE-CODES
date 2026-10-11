@@ -31,28 +31,40 @@ async function initializePatientDashboard() {
 function refreshPatientDashboard() {
   void loadPatientDashboardData().then(renderPatientDashboard);
 }
+
 async function loadPatientDashboardData() {
-  const [recordResponse, financeResponse, doctorsResponse] = await Promise.all([
-    fetch(PATIENT_RECORD_API, {
-      credentials: "same-origin",
-      cache: "no-store",
-    }),
-    fetch(FINANCE_API, { credentials: "same-origin", cache: "no-store" }),
-    fetch(DOCTORS_API, { credentials: "same-origin", cache: "no-store" }),
-  ]);
+  const recordResponse = await fetch(PATIENT_RECORD_API, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
   const recordResult = await recordResponse.json();
-  const financeResult = await financeResponse.json();
-  const doctorsResult = await doctorsResponse.json();
   if (!recordResponse.ok || !recordResult.success || !recordResult.data) {
     throw new Error(recordResult.message || "Patient record unavailable.");
   }
-  patientDashboardData.patient = recordResult.data;
-  patientDashboardData.appointments = Array.isArray(
-    recordResult.data.appointments,
-  )
-    ? recordResult.data.appointments
+  const patient = recordResult.data;
+  const patientId = String(
+    patient.patientId || patient.patient_id || patient.id || "",
+  ).trim();
+  if (!patientId) {
+    throw new Error("Patient ID was not found.");
+  }
+  patientDashboardData.patient = patient;
+  patientDashboardData.appointments = Array.isArray(patient.appointments)
+    ? patient.appointments
     : [];
-  patientDashboardData.records = [recordResult.data];
+  patientDashboardData.records = [patient];
+  const [financeResponse, doctorsResponse] = await Promise.all([
+    fetch(`${FINANCE_API}?patient_id=${encodeURIComponent(patientId)}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+    }),
+    fetch(DOCTORS_API, {
+      credentials: "same-origin",
+      cache: "no-store",
+    }),
+  ]);
+  const financeResult = await financeResponse.json();
+  const doctorsResult = await doctorsResponse.json();
   patientDashboardData.transactions =
     financeResponse.ok &&
     financeResult.success &&
@@ -841,45 +853,93 @@ function getUpcomingAppointments() {
     })
     .sort(compareAppointments);
 }
+
 function calculatePaymentTotals() {
   let total = 0;
   let paid = 0;
   let discount = 0;
-  patientDashboardData.transactions.forEach((transaction) => {
+  const transactions = getStoredTransactions();
+
+  transactions.forEach((transaction) => {
     const transactionTotal = Number(
-      transaction.total ??
-        transaction.amountDue ??
+      transaction.total_amount ??
         transaction.totalAmount ??
-        transaction.total_amount ??
+        transaction.total ??
+        transaction.amountDue ??
         transaction.amount ??
         0,
     );
     const transactionDiscount = Number(
-      transaction.discount ??
+      transaction.discount_amount ??
         transaction.discountAmount ??
-        transaction.discount_amount ??
+        transaction.discount ??
         0,
     );
-    const transactionPaid = Number(
-      transaction.paid ??
-        transaction.amountPaid ??
-        transaction.amount_paid ??
-        transaction.payment ??
-        0,
-    );
+    const paymentHistory = Array.isArray(transaction.paymentHistory)
+      ? transaction.paymentHistory
+      : Array.isArray(transaction.payment_history)
+        ? transaction.payment_history
+        : null;
+
+    let transactionPaid = 0;
+
+    if (paymentHistory && paymentHistory.length > 0) {
+      transactionPaid = paymentHistory.reduce((sum, payment) => {
+        const status = String(payment.status || payment.payment_status || "")
+          .trim()
+          .toLowerCase();
+        const isSettled = [
+          "paid",
+          "partial",
+          "partially_paid",
+          "completed",
+          "succeeded",
+          "success",
+        ].includes(status);
+
+        return isSettled ? sum + Math.max(0, Number(payment.amount) || 0) : sum;
+      }, 0);
+    } else {
+      const status = String(
+        transaction.status || transaction.payment_status || "",
+      )
+        .trim()
+        .toLowerCase();
+      const isSettled = [
+        "paid",
+        "partial",
+        "partially_paid",
+        "completed",
+        "succeeded",
+        "success",
+      ].includes(status);
+
+      transactionPaid = isSettled
+        ? Math.max(
+            0,
+            Number(
+              transaction.paid_amount ??
+                transaction.amount_paid ??
+                transaction.amountPaid ??
+                transaction.paid ??
+                transaction.payment ??
+                0,
+            ) || 0,
+          )
+        : 0;
+    }
+
     if (Number.isFinite(transactionTotal) && transactionTotal > 0) {
       total += transactionTotal;
     }
+
     if (Number.isFinite(transactionDiscount) && transactionDiscount > 0) {
       discount += transactionDiscount;
     }
-    if (Number.isFinite(transactionPaid) && transactionPaid > 0) {
-      paid += transactionPaid;
-    }
-    if (transactionTotal === 0 && transactionPaid > 0) {
-      total += transactionPaid;
-    }
+
+    paid += transactionPaid;
   });
+
   return {
     total,
     discount,
@@ -887,6 +947,7 @@ function calculatePaymentTotals() {
     balance: Math.max(total - discount - paid, 0),
   };
 }
+
 function isMedicalRecordComplete() {
   const patient = patientDashboardData.patient;
   if (!patient || typeof patient !== "object") {

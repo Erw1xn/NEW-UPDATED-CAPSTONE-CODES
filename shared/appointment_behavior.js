@@ -31,14 +31,28 @@
       );
     }).length;
   }
-  function getServerRestriction(appointments) {
+  function getServerRestriction(appointments, patientId) {
     if (!appointments || typeof appointments !== "object") return null;
     const restriction = appointments.__bookingRestriction;
     if (!restriction || typeof restriction !== "object") return null;
-    return restriction;
+    const patientKey = String(patientId || "").trim();
+    if (
+      patientKey &&
+      restriction[patientKey] &&
+      typeof restriction[patientKey] === "object"
+    ) {
+      return restriction[patientKey];
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(restriction, "noShowCount") ||
+      Object.prototype.hasOwnProperty.call(restriction, "restrictedUntil")
+    ) {
+      return restriction;
+    }
+    return null;
   }
   function getRestriction(appointments, patientId) {
-    const serverRestriction = getServerRestriction(appointments);
+    const serverRestriction = getServerRestriction(appointments, patientId);
     const noShowCount = Number.isFinite(Number(serverRestriction?.noShowCount))
       ? Number(serverRestriction.noShowCount)
       : getNoShowCount(appointments, patientId);
