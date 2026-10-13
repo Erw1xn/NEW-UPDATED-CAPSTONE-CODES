@@ -3361,3 +3361,80 @@ select {
     max-width: none;
   }
 }
+
+@media (min-width: 1351px) {
+  .finance-header {
+    min-height: 84px;
+    margin-bottom: 16px;
+    padding: 18px 22px;
+  }
+  .finance-header h1 {
+    font-size: 17px;
+  }
+  .finance-header-info p {
+    font-size: 10px;
+  }
+  .header-action-btn,
+  .header-actions .primary-btn {
+    min-height: 40px;
+    font-size: 10px;
+  }
+  .summary-grid {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .finance-card {
+    min-height: 114px;
+    padding: 18px;
+    gap: 14px;
+  }
+  .card-icon {
+    width: 50px;
+    height: 50px;
+  }
+  .card-information > span:first-child {
+    font-size: 12.5px;
+  }
+  .card-information strong {
+    font-size: 23px;
+  }
+  .card-subtitle {
+    font-size: 10.5px;
+  }
+  .transaction-filters {
+    padding: 13px 18px;
+    gap: 10px;
+  }
+  .search-wrapper,
+  .transaction-filters select {
+    height: 42px;
+  }
+  .transaction-table th {
+    height: 44px;
+    font-size: 9.5px;
+  }
+  .transaction-table td {
+    height: 73px;
+    font-size: 11.5px;
+  }
+  .patient-avatar {
+    width: 38px;
+    height: 38px;
+  }
+  .patient-name {
+    font-size: 11.5px;
+  }
+  .charts-grid,
+  .lower-grid {
+    gap: 18px;
+  }
+  .chart-header {
+    padding: 22px 26px 16px;
+  }
+  .chart-header h2 {
+    font-size: 16.5px;
+  }
+  .chart-header p {
+    font-size: 10.5px;
+  }
+}

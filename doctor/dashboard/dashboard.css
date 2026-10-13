@@ -1544,3 +1544,75 @@ button:focus-visible {
     padding: 9px;
   }
 }
+
+@media (min-width: 1181px) {
+  .main-content {
+    padding: 20px 32px 32px;
+  }
+  .dashboard-header {
+    min-height: 76px;
+    margin-bottom: 15px;
+    padding: 16px 20px;
+  }
+  .header-left h1 {
+    font-size: 1.22rem;
+  }
+  .header-left p {
+    font-size: 0.68rem;
+  }
+  .date-time-card {
+    min-height: 46px;
+    font-size: 0.64rem;
+  }
+  .stats-grid {
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    min-height: 112px;
+    padding: 18px 20px;
+  }
+  .stat-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .stat-title {
+    font-size: 11px;
+  }
+  .stat-content strong {
+    font-size: 21px;
+  }
+  .stat-subtitle {
+    font-size: 10px;
+  }
+  .production-card {
+    margin-bottom: 18px;
+    padding: 18px 20px;
+  }
+  .production-header h2 {
+    font-size: 15px;
+  }
+  .progress-label {
+    font-size: 10px;
+  }
+  .two-col-grid,
+  .lower-grid,
+  .charts-grid {
+    gap: 18px;
+  }
+  .panel-header {
+    min-height: 73px;
+    padding: 17px 20px;
+  }
+  .panel-header h3,
+  .card-header h2 {
+    font-size: 14.5px;
+  }
+  .panel-subtitle,
+  .card-header p {
+    font-size: 10.5px;
+  }
+  .panel-body {
+    padding: 16px 20px 18px;
+  }
+}

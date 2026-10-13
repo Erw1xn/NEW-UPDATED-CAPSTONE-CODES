@@ -2357,3 +2357,189 @@ body {
   color: #fff !important;
   box-shadow: 0 4px 10px rgba(220, 56, 56, 0.25);
 }
+
+@media (min-width: 761px) {
+  .modal-container {
+    max-width: 500px;
+    border-radius: 19px;
+  }
+  .modal-header {
+    gap: 14px;
+    padding: 19px 22px;
+  }
+  .modal-header h3 {
+    font-size: 16px;
+  }
+  .modal-subtitle {
+    font-size: 9px;
+  }
+  .primary-btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 9px;
+  }
+  .modal-close-icon {
+    width: 34px;
+    height: 34px;
+  }
+  .modal-body {
+    padding: 22px 22px 8px;
+  }
+  .form-group {
+    margin-bottom: 17px;
+  }
+  .form-row-inline {
+    gap: 14px;
+  }
+  .form-row-inline .form-group {
+    margin-bottom: 17px;
+  }
+  .form-group label {
+    min-height: 16px;
+    margin-bottom: 7px;
+    font-size: 9.5px;
+  }
+  .form-control,
+  .modal-status {
+    height: 43px;
+    min-height: 43px;
+    font-size: 10.5px;
+  }
+  .form-control {
+    padding: 0 13px;
+  }
+  .duration-input-wrapper .form-control {
+    padding-right: 76px;
+  }
+  .duration-unit {
+    right: 13px;
+    font-size: 8.5px;
+  }
+  .view-only-notice {
+    gap: 10px;
+    padding: 12px 13px;
+  }
+  .view-only-notice strong {
+    font-size: 9px;
+  }
+  .view-only-notice span {
+    font-size: 8.3px;
+  }
+  .modal-actions {
+    padding: 10px 22px 20px;
+  }
+  .btn-cancel,
+  .btn-unavailable-save,
+  .btn-reopen {
+    min-height: 38px;
+    font-size: 9.5px;
+  }
+}
+
+@media (min-width: 1051px) {
+  .appointments-shell {
+    padding: 26px 28px 28px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 17px;
+  }
+  .appointments-page-heading p {
+    font-size: 10.5px;
+  }
+  .appointments-layout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 22px;
+    align-items: stretch;
+  }
+  .side-col-stack {
+    align-self: flex-start;
+    gap: 18px;
+  }
+  .calendar-panel {
+    padding: 20px;
+  }
+  .calendar-panel .calendar-header {
+    margin-bottom: 16px;
+  }
+  .calendar-panel h4 {
+    font-size: 14px;
+  }
+  .calendar-nav-btns button {
+    width: 34px;
+    height: 34px;
+  }
+  .day {
+    min-height: 35px;
+    font-size: 10px;
+  }
+  .side-content-panel {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+  .side-section-header {
+    min-height: 70px;
+    padding: 17px 20px 8px;
+  }
+  .side-section-title-line h3 {
+    font-size: 14px;
+  }
+  .side-section-description {
+    font-size: 9px;
+  }
+  .side-content-body {
+    flex: 0 0 auto;
+    padding: 10px 16px 18px;
+  }
+  .waiting-queue-list {
+    flex: 0 0 auto;
+    gap: 10px;
+  }
+  .queue-item {
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+  .queue-name {
+    font-size: 9.5px;
+  }
+  .queue-time {
+    font-size: 8px;
+  }
+  .queue-type {
+    font-size: 7.5px;
+  }
+  .schedule-panel {
+    height: 660px;
+    min-height: 660px;
+  }
+  .schedule-main-header {
+    min-height: 82px;
+    padding: 18px 26px;
+  }
+  .schedule-main-header h3 {
+    font-size: 19px;
+  }
+  .schedule-date-label {
+    font-size: 10px;
+  }
+  .time-slots-container {
+    padding: 8px 22px 22px 26px;
+  }
+  .tl-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    min-height: 80px;
+  }
+  .tl-time {
+    font-size: 10px;
+  }
+  .appt-card {
+    min-height: 66px;
+    padding: 11px 15px;
+  }
+  .pname {
+    font-size: 11px;
+  }
+  .ptype,
+  .appt-time-range {
+    font-size: 9px;
+  }
+}

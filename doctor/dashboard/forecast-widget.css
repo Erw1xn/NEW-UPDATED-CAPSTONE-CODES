@@ -651,3 +651,40 @@
     height: 200px;
   }
 }
+
+@media (min-width: 1181px) {
+  .two-col-grid
+    > .stacked-panel-column:first-child
+    > .panel.forecast-panel
+    .panel-body {
+    padding: 16px 22px 18px;
+  }
+  .forecast-panel .panel-header {
+    padding: 18px 22px 16px;
+  }
+  .forecast-panel .panel-heading .panel-subtitle {
+    font-size: 10.5px;
+  }
+  .forecast-panel .fc-body {
+    gap: 9px;
+  }
+  .fc-stats {
+    gap: 10px;
+  }
+  .fc-stat {
+    min-height: 80px;
+    padding: 11px 14px;
+  }
+  .fc-stat-label {
+    font-size: 10px;
+  }
+  .fc-stat-value {
+    font-size: 20px;
+  }
+  .fc-stat-sub {
+    font-size: 9.5px;
+  }
+  .fc-chart-wrap {
+    height: 188px;
+  }
+}

@@ -1306,7 +1306,7 @@ function renderWaitingQueue() {
   }
   list.innerHTML = "";
   const selectedKey = dateToKey(selectedDate);
-  const queue = filteredAppts();
+  const queue = filteredAppts().slice(0, 2);
   if (!queue.length) {
     const empty = document.createElement("div");
     empty.className = "empty-queue";

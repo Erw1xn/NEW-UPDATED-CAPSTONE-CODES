@@ -894,3 +894,110 @@ a:focus-visible {
   font-weight: 600;
   line-height: 1;
 }
+
+@media (min-width: 1181px) {
+  .dashboard-layout {
+    height: 100vh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 0;
+    padding: 16px 26px 18px;
+  }
+  .dash-header {
+    flex-shrink: 0;
+    min-height: 70px;
+    margin-bottom: 12px;
+    padding: 13px 18px;
+  }
+  .dashboard-title {
+    font-size: 1.22rem;
+  }
+  .dashboard-subtitle {
+    font-size: 0.68rem;
+  }
+  .stats-grid {
+    flex-shrink: 0;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    min-height: 104px;
+    padding: 16px 18px;
+  }
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .stat-label {
+    font-size: 11px;
+  }
+  .stat-value {
+    font-size: 23px;
+  }
+  .stat-trend,
+  .stat-trend.up,
+  .stat-trend.neutral,
+  .stat-trend.down,
+  #statPatientsTrend,
+  #statAppointmentsTrend,
+  #statTodayRevenueTrend,
+  #statMonthlyRevenueTrend {
+    font-size: 10px;
+  }
+  .two-col-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .stacked-panel-column {
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+  }
+  .two-col-grid > .stacked-panel-column:first-child {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .two-col-grid > .stacked-panel-column:first-child > .panel:first-child {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+  .forecast-panel .ta-list {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .forecast-panel .ta-empty {
+    min-height: 0;
+  }
+  .two-col-grid > .stacked-panel-column:last-child > .panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .two-col-grid > .stacked-panel-column:last-child > .panel:first-child {
+    min-height: 0;
+  }
+  .panel-header {
+    flex-shrink: 0;
+    min-height: 64px;
+    padding: 14px 18px;
+  }
+  .panel-header h3 {
+    font-size: 14.5px;
+  }
+  .panel-subtitle {
+    font-size: 10.5px;
+  }
+  .two-col-grid > .stacked-panel-column:last-child .panel-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}

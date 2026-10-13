@@ -57,7 +57,7 @@ button {
 .payments-main {
   flex: 1;
   min-width: 0;
-  padding: 28px 34px 38px;
+  padding: 28px 34px 36px;
 }
 .payments-content {
   width: 100%;
@@ -65,9 +65,9 @@ button {
   margin: 0 auto;
 }
 .payments-page-header {
-  min-height: 80px;
-  margin-bottom: 18px;
-  padding: 18px 24px;
+  min-height: 86px;
+  margin-bottom: 20px;
+  padding: 18px 26px;
   display: flex;
   align-items: center;
   border: 1px solid var(--border);
@@ -78,20 +78,10 @@ button {
 .page-title-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0;
 }
 .page-icon {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-md);
-  background: var(--green-soft);
-  border: 1px solid #d5eadc;
-  color: var(--green);
-  font-size: 1rem;
+  display: none !important;
 }
 .payments-heading {
   min-width: 0;
@@ -100,7 +90,7 @@ button {
   margin: 0 0 4px;
   color: #14231a;
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.025em;
@@ -108,24 +98,24 @@ button {
 .payments-heading p {
   margin: 0;
   color: var(--text-soft);
-  font-size: 10.5px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .payment-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .payment-summary-card {
   min-width: 0;
-  min-height: 114px;
-  padding: 16px 19px;
+  min-height: 112px;
+  padding: 18px 22px;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 44px minmax(0, 1fr);
   grid-template-rows: auto auto auto;
   align-content: center;
-  column-gap: 12px;
+  column-gap: 14px;
   row-gap: 2px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -144,7 +134,7 @@ button {
 .summary-card-top {
   display: contents;
   color: #65736b;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -155,8 +145,8 @@ button {
 .summary-icon {
   position: relative;
   overflow: hidden;
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   grid-column: 1;
   grid-row: 1 / span 3;
   display: flex;
@@ -164,8 +154,8 @@ button {
   justify-content: center;
   align-self: center;
   border: 1px solid transparent;
-  border-radius: 11px;
-  font-size: 13px;
+  border-radius: 12px;
+  font-size: 15px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 2px 6px rgba(28, 52, 38, 0.08);
@@ -178,8 +168,8 @@ button {
   position: absolute;
   top: -8px;
   right: -8px;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: 1px solid currentColor;
   border-radius: 50%;
   content: "";
@@ -207,7 +197,7 @@ button {
   margin-top: 0;
   color: #17241c;
   font-family: var(--font-heading);
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -217,7 +207,7 @@ button {
   grid-row: 3;
   margin: 3px 0 0;
   color: var(--text-muted);
-  font-size: 8.5px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .balance-card strong {
@@ -225,7 +215,7 @@ button {
 }
 .payment-history-card {
   overflow: hidden;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--white);
@@ -233,7 +223,7 @@ button {
 }
 .payment-history-header {
   min-height: 78px;
-  padding: 18px 22px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -244,19 +234,26 @@ button {
   margin: 0 0 3px;
   color: #17251d;
   font-family: var(--font-heading);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.3;
 }
 .payment-history-header p {
   margin: 0;
   color: #7b8780;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.45;
 }
+.payment-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .transaction-count {
-  min-height: 28px;
-  padding: 0 11px;
+  min-height: 32px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -264,13 +261,44 @@ button {
   border-radius: var(--radius-sm);
   background: #f4faf6;
   color: #3c7d55;
-  font-size: 7.5px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
+.export-pdf-btn {
+  min-height: 32px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--green);
+  border-radius: var(--radius-sm);
+  background: var(--green);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.export-pdf-btn i {
+  font-size: 12px;
+}
+.export-pdf-btn:hover:not(:disabled) {
+  border-color: var(--green-dark);
+  background: var(--green-dark);
+  transform: translateY(-1px);
+}
+.export-pdf-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
 .payment-filters {
-  min-height: 54px;
-  padding: 10px 22px;
+  min-height: 52px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -278,13 +306,13 @@ button {
   background: #fbfcfb;
 }
 .payment-filter {
-  min-height: 31px;
-  padding: 0 14px;
+  min-height: 32px;
+  padding: 0 16px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   color: #78847d;
-  font-size: 8px;
+  font-size: 11.5px;
   font-weight: 700;
   transition:
     background 0.15s ease,
@@ -302,42 +330,41 @@ button {
 }
 .payment-table-wrapper {
   width: 100%;
-  overflow-x: auto;
+  overflow: visible;
 }
 .payment-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 0;
   border-collapse: collapse;
   table-layout: auto;
 }
 .payment-table th {
-  height: 48px;
-  padding: 0 16px;
+  height: 46px;
+  padding: 0 10px;
   border-bottom: 1px solid #e9eeeb;
   background: #fcfdfc;
   color: #87928b;
-  font-size: 8.5px;
+  font-size: 10.5px;
   font-weight: 700;
   text-align: left;
   text-transform: uppercase;
-  letter-spacing: 0.045em;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 .payment-table th:first-child,
 .payment-table td:first-child {
-  width: 250px;
-  padding-left: 22px;
+  padding-left: 24px;
 }
 .payment-table th:last-child,
 .payment-table td:last-child {
-  padding-right: 22px;
+  padding-right: 24px;
 }
 .payment-table td {
-  height: 78px;
-  padding: 12px 16px;
+  height: 74px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--border-soft);
   color: #536158;
-  font-size: 10px;
+  font-size: 12px;
   vertical-align: middle;
 }
 .payment-table td:nth-last-child(2) {
@@ -352,22 +379,22 @@ button {
 .transaction-patient {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   min-width: 0;
 }
 .transaction-avatar {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 11px;
   background: linear-gradient(145deg, #eaf7ef, #dcf0e4);
   border: 1px solid #d5eadc;
   color: var(--green);
   font-family: var(--font-heading);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 .transaction-patient-info {
@@ -380,7 +407,7 @@ button {
   margin: 0;
   color: #24332a;
   font-family: var(--font-heading);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
@@ -389,28 +416,27 @@ button {
 }
 .transaction-id {
   display: block;
+  margin-top: 2px;
   color: #89958e;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 500;
   line-height: 1.3;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .transaction-reference {
   display: block;
   color: #99a29c;
-  font-size: 8px;
-  white-space: nowrap;
+  font-size: 10px;
 }
 .service-name {
   color: #3b4c42;
   font-weight: 600;
-  white-space: nowrap;
 }
 .payment-amount,
 .payment-discount,
 .payment-balance {
   font-family: var(--font-heading);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -424,24 +450,22 @@ button {
 .payment-method {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   color: #68766d;
-  white-space: nowrap;
 }
 .payment-method i {
-  font-size: 9px;
+  font-size: 11px;
 }
 .payment-status-badge {
-  width: 68px;
-  min-width: 68px;
-  height: 32px;
-  padding: 0 10px;
+  min-width: 66px;
+  height: 28px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   font-family: var(--font-body);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -470,21 +494,21 @@ button {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 7px;
+  gap: 6px;
 }
 .view-payment-btn,
 .pay-payment-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 32px;
+  flex: 0 0 34px;
   border: 1px solid #dfe7e2;
   border-radius: var(--radius-sm);
   background: #fff;
   color: #708078;
-  font-size: 10px;
+  font-size: 12px;
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -523,29 +547,29 @@ button {
   display: none;
 }
 .payment-empty-icon {
-  width: 54px;
-  height: 54px;
-  margin-bottom: 13px;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
   background: #f1f8f4;
   color: var(--green);
-  font-size: 16px;
+  font-size: 18px;
 }
 .payment-empty-state h3 {
   margin: 0 0 5px;
   color: #27352d;
   font-family: var(--font-heading);
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: 700;
 }
 .payment-empty-state p {
-  max-width: 330px;
+  max-width: 350px;
   margin: 0;
   color: #89948d;
-  font-size: 8.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .payment-modal,
@@ -1526,16 +1550,134 @@ button {
 }
 .mobile-payment-patient {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #24332a;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .payments-main {
-    padding: 20px;
+    padding: 24px 22px 32px;
   }
-  .payment-table {
-    min-width: 1180px;
+  .payment-history-header {
+    padding: 14px 18px;
+  }
+  .payment-filters {
+    padding: 8px 18px;
+  }
+  .payment-table th {
+    padding: 0 6px;
+    font-size: 9.5px;
+    letter-spacing: 0.02em;
+  }
+  .payment-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+  .payment-table th:first-child,
+  .payment-table td:first-child {
+    padding-left: 18px;
+  }
+  .payment-table th:last-child,
+  .payment-table td:last-child {
+    padding-right: 18px;
+  }
+  .transaction-avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    font-size: 10px;
+  }
+  .transaction-patient {
+    gap: 8px;
+  }
+  .transaction-patient-name {
+    font-size: 12px;
+  }
+  .transaction-id {
+    font-size: 9px;
+  }
+  .payment-amount,
+  .payment-discount,
+  .payment-balance {
+    font-size: 11px;
+  }
+  .payment-method i {
+    font-size: 10px;
+  }
+  .payment-status-badge {
+    min-width: 58px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+  .view-payment-btn,
+  .pay-payment-btn {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    font-size: 11px;
+  }
+  .payment-action-group {
+    gap: 4px;
+  }
+}
+@media (max-width: 1200px) {
+  .payments-main {
+    padding: 20px 16px 28px;
+  }
+  .payment-table th {
+    padding: 0 4px;
+    font-size: 9px;
+    letter-spacing: 0;
+  }
+  .payment-table td {
+    padding: 10px 4px;
+    font-size: 10.5px;
+  }
+  .payment-table th:first-child,
+  .payment-table td:first-child {
+    padding-left: 14px;
+  }
+  .payment-table th:last-child,
+  .payment-table td:last-child {
+    padding-right: 14px;
+  }
+  .transaction-avatar {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 9px;
+    font-size: 9px;
+  }
+  .transaction-patient {
+    gap: 6px;
+  }
+  .transaction-patient-name {
+    font-size: 11px;
+  }
+  .transaction-id {
+    font-size: 8.5px;
+  }
+  .payment-amount,
+  .payment-discount,
+  .payment-balance {
+    font-size: 10.5px;
+  }
+  .payment-status-badge {
+    min-width: 52px;
+    height: 24px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+  .view-payment-btn,
+  .pay-payment-btn {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    font-size: 10px;
+  }
+  .payment-method {
+    gap: 4px;
   }
 }
 @media (max-width: 800px) {
@@ -1550,6 +1692,10 @@ button {
   }
   .payment-history-header {
     align-items: flex-start;
+    padding: 14px 16px;
+  }
+  .payment-filters {
+    padding: 8px 16px;
   }
   .mobile-payment-item {
     padding: 14px 16px;
@@ -1567,18 +1713,18 @@ button {
   .mobile-payment-id {
     color: #24332a;
     font-family: var(--font-heading);
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 700;
   }
   .mobile-payment-date {
     margin-top: 3px;
     color: #89948e;
-    font-size: 7px;
+    font-size: 11px;
   }
   .mobile-payment-service {
     margin-top: 9px;
     color: #3b4c42;
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 700;
   }
   .mobile-payment-details {
@@ -1597,11 +1743,11 @@ button {
     display: block;
     margin-bottom: 3px;
     color: #89948e;
-    font-size: 6.5px;
+    font-size: 10px;
   }
   .mobile-payment-detail strong {
     color: #35453c;
-    font-size: 8px;
+    font-size: 12px;
   }
   .mobile-payment-bottom {
     margin-top: 10px;
@@ -1619,13 +1765,12 @@ button {
     padding: 15px;
   }
   .payments-page-header {
-    padding: 15px;
+    min-height: 76px;
+    padding: 14px 18px;
   }
-  .payment-history-header {
-    padding: 14px 16px;
-  }
-  .payment-filters {
-    padding: 8px 16px;
+  .payment-summary-card {
+    min-height: 100px;
+    padding: 16px 18px;
   }
   .patient-pay-dialog {
     width: 100%;
@@ -1662,100 +1807,6 @@ button {
     width: 100%;
   }
 }
-@media (max-width: 480px) {
-  .payments-main {
-    padding: 10px;
-  }
-  .payment-summary-card {
-    min-height: 100px;
-    padding: 13px;
-  }
-  .payment-history-header {
-    flex-direction: column;
-  }
-  .transaction-count {
-    align-self: flex-start;
-  }
-  .patient-pay-body,
-  .payment-modal-body,
-  .receipt-modal-body {
-    padding: 14px;
-  }
-  .payment-modal,
-  .receipt-modal,
-  .patient-pay-modal {
-    padding: 10px;
-  }
-  .payment-modal-dialog,
-  .receipt-modal-dialog,
-  .patient-pay-dialog {
-    max-height: calc(100vh - 20px);
-  }
-}
-.page-icon {
-  display: none !important;
-}
-.payments-main {
-  padding: 24px 30px 32px;
-}
-.payments-page-header {
-  min-height: 74px;
-  margin-bottom: 16px;
-  padding: 16px 22px;
-}
-.page-title-row {
-  gap: 0;
-}
-.payments-heading h1 {
-  font-size: 20px;
-  line-height: 1.2;
-}
-.payments-heading p {
-  font-size: 10.5px;
-  line-height: 1.5;
-}
-.payment-summary-grid {
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.payment-summary-card {
-  min-height: 108px;
-  padding: 15px 18px;
-  column-gap: 11px;
-}
-.summary-icon {
-  width: 34px;
-  height: 34px;
-  font-size: 12px;
-}
-.payment-summary-card strong {
-  font-size: 23px;
-}
-.payment-history-card {
-  margin-bottom: 16px;
-}
-.payment-history-header {
-  min-height: 72px;
-  padding: 16px 22px;
-}
-.payment-filters {
-  min-height: 48px;
-  padding: 8px 22px;
-}
-.payment-table th {
-  height: 48px;
-}
-.payment-table td {
-  height: 78px;
-}
-@media (max-width: 800px) {
-  .payment-history-header {
-    padding: 14px 16px;
-  }
-  .payment-filters {
-    padding: 8px 16px;
-  }
-}
 @media (max-width: 768px) {
   .payments-main {
     padding: 14px 14px 24px;
@@ -1774,50 +1825,53 @@ button {
   }
   .payments-heading h1 {
     margin-bottom: 3px;
+    font-size: 20px;
+  }
+  .payments-heading p {
+    font-size: 12px;
   }
 }
-
-.payment-history-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.export-pdf-btn {
-  min-height: 28px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid var(--green);
-  border-radius: var(--radius-sm);
-  background: var(--green);
-  color: #fff;
-  font-size: 8px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
-}
-.export-pdf-btn i {
-  font-size: 9px;
-}
-.export-pdf-btn:hover:not(:disabled) {
-  border-color: var(--green-dark);
-  background: var(--green-dark);
-  transform: translateY(-1px);
-}
-.export-pdf-btn:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
 @media (max-width: 480px) {
+  .payments-main {
+    padding: 10px;
+  }
+  .payment-summary-card {
+    min-height: 96px;
+    padding: 13px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  .summary-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+  }
+  .payment-summary-card strong {
+    font-size: 21px;
+  }
+  .payment-history-header {
+    flex-direction: column;
+  }
+  .transaction-count {
+    align-self: flex-start;
+  }
   .payment-history-actions {
     align-self: flex-start;
     justify-content: flex-start;
+  }
+  .patient-pay-body,
+  .payment-modal-body,
+  .receipt-modal-body {
+    padding: 14px;
+  }
+  .payment-modal,
+  .receipt-modal,
+  .patient-pay-modal {
+    padding: 10px;
+  }
+  .payment-modal-dialog,
+  .receipt-modal-dialog,
+  .patient-pay-dialog {
+    max-height: calc(100vh - 20px);
   }
 }

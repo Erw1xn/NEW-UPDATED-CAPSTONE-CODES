@@ -173,26 +173,26 @@ function openClinicalImageViewer(title, beforeImage, afterImage) {
   const modal = document.createElement("div");
   modal.className = "clinical-image-viewer";
   modal.innerHTML = `
-      <div class="clinical-image-viewer-dialog">
-        <button type="button" class="clinical-image-viewer-close" aria-label="Close">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="clinical-image-viewer-header">
-          <span>CLINICAL DOCUMENTATION</span>
-          <h3>${escapeHTML(title)}</h3>
-        </div>
-        <div class="clinical-image-viewer-pair">
-          <div class="clinical-image-viewer-side">
-            <span class="before">BEFORE</span>
-            ${beforeImage ? `<img src="${escapeHTML(beforeImage)}" alt="Before" />` : `<div class="clinical-image-viewer-empty">No before image</div>`}
+        <div class="clinical-image-viewer-dialog">
+          <button type="button" class="clinical-image-viewer-close" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="clinical-image-viewer-header">
+            <span>CLINICAL DOCUMENTATION</span>
+            <h3>${escapeHTML(title)}</h3>
           </div>
-          <div class="clinical-image-viewer-side">
-            <span class="after">AFTER</span>
-            ${afterImage ? `<img src="${escapeHTML(afterImage)}" alt="After" />` : `<div class="clinical-image-viewer-empty">No after image</div>`}
+          <div class="clinical-image-viewer-pair">
+            <div class="clinical-image-viewer-side">
+              <span class="before">BEFORE</span>
+              ${beforeImage ? `<img src="${escapeHTML(beforeImage)}" alt="Before" />` : `<div class="clinical-image-viewer-empty">No before image</div>`}
+            </div>
+            <div class="clinical-image-viewer-side">
+              <span class="after">AFTER</span>
+              ${afterImage ? `<img src="${escapeHTML(afterImage)}" alt="After" />` : `<div class="clinical-image-viewer-empty">No after image</div>`}
+            </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
   document.body.appendChild(modal);
   const closeViewer = () => modal.remove();
   modal
@@ -691,40 +691,40 @@ function renderPatientOverview() {
   const gender =
     currentPatient.gender || currentPatient.patientGender || "Not specified";
   container.innerHTML = `
-      <div class="patient-overview-card">
-        <div class="patient-overview-card-header">
-          <div>
-            <span class="record-page-eyebrow">PATIENT INFORMATION</span>
-            <h3>Personal Information</h3>
+        <div class="patient-overview-card">
+          <div class="patient-overview-card-header">
+            <div>
+              <span class="record-page-eyebrow">PATIENT INFORMATION</span>
+              <h3>Personal Information</h3>
+            </div>
+            <button type="button" class="profile-edit-btn" id="editProfileBtn">
+              <i class="fa-solid fa-pen-to-square"></i>
+              Edit Record
+            </button>
           </div>
-          <button type="button" class="profile-edit-btn" id="editProfileBtn">
-            <i class="fa-solid fa-pen-to-square"></i>
-            Edit Record
-          </button>
+          <div class="patient-overview-information-grid">
+            ${patientOverviewItem("Patient Name", name)}
+            ${patientOverviewItem("Patient ID", patientId)}
+            ${patientOverviewItem("Date of Birth", formatDate(currentPatient.dateOfBirth))}
+            ${patientOverviewItem("Gender", gender)}
+            ${patientOverviewItem("Phone", currentPatient.phone)}
+            ${patientOverviewItem("Email", currentPatient.email)}
+            ${patientOverviewItem("Emergency Contact", currentPatient.emergencyName)}
+            ${patientOverviewItem("Emergency Contact No.", currentPatient.emergencyContact)}
+            ${patientOverviewItem("Address", currentPatient.address, true)}
+          </div>
         </div>
-        <div class="patient-overview-information-grid">
-          ${patientOverviewItem("Patient Name", name)}
-          ${patientOverviewItem("Patient ID", patientId)}
-          ${patientOverviewItem("Date of Birth", formatDate(currentPatient.dateOfBirth))}
-          ${patientOverviewItem("Gender", gender)}
-          ${patientOverviewItem("Phone", currentPatient.phone)}
-          ${patientOverviewItem("Email", currentPatient.email)}
-          ${patientOverviewItem("Emergency Contact", currentPatient.emergencyName)}
-          ${patientOverviewItem("Emergency Contact No.", currentPatient.emergencyContact)}
-          ${patientOverviewItem("Address", currentPatient.address, true)}
-        </div>
-      </div>
-    `;
+      `;
 }
 function patientOverviewItem(label, value, fullWidth = false) {
   return `
-      <div class="patient-overview-information-item${fullWidth ? " full-width" : ""}">
-        <div>
-          <span>${escapeHTML(label)}</span>
-          <strong>${escapeHTML(String(value || "Not provided"))}</strong>
+        <div class="patient-overview-information-item${fullWidth ? " full-width" : ""}">
+          <div>
+            <span>${escapeHTML(label)}</span>
+            <strong>${escapeHTML(String(value || "Not provided"))}</strong>
+          </div>
         </div>
-      </div>
-    `;
+      `;
 }
 function renderPatientMedicalRecord() {
   const container = $("patientPageMedical");
@@ -734,12 +734,12 @@ function renderPatientMedicalRecord() {
   const medical = currentPatient.medicalForm;
   if (!medical?.completed) {
     container.innerHTML = `
-        <div class="patient-record-empty">
-          <i class="fa-solid fa-notes-medical"></i>
-          <h3>No Medical Record Yet</h3>
-          <p>Your medical and dental history has not been completed yet.</p>
-        </div>
-      `;
+          <div class="patient-record-empty">
+            <i class="fa-solid fa-notes-medical"></i>
+            <h3>No Medical Record Yet</h3>
+            <p>Your medical and dental history has not been completed yet.</p>
+          </div>
+        `;
     return;
   }
   const dentalConcerns = [
@@ -761,38 +761,38 @@ function renderPatientMedicalRecord() {
     allergies.push(medical.allergyOther);
   }
   container.innerHTML = `
-      <div class="patient-medical-record-grid">
-        <div class="patient-record-info-card">
-          <h3>Dental Concern</h3>
-          ${patientRecordInfo("Reason for Visit", dentalConcerns.join(", ") || "None provided")}
-          ${patientRecordInfo("Negative Dental Experience", medical.negativeExperience || "No")}
-          ${patientRecordInfo("Explanation", medical.negativeExperienceNote || "Not provided")}
+        <div class="patient-medical-record-grid">
+          <div class="patient-record-info-card">
+            <h3>Dental Concern</h3>
+            ${patientRecordInfo("Reason for Visit", dentalConcerns.join(", ") || "None provided")}
+            ${patientRecordInfo("Negative Dental Experience", medical.negativeExperience || "No")}
+            ${patientRecordInfo("Explanation", medical.negativeExperienceNote || "Not provided")}
+          </div>
+          <div class="patient-record-info-card">
+            <h3>Dental History</h3>
+            ${patientRecordInfo("Last Dental Visit", formatDate(medical.medLastVisit))}
+            ${patientRecordInfo("Last Treatment", medical.medLastTreatment || "Not provided")}
+            ${patientRecordInfo("Current Medications", medical.currentMedications || "No")}
+            ${patientRecordInfo("Medication / Supplement List", medical.currentMedicationsList || "Not provided")}
+          </div>
+          <div class="patient-record-info-card">
+            <h3>Medical History</h3>
+            ${patientRecordInfo("Medical Conditions", medicalHistory.join(", ") || "None provided")}
+          </div>
+          <div class="patient-record-info-card">
+            <h3>Allergies</h3>
+            ${patientRecordInfo("Allergies", allergies.join(", ") || "None provided")}
+          </div>
         </div>
-        <div class="patient-record-info-card">
-          <h3>Dental History</h3>
-          ${patientRecordInfo("Last Dental Visit", formatDate(medical.medLastVisit))}
-          ${patientRecordInfo("Last Treatment", medical.medLastTreatment || "Not provided")}
-          ${patientRecordInfo("Current Medications", medical.currentMedications || "No")}
-          ${patientRecordInfo("Medication / Supplement List", medical.currentMedicationsList || "Not provided")}
-        </div>
-        <div class="patient-record-info-card">
-          <h3>Medical History</h3>
-          ${patientRecordInfo("Medical Conditions", medicalHistory.join(", ") || "None provided")}
-        </div>
-        <div class="patient-record-info-card">
-          <h3>Allergies</h3>
-          ${patientRecordInfo("Allergies", allergies.join(", ") || "None provided")}
-        </div>
-      </div>
-    `;
+      `;
 }
 function patientRecordInfo(label, value) {
   return `
-      <div class="patient-record-info-row">
-        <span>${escapeHTML(label)}</span>
-        <strong>${escapeHTML(String(value || "Not provided"))}</strong>
-      </div>
-    `;
+        <div class="patient-record-info-row">
+          <span>${escapeHTML(label)}</span>
+          <strong>${escapeHTML(String(value || "Not provided"))}</strong>
+        </div>
+      `;
 }
 function renderPatientDentalChart() {
   const container = $("patientPageDental");
@@ -827,13 +827,13 @@ function renderPatientDentalChart() {
       String(record.procedure || "").trim() ||
       (Array.isArray(record.history) && record.history.length);
     return `
-        <div class="patient-dental-tooth-item">
-          <span class="patient-dental-tooth-number">${escapeHTML(number)}</span>
-          <div class="patient-dental-tooth ${hasRecord ? "recorded" : ""}">
-            <i class="fa-solid fa-tooth"></i>
+          <div class="patient-dental-tooth-item">
+            <span class="patient-dental-tooth-number">${escapeHTML(number)}</span>
+            <div class="patient-dental-tooth ${hasRecord ? "recorded" : ""}">
+              <i class="fa-solid fa-tooth"></i>
+            </div>
           </div>
-        </div>
-      `;
+        `;
   };
   const buildHistory = (number) => {
     const record = teeth[number] || {};
@@ -856,148 +856,148 @@ function renderPatientDentalChart() {
     return history
       .map(
         (item, index) => `
-          <div class="patient-dental-history-entry">
-            <div class="patient-dental-history-entry-dot"></div>
-            <div class="patient-dental-history-entry-content">
-              <div class="patient-dental-history-entry-title">
-                ${escapeHTML(item.procedure || "Dental Procedure")}
+            <div class="patient-dental-history-entry">
+              <div class="patient-dental-history-entry-dot"></div>
+              <div class="patient-dental-history-entry-content">
+                <div class="patient-dental-history-entry-title">
+                  ${escapeHTML(item.procedure || "Dental Procedure")}
+                  ${
+                    index === 0
+                      ? `<span class="patient-dental-latest">LATEST</span>`
+                      : ""
+                  }
+                </div>
                 ${
-                  index === 0
-                    ? `<span class="patient-dental-latest">LATEST</span>`
+                  item.updatedAt
+                    ? `
+                      <div class="patient-dental-history-entry-date">
+                        ${escapeHTML(
+                          formatDate(String(item.updatedAt).slice(0, 10)),
+                        )}
+                      </div>
+                    `
+                    : ""
+                }
+                ${
+                  item.note
+                    ? `
+                      <div class="patient-dental-history-entry-note">
+                        ${escapeHTML(item.note)}
+                      </div>
+                    `
                     : ""
                 }
               </div>
-              ${
-                item.updatedAt
-                  ? `
-                    <div class="patient-dental-history-entry-date">
-                      ${escapeHTML(
-                        formatDate(String(item.updatedAt).slice(0, 10)),
-                      )}
-                    </div>
-                  `
-                  : ""
-              }
-              ${
-                item.note
-                  ? `
-                    <div class="patient-dental-history-entry-note">
-                      ${escapeHTML(item.note)}
-                    </div>
-                  `
-                  : ""
-              }
             </div>
-          </div>
-        `,
+          `,
       )
       .join("");
   };
   const historyRecords = recordedTeeth
     .map(
       (number) => `
-        <div class="patient-dental-history-card">
-          <div class="patient-dental-history-tooth">
-            <div class="patient-dental-history-tooth-icon">
-              <i class="fa-solid fa-tooth"></i>
+          <div class="patient-dental-history-card">
+            <div class="patient-dental-history-tooth">
+              <div class="patient-dental-history-tooth-icon">
+                <i class="fa-solid fa-tooth"></i>
+              </div>
+              <div>
+                <span>TOOTH</span>
+                <strong>${escapeHTML(number)}</strong>
+              </div>
             </div>
-            <div>
-              <span>TOOTH</span>
-              <strong>${escapeHTML(number)}</strong>
+            <div class="patient-dental-history-content">
+              ${buildHistory(number)}
             </div>
           </div>
-          <div class="patient-dental-history-content">
-            ${buildHistory(number)}
-          </div>
-        </div>
-      `,
+        `,
     )
     .join("");
   container.innerHTML = `
-      <div class="patient-record-section">
-        <div class="patient-record-section-header">
-          <div>
-            <span class="patient-record-section-eyebrow">
-              ODONTOGRAM
-            </span>
-            <h3>Dental Chart</h3>
-            <p>
-              Patient-specific dental procedures recorded by the Doctor.
-            </p>
-          </div>
-          <span class="patient-record-count">
-            ${recordedTeeth.length}
-            ${recordedTeeth.length === 1 ? "tooth" : "teeth"} recorded
-          </span>
-        </div>
-        <div class="patient-dental-chart-view">
-          <div class="patient-dental-arch-label">
-            UPPER ARCH
-          </div>
-          <div class="patient-dental-arch-row">
-            ${upperLeft.map(toothButton).join("")}
-            <div class="patient-dental-midline">
-              MIDLINE
+        <div class="patient-record-section">
+          <div class="patient-record-section-header">
+            <div>
+              <span class="patient-record-section-eyebrow">
+                ODONTOGRAM
+              </span>
+              <h3>Dental Chart</h3>
+              <p>
+                Patient-specific dental procedures recorded by the Doctor.
+              </p>
             </div>
-            ${upperRight.map(toothButton).join("")}
-          </div>
-          <div class="patient-dental-divider"></div>
-          <div class="patient-dental-arch-row">
-            ${lowerLeft.map(toothButton).join("")}
-            <div class="patient-dental-midline"></div>
-            ${lowerRight.map(toothButton).join("")}
-          </div>
-          <div class="patient-dental-arch-label">
-            LOWER ARCH
-          </div>
-        </div>
-      </div>
-      <div class="patient-record-section">
-        <div class="patient-record-section-header">
-          <div>
-            <span class="patient-record-section-eyebrow">
-              PROCEDURE HISTORY
+            <span class="patient-record-count">
+              ${recordedTeeth.length}
+              ${recordedTeeth.length === 1 ? "tooth" : "teeth"} recorded
             </span>
-            <h3>
-              ${
-                recordedTeeth.length
-                  ? "Recorded Dental Procedures"
-                  : "No Dental Procedures Yet"
-              }
-            </h3>
-            <p>
-              Dental procedures recorded by the Doctor.
-            </p>
+          </div>
+          <div class="patient-dental-chart-view">
+            <div class="patient-dental-arch-label">
+              UPPER ARCH
+            </div>
+            <div class="patient-dental-arch-row">
+              ${upperLeft.map(toothButton).join("")}
+              <div class="patient-dental-midline">
+                MIDLINE
+              </div>
+              ${upperRight.map(toothButton).join("")}
+            </div>
+            <div class="patient-dental-divider"></div>
+            <div class="patient-dental-arch-row">
+              ${lowerLeft.map(toothButton).join("")}
+              <div class="patient-dental-midline"></div>
+              ${lowerRight.map(toothButton).join("")}
+            </div>
+            <div class="patient-dental-arch-label">
+              LOWER ARCH
+            </div>
           </div>
         </div>
-        ${
-          historyRecords
-            ? `
-              <div class="patient-dental-history-list">
-                ${historyRecords}
-              </div>
-            `
-            : `
-              <div class="patient-record-empty">
-                <i class="fa-solid fa-tooth"></i>
-                <strong>No dental procedures recorded</strong>
-                <span>
-                  Dental procedures will appear here after they are recorded by the Doctor.
-                </span>
-              </div>
-            `
-        }
-      </div>
-      <div class="patient-record-view-only">
-        <i class="fa-solid fa-eye"></i>
-        <div>
-          <strong>View Only</strong>
-          <span>
-            Displaying dental procedures recorded by the Doctor. No changes can be made from the Patient account.
-          </span>
+        <div class="patient-record-section">
+          <div class="patient-record-section-header">
+            <div>
+              <span class="patient-record-section-eyebrow">
+                PROCEDURE HISTORY
+              </span>
+              <h3>
+                ${
+                  recordedTeeth.length
+                    ? "Recorded Dental Procedures"
+                    : "No Dental Procedures Yet"
+                }
+              </h3>
+              <p>
+                Dental procedures recorded by the Doctor.
+              </p>
+            </div>
+          </div>
+          ${
+            historyRecords
+              ? `
+                <div class="patient-dental-history-list">
+                  ${historyRecords}
+                </div>
+              `
+              : `
+                <div class="patient-record-empty">
+                  <i class="fa-solid fa-tooth"></i>
+                  <strong>No dental procedures recorded</strong>
+                  <span>
+                    Dental procedures will appear here after they are recorded by the Doctor.
+                  </span>
+                </div>
+              `
+          }
         </div>
-      </div>
-    `;
+        <div class="patient-record-view-only">
+          <i class="fa-solid fa-eye"></i>
+          <div>
+            <strong>View Only</strong>
+            <span>
+              Displaying dental procedures recorded by the Doctor. No changes can be made from the Patient account.
+            </span>
+          </div>
+        </div>
+      `;
 }
 function renderPatientClinicalImages() {
   const container = $("patientPageImages");
@@ -1015,6 +1015,30 @@ function renderPatientClinicalImages() {
   });
   if (!clinicalImages.length) {
     container.innerHTML = `
+          <div class="patient-record-section">
+            <div class="patient-record-section-header">
+              <div>
+                <span class="patient-record-section-eyebrow">
+                  CLINICAL DOCUMENTATION
+                </span>
+                <h3>Clinical Images</h3>
+                <p>
+                  Clinical photographs recorded by the Doctor.
+                </p>
+              </div>
+            </div>
+            <div class="patient-record-empty">
+              <i class="fa-regular fa-images"></i>
+              <strong>No clinical images yet</strong>
+              <span>
+                Clinical images will appear here after they are uploaded by the Doctor.
+              </span>
+            </div>
+          </div>
+        `;
+    return;
+  }
+  container.innerHTML = `
         <div class="patient-record-section">
           <div class="patient-record-section-header">
             <div>
@@ -1023,124 +1047,101 @@ function renderPatientClinicalImages() {
               </span>
               <h3>Clinical Images</h3>
               <p>
-                Clinical photographs recorded by the Doctor.
+                Before and after clinical photographs recorded by the Doctor.
               </p>
             </div>
-          </div>
-          <div class="patient-record-empty">
-            <i class="fa-regular fa-images"></i>
-            <strong>No clinical images yet</strong>
-            <span>
-              Clinical images will appear here after they are uploaded by the Doctor.
+            <span class="patient-record-count">
+              ${clinicalImages.length}
+              ${clinicalImages.length === 1 ? "record" : "records"}
             </span>
           </div>
-        </div>
-      `;
-    return;
-  }
-  container.innerHTML = `
-      <div class="patient-record-section">
-        <div class="patient-record-section-header">
-          <div>
-            <span class="patient-record-section-eyebrow">
-              CLINICAL DOCUMENTATION
-            </span>
-            <h3>Clinical Images</h3>
-            <p>
-              Before and after clinical photographs recorded by the Doctor.
-            </p>
-          </div>
-          <span class="patient-record-count">
-            ${clinicalImages.length}
-            ${clinicalImages.length === 1 ? "record" : "records"}
-          </span>
-        </div>
-        <div class="staff-clinical-images-list">
-          ${clinicalImages
-            .map((image) => {
-              const title = image.title || "Clinical Image";
-              const description = image.description || "";
-              const date = image.date || image.createdAt || "";
-              const beforeImage =
-                image.beforeImageData ||
-                image.beforeImage ||
-                image.imageData ||
-                "";
-              const afterImage = image.afterImageData || image.afterImage || "";
-              return `
-                <div class="staff-clinical-image-card patient-clinical-image-readonly">
-                  <div class="staff-clinical-image-header">
-                    <div>
-                      <h4>${escapeHTML(title)}</h4>
+          <div class="staff-clinical-images-list">
+            ${clinicalImages
+              .map((image) => {
+                const title = image.title || "Clinical Image";
+                const description = image.description || "";
+                const date = image.date || image.createdAt || "";
+                const beforeImage =
+                  image.beforeImageData ||
+                  image.beforeImage ||
+                  image.imageData ||
+                  "";
+                const afterImage =
+                  image.afterImageData || image.afterImage || "";
+                return `
+                  <div class="staff-clinical-image-card patient-clinical-image-readonly">
+                    <div class="staff-clinical-image-header">
+                      <div>
+                        <h4>${escapeHTML(title)}</h4>
+                        ${
+                          date
+                            ? `
+                              <span>
+                                <i class="fa-regular fa-calendar"></i>
+                                ${escapeHTML(formatDate(String(date).slice(0, 10)))}
+                              </span>
+                            `
+                            : ""
+                        }
+                      </div>
+                      <span class="patient-record-view-only-mini">
+                        <i class="fa-solid fa-eye"></i>
+                        View Only
+                      </span>
+                    </div>
+                    ${
+                      description
+                        ? `
+                          <div class="staff-clinical-image-description">
+                            ${escapeHTML(description)}
+                          </div>
+                        `
+                        : ""
+                    }
+                    <div class="patient-clinical-image-pair">
                       ${
-                        date
+                        beforeImage
                           ? `
-                            <span>
-                              <i class="fa-regular fa-calendar"></i>
-                              ${escapeHTML(formatDate(String(date).slice(0, 10)))}
-                            </span>
+                            <div class="patient-clinical-image-panel">
+                              <span>BEFORE</span>
+                              <img
+                                src="${escapeHTML(beforeImage)}"
+                                alt="Before ${escapeHTML(title)}"
+                              />
+                            </div>
+                          `
+                          : ""
+                      }
+                      ${
+                        afterImage
+                          ? `
+                            <div class="patient-clinical-image-panel">
+                              <span>AFTER</span>
+                              <img
+                                src="${escapeHTML(afterImage)}"
+                                alt="After ${escapeHTML(title)}"
+                              />
+                            </div>
                           `
                           : ""
                       }
                     </div>
-                    <span class="patient-record-view-only-mini">
-                      <i class="fa-solid fa-eye"></i>
-                      View Only
-                    </span>
                   </div>
-                  ${
-                    description
-                      ? `
-                        <div class="staff-clinical-image-description">
-                          ${escapeHTML(description)}
-                        </div>
-                      `
-                      : ""
-                  }
-                  <div class="patient-clinical-image-pair">
-                    ${
-                      beforeImage
-                        ? `
-                          <div class="patient-clinical-image-panel">
-                            <span>BEFORE</span>
-                            <img
-                              src="${escapeHTML(beforeImage)}"
-                              alt="Before ${escapeHTML(title)}"
-                            />
-                          </div>
-                        `
-                        : ""
-                    }
-                    ${
-                      afterImage
-                        ? `
-                          <div class="patient-clinical-image-panel">
-                            <span>AFTER</span>
-                            <img
-                              src="${escapeHTML(afterImage)}"
-                              alt="After ${escapeHTML(title)}"
-                            />
-                          </div>
-                        `
-                        : ""
-                    }
-                  </div>
-                </div>
-              `;
-            })
-            .join("")}
+                `;
+              })
+              .join("")}
+          </div>
         </div>
-      </div>
-      <div class="patient-record-view-only">
-        <i class="fa-solid fa-eye"></i>
-        <div>
-          <strong>View Only</strong>
-          <span>
-            Clinical images are uploaded and managed by the Doctor. Patients cannot add, replace, or delete clinical images.
-          </span>
+        <div class="patient-record-view-only">
+          <i class="fa-solid fa-eye"></i>
+          <div>
+            <strong>View Only</strong>
+            <span>
+              Clinical images are uploaded and managed by the Doctor. Patients cannot add, replace, or delete clinical images.
+            </span>
+          </div>
         </div>
-      </div>
-    `;
+      `;
 }
 function renderPatientTreatments() {
   const container = $("patientPageTreatments");
@@ -1158,6 +1159,33 @@ function renderPatientTreatments() {
   });
   if (!treatments.length) {
     container.innerHTML = `
+          <div class="patient-record-section">
+            <div class="patient-record-section-header">
+              <div>
+                <span class="patient-record-section-eyebrow">
+                  TREATMENTS
+                </span>
+                <h3>Actual Treatment</h3>
+                <p>
+                  Actual dental procedures performed and recorded by the Doctor.
+                </p>
+              </div>
+              <span class="patient-record-count">
+                0 treatments
+              </span>
+            </div>
+            <div class="patient-record-empty">
+              <i class="fa-solid fa-tooth"></i>
+              <strong>No treatments recorded yet</strong>
+              <span>
+                Completed treatments will appear here after they are recorded by the Doctor.
+              </span>
+            </div>
+          </div>
+        `;
+    return;
+  }
+  container.innerHTML = `
         <div class="patient-record-section">
           <div class="patient-record-section-header">
             <div>
@@ -1170,144 +1198,117 @@ function renderPatientTreatments() {
               </p>
             </div>
             <span class="patient-record-count">
-              0 treatments
+              ${treatments.length}
+              ${treatments.length === 1 ? "treatment" : "treatments"}
             </span>
           </div>
-          <div class="patient-record-empty">
-            <i class="fa-solid fa-tooth"></i>
-            <strong>No treatments recorded yet</strong>
+          <div class="staff-treatment-list">
+            ${treatments
+              .map((treatment) => {
+                const procedure =
+                  treatment.procedure ||
+                  treatment.treatment ||
+                  "Dental Treatment";
+                const tooth = treatment.toothNumber || treatment.tooth || "";
+                const date = treatment.date || treatment.createdAt || "";
+                const note = treatment.note || treatment.notes || "";
+                const consumedMaterials = Array.isArray(
+                  treatment.consumedMaterials,
+                )
+                  ? treatment.consumedMaterials.filter(
+                      (item) => Number(item.quantity) > 0,
+                    )
+                  : [];
+                const appointmentId = treatment.appointmentId || "";
+                return `
+                  <div class="staff-treatment-card patient-treatment-readonly">
+                    <div class="patient-treatment-date">
+                      ${
+                        date
+                          ? `
+                            <strong>
+                              ${escapeHTML(formatDate(String(date).slice(0, 10)))}
+                            </strong>
+                          `
+                          : `
+                            <strong>Date not provided</strong>
+                          `
+                      }
+                      <span>
+                        <i class="fa-regular fa-clock"></i>
+                        Actual Treatment
+                      </span>
+                    </div>
+                    <div class="patient-treatment-main">
+                      <div class="patient-treatment-title-row">
+                        <h4>${escapeHTML(procedure)}</h4>
+                        <span class="patient-record-view-only-mini">
+                          <i class="fa-solid fa-eye"></i>
+                          View Only
+                        </span>
+                      </div>
+                      ${
+                        tooth
+                          ? `
+                            <div class="patient-treatment-detail">
+                              <span>TOOTH</span>
+                              <strong>${escapeHTML(tooth)}</strong>
+                            </div>
+                          `
+                          : ""
+                      }
+                      ${
+                        appointmentId
+                          ? `
+                            <div class="patient-treatment-detail">
+                              <span>APPOINTMENT ID</span>
+                              <strong>${escapeHTML(appointmentId)}</strong>
+                            </div>
+                          `
+                          : ""
+                      }
+                      ${
+                        note
+                          ? `
+                            <div class="patient-treatment-note">
+                              <span>NOTES</span>
+                              <p>${escapeHTML(note)}</p>
+                            </div>
+                          `
+                          : ""
+                      }
+                      ${
+                        consumedMaterials.length
+                          ? `
+                            <div class="patient-treatment-materials">
+                              <span><i class="fa-solid fa-boxes-stacked"></i> ITEMS USED</span>
+                              <p>${consumedMaterials
+                                .map(
+                                  (item) =>
+                                    `${escapeHTML(item.itemName || item.name || "Item")} x ${Number(item.quantity)}`,
+                                )
+                                .join(" · ")}</p>
+                            </div>
+                          `
+                          : ""
+                      }
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        </div>
+        <div class="patient-record-view-only">
+          <i class="fa-solid fa-eye"></i>
+          <div>
+            <strong>View Only</strong>
             <span>
-              Completed treatments will appear here after they are recorded by the Doctor.
+              Treatment records are recorded by the Doctor. Patients cannot add, edit, or delete treatment records.
             </span>
           </div>
         </div>
       `;
-    return;
-  }
-  container.innerHTML = `
-      <div class="patient-record-section">
-        <div class="patient-record-section-header">
-          <div>
-            <span class="patient-record-section-eyebrow">
-              TREATMENTS
-            </span>
-            <h3>Actual Treatment</h3>
-            <p>
-              Actual dental procedures performed and recorded by the Doctor.
-            </p>
-          </div>
-          <span class="patient-record-count">
-            ${treatments.length}
-            ${treatments.length === 1 ? "treatment" : "treatments"}
-          </span>
-        </div>
-        <div class="staff-treatment-list">
-          ${treatments
-            .map((treatment) => {
-              const procedure =
-                treatment.procedure ||
-                treatment.treatment ||
-                "Dental Treatment";
-              const tooth = treatment.toothNumber || treatment.tooth || "";
-              const date = treatment.date || treatment.createdAt || "";
-              const note = treatment.note || treatment.notes || "";
-              const consumedMaterials = Array.isArray(
-                treatment.consumedMaterials,
-              )
-                ? treatment.consumedMaterials.filter(
-                    (item) => Number(item.quantity) > 0,
-                  )
-                : [];
-              const appointmentId = treatment.appointmentId || "";
-              return `
-                <div class="staff-treatment-card patient-treatment-readonly">
-                  <div class="patient-treatment-date">
-                    ${
-                      date
-                        ? `
-                          <strong>
-                            ${escapeHTML(formatDate(String(date).slice(0, 10)))}
-                          </strong>
-                        `
-                        : `
-                          <strong>Date not provided</strong>
-                        `
-                    }
-                    <span>
-                      <i class="fa-regular fa-clock"></i>
-                      Actual Treatment
-                    </span>
-                  </div>
-                  <div class="patient-treatment-main">
-                    <div class="patient-treatment-title-row">
-                      <h4>${escapeHTML(procedure)}</h4>
-                      <span class="patient-record-view-only-mini">
-                        <i class="fa-solid fa-eye"></i>
-                        View Only
-                      </span>
-                    </div>
-                    ${
-                      tooth
-                        ? `
-                          <div class="patient-treatment-detail">
-                            <span>TOOTH</span>
-                            <strong>${escapeHTML(tooth)}</strong>
-                          </div>
-                        `
-                        : ""
-                    }
-                    ${
-                      appointmentId
-                        ? `
-                          <div class="patient-treatment-detail">
-                            <span>APPOINTMENT ID</span>
-                            <strong>${escapeHTML(appointmentId)}</strong>
-                          </div>
-                        `
-                        : ""
-                    }
-                    ${
-                      note
-                        ? `
-                          <div class="patient-treatment-note">
-                            <span>NOTES</span>
-                            <p>${escapeHTML(note)}</p>
-                          </div>
-                        `
-                        : ""
-                    }
-                    ${
-                      consumedMaterials.length
-                        ? `
-                          <div class="patient-treatment-materials">
-                            <span><i class="fa-solid fa-boxes-stacked"></i> ITEMS USED</span>
-                            <p>${consumedMaterials
-                              .map(
-                                (item) =>
-                                  `${escapeHTML(item.itemName || item.name || "Item")} x ${Number(item.quantity)}`,
-                              )
-                              .join(" · ")}</p>
-                          </div>
-                        `
-                        : ""
-                    }
-                  </div>
-                </div>
-              `;
-            })
-            .join("")}
-        </div>
-      </div>
-      <div class="patient-record-view-only">
-        <i class="fa-solid fa-eye"></i>
-        <div>
-          <strong>View Only</strong>
-          <span>
-            Treatment records are recorded by the Doctor. Patients cannot add, edit, or delete treatment records.
-          </span>
-        </div>
-      </div>
-    `;
 }
 function renderPatientAppointments() {
   const container = $("patientPageAppointments");
@@ -1319,12 +1320,12 @@ function renderPatientAppointments() {
     : [];
   if (!appointments.length) {
     container.innerHTML = `
-        <div class="patient-record-empty">
-          <i class="fa-solid fa-calendar-check"></i>
-          <h3>No Appointments Yet</h3>
-          <p>Your appointment history will appear here.</p>
-        </div>
-      `;
+          <div class="patient-record-empty">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>No Appointments Yet</h3>
+            <p>Your appointment history will appear here.</p>
+          </div>
+        `;
     return;
   }
   appointments.sort((a, b) => {
@@ -1341,49 +1342,49 @@ function renderPatientAppointments() {
     return dateB - dateA;
   });
   container.innerHTML = `
-      <div class="patient-record-table-card">
-        <div class="patient-record-table-header">
-          <div>
-            <span class="record-page-eyebrow">VISIT HISTORY</span>
-            <h3>Appointments</h3>
+        <div class="patient-record-table-card">
+          <div class="patient-record-table-header">
+            <div>
+              <span class="record-page-eyebrow">VISIT HISTORY</span>
+              <h3>Appointments</h3>
+            </div>
+          </div>
+          <div class="patient-record-table-wrapper">
+            <table class="patient-record-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Service</th>
+                  <th>Dentist</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${appointments
+                  .map(
+                    (appointment) => `
+                      <tr>
+                        <td>${escapeHTML(formatDate(appointment.appointment_date || appointment.date))}</td>
+                        <td>${escapeHTML(
+                          appointment.appointment_time ||
+                            appointment.start ||
+                            "—",
+                        )}</td>
+                        <td>${escapeHTML(
+                          appointment.service_type || appointment.type || "—",
+                        )}</td>
+                        <td>${escapeHTML(appointment.dentist || "—")}</td>
+                        <td>${escapeHTML(appointment.status || "—")}</td>
+                      </tr>
+                    `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="patient-record-table-wrapper">
-          <table class="patient-record-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Service</th>
-                <th>Dentist</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${appointments
-                .map(
-                  (appointment) => `
-                    <tr>
-                      <td>${escapeHTML(formatDate(appointment.appointment_date || appointment.date))}</td>
-                      <td>${escapeHTML(
-                        appointment.appointment_time ||
-                          appointment.start ||
-                          "—",
-                      )}</td>
-                      <td>${escapeHTML(
-                        appointment.service_type || appointment.type || "—",
-                      )}</td>
-                      <td>${escapeHTML(appointment.dentist || "—")}</td>
-                      <td>${escapeHTML(appointment.status || "—")}</td>
-                    </tr>
-                  `,
-                )
-                .join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
+      `;
 }
 function updatePageState() {
   const hasProfile = currentPatient && isProfileComplete(currentPatient);
@@ -2038,53 +2039,53 @@ function buildReview() {
     allergyValues.push(allergyOther);
   }
   container.innerHTML = `
-      <div class="review-card">
-        <h4>Dental Concern</h4>
-        ${reviewRow(
-          "Reason for Visit",
-          concernValues.length ? concernValues.join(", ") : "None provided",
-        )}
-        ${reviewRow("Negative Dental Experience", negativeExperience)}
-        ${reviewRow("Explanation", $("negativeExperienceNote").value.trim())}
-      </div>
-      <div class="review-card">
-        <h4>Dental History</h4>
-        ${reviewRow("Last Dental Visit", formatDate($("lastDentalVisit").value))}
-        ${reviewRow("Last Treatment", $("lastDentalTreatment").value.trim())}
-        ${reviewRow("Current Medications", currentMedications)}
-        ${reviewRow(
-          "Medication / Supplement List",
-          $("medicationList").value.trim(),
-        )}
-      </div>
-      <div class="review-card">
-        <h4>Medical History</h4>
-        ${reviewRow(
-          "Medical Conditions",
-          medicalValues.length ? medicalValues.join(", ") : "None provided",
-        )}
-      </div>
-      <div class="review-card">
-        <h4>Allergies</h4>
-        ${reviewRow(
-          "Allergies",
-          allergyValues.length ? allergyValues.join(", ") : "None provided",
-        )}
-      </div>
-    `;
+        <div class="review-card">
+          <h4>Dental Concern</h4>
+          ${reviewRow(
+            "Reason for Visit",
+            concernValues.length ? concernValues.join(", ") : "None provided",
+          )}
+          ${reviewRow("Negative Dental Experience", negativeExperience)}
+          ${reviewRow("Explanation", $("negativeExperienceNote").value.trim())}
+        </div>
+        <div class="review-card">
+          <h4>Dental History</h4>
+          ${reviewRow("Last Dental Visit", formatDate($("lastDentalVisit").value))}
+          ${reviewRow("Last Treatment", $("lastDentalTreatment").value.trim())}
+          ${reviewRow("Current Medications", currentMedications)}
+          ${reviewRow(
+            "Medication / Supplement List",
+            $("medicationList").value.trim(),
+          )}
+        </div>
+        <div class="review-card">
+          <h4>Medical History</h4>
+          ${reviewRow(
+            "Medical Conditions",
+            medicalValues.length ? medicalValues.join(", ") : "None provided",
+          )}
+        </div>
+        <div class="review-card">
+          <h4>Allergies</h4>
+          ${reviewRow(
+            "Allergies",
+            allergyValues.length ? allergyValues.join(", ") : "None provided",
+          )}
+        </div>
+      `;
 }
 function reviewRow(label, value) {
   const cleanValue = String(value || "").trim();
   return `
-      <div class="review-row">
-        <span class="review-label">
-          ${escapeHTML(label)}
-        </span>
-        <span class="review-value ${cleanValue ? "" : "empty"}">
-          ${escapeHTML(cleanValue || "Not provided")}
-        </span>
-      </div>
-    `;
+        <div class="review-row">
+          <span class="review-label">
+            ${escapeHTML(label)}
+          </span>
+          <span class="review-value ${cleanValue ? "" : "empty"}">
+            ${escapeHTML(cleanValue || "Not provided")}
+          </span>
+        </div>
+      `;
 }
 function openSuccessModal() {
   $("successModalBackdrop")?.classList.add("open");

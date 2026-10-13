@@ -3393,3 +3393,359 @@ button {
     grid-template-columns: 1fr;
   }
 }
+@media (min-width: 1201px) {
+  .finance-page {
+    padding: 22px 26px 26px;
+  }
+  .card-header {
+    min-height: 82px;
+    margin-bottom: 15px;
+    padding: 18px 22px;
+    border-radius: 15px;
+  }
+  .card-header h2 {
+    font-size: 17px;
+  }
+  .card-header p {
+    font-size: 10px;
+  }
+  .transactions-header-actions {
+    gap: 9px;
+  }
+  .transaction-count {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 9.5px;
+  }
+  .primary-button,
+  .secondary-button,
+  .collection-header-button {
+    min-height: 39px;
+    font-size: 10px;
+  }
+  .finance-overview {
+    margin-bottom: 17px;
+  }
+  .finance-overview-grid {
+    gap: 12px;
+  }
+  .finance-overview-card {
+    min-height: 96px;
+    gap: 12px;
+    padding: 15px 16px;
+    border-radius: 14px;
+  }
+  .finance-overview-card-label {
+    font-size: 10px;
+  }
+  .finance-overview-card-value {
+    font-size: 21px;
+  }
+  .finance-overview-card-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 13px;
+  }
+  .finance-overview-card-icon svg {
+    width: 19px;
+    height: 19px;
+  }
+  .filters {
+    grid-template-columns: minmax(260px, 1fr) 190px 130px;
+    gap: 9px;
+    padding: 12px 16px;
+    border-radius: 14px 14px 0 0;
+  }
+  .search-box,
+  .filters select {
+    height: 40px;
+  }
+  .search-box input,
+  .filters select {
+    font-size: 10px;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 0 0 14px 14px;
+  }
+  .transactions-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .transactions-table th {
+    height: 43px;
+    padding: 0 10px;
+    font-size: 8.5px;
+    letter-spacing: 0.42px;
+  }
+  .transactions-table th:nth-child(1) {
+    width: 16%;
+  }
+  .transactions-table th:nth-child(2) {
+    width: 11%;
+  }
+  .transactions-table th:nth-child(3) {
+    width: 9%;
+  }
+  .transactions-table th:nth-child(4) {
+    width: 9%;
+  }
+  .transactions-table th:nth-child(5) {
+    width: 8%;
+  }
+  .transactions-table th:nth-child(6) {
+    width: 9%;
+  }
+  .transactions-table th:nth-child(7) {
+    width: 13%;
+  }
+  .transactions-table th:nth-child(8) {
+    width: 9%;
+  }
+  .transactions-table th:nth-child(9) {
+    width: 8%;
+  }
+  .transactions-table th.action-header {
+    width: 8%;
+    padding: 0 8px;
+  }
+  .transactions-table td {
+    height: 70px;
+    padding: 9px 10px;
+    font-size: 10px;
+  }
+  .transactions-table td:nth-child(7) {
+    overflow-wrap: anywhere;
+  }
+  .patient-cell {
+    min-width: 0;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 9px;
+  }
+  .patient-initials {
+    width: 36px;
+    height: 36px;
+  }
+  .patient-cell strong {
+    font-size: 10.5px;
+  }
+  .patient-cell > span:not(.patient-initials) {
+    font-size: 8.5px;
+  }
+  .status-badge {
+    min-height: 27px;
+    padding: 5px 9px;
+    font-size: 8.5px;
+  }
+  .action-cell {
+    width: auto;
+  }
+  .action-cell .table-action-button {
+    width: 32px;
+    height: 32px;
+    margin: 0 2px;
+  }
+  .pagination-bar {
+    min-height: 58px;
+    border-radius: 0 0 14px 14px;
+  }
+  .pagination-info {
+    font-size: 10px;
+  }
+  .payment-modal,
+  .details-modal {
+    max-height: calc(100vh - 48px);
+    border-radius: 18px;
+  }
+  .payment-modal {
+    width: min(690px, 100%);
+  }
+  .details-modal {
+    width: min(660px, 100%);
+  }
+  .modal-overlay .payment-modal .modal-header,
+  .modal-overlay .details-modal .modal-header {
+    padding: 19px 24px;
+  }
+  .modal-overlay .payment-modal .modal-label,
+  .modal-overlay .details-modal .modal-label {
+    font-size: 8.5px;
+  }
+  .modal-overlay .payment-modal .modal-header h2,
+  .modal-overlay .details-modal .modal-header h2 {
+    font-size: 19px;
+  }
+  .modal-overlay .payment-modal #paymentForm {
+    padding: 19px 24px 21px;
+  }
+  .modal-overlay .payment-modal .form-grid {
+    gap: 12px 16px;
+  }
+  .modal-overlay .payment-modal .form-group label {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+  .modal-overlay .payment-modal .form-group input,
+  .modal-overlay .payment-modal .form-group select,
+  .modal-overlay .payment-modal .form-group textarea,
+  .modal-overlay .payment-modal .amount-input {
+    height: 41px;
+    font-size: 10.5px;
+  }
+  .modal-overlay .payment-modal .field-help {
+    font-size: 8.5px;
+  }
+  .modal-overlay .payment-modal .modal-actions {
+    margin-top: 17px;
+    padding-top: 16px;
+  }
+  .modal-overlay .payment-modal .payment-summary {
+    margin-bottom: 14px;
+    padding: 14px 16px;
+  }
+  .modal-overlay .payment-modal .payment-summary-title {
+    margin-bottom: 10px;
+    font-size: 8.5px;
+  }
+  .modal-overlay .payment-modal .payment-summary-grid {
+    gap: 11px 24px;
+  }
+  .modal-overlay .payment-modal .payment-summary-grid span {
+    font-size: 9px;
+  }
+  .modal-overlay .payment-modal .payment-summary-grid strong {
+    font-size: 11.5px;
+  }
+  .modal-overlay .payment-modal .payment-method-options {
+    gap: 11px;
+    margin-top: 8px;
+  }
+  .modal-overlay .payment-modal .payment-method-option {
+    min-height: 94px;
+    gap: 5px;
+    padding: 13px 14px;
+    border-radius: 12px;
+  }
+  .modal-overlay .payment-modal .payment-method-option-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .modal-overlay .payment-modal .payment-method-option strong {
+    font-size: 11px;
+  }
+  .modal-overlay .payment-modal .payment-method-option small {
+    font-size: 8.5px;
+  }
+  .modal-overlay .payment-modal .payment-process-box {
+    padding: 15px 16px;
+  }
+  .modal-overlay .payment-modal .process-field label {
+    font-size: 9px;
+  }
+  .modal-overlay .payment-modal .payment-process-status,
+  .modal-overlay .payment-modal .payment-process-status span {
+    font-size: 8.3px;
+  }
+  .modal-overlay .details-modal .details-content {
+    padding: 20px 24px;
+  }
+  .modal-overlay .details-modal .transaction-reference {
+    padding: 13px 15px;
+  }
+  .modal-overlay .details-modal .transaction-reference span,
+  .modal-overlay .details-modal .details-grid span {
+    font-size: 9px;
+  }
+  .modal-overlay .details-modal .transaction-reference strong {
+    font-size: 12px;
+  }
+  .modal-overlay .details-modal .details-grid {
+    gap: 13px 18px;
+  }
+  .modal-overlay .details-modal .details-grid > div {
+    min-height: 51px;
+    padding-bottom: 11px;
+  }
+  .modal-overlay .details-modal .details-grid strong {
+    font-size: 11px;
+  }
+  .modal-overlay .details-modal .payment-history-section {
+    margin-top: 17px;
+    padding-top: 16px;
+  }
+  .modal-overlay .details-modal .payment-history-item {
+    padding: 12px 13px;
+  }
+  .modal-overlay .details-modal .payment-history-item-info strong,
+  .modal-overlay .details-modal .payment-history-item-right strong {
+    font-size: 10px;
+  }
+  .modal-overlay .details-modal .payment-history-item-info span,
+  .modal-overlay .details-modal .payment-history-item-right span {
+    font-size: 8px;
+  }
+  .modal-overlay .details-modal .details-actions {
+    padding: 14px 24px;
+  }
+  .collection-drawer {
+    width: min(470px, 100%);
+  }
+  .collection-drawer-header {
+    padding: 22px 24px 18px;
+  }
+  .collection-drawer-label {
+    font-size: 8.5px;
+  }
+  .collection-drawer-header h2 {
+    font-size: 18px;
+  }
+  .collection-drawer-header p {
+    font-size: 10px;
+  }
+  .collection-drawer-content {
+    padding: 18px 20px 24px;
+  }
+  .collection-period-header {
+    gap: 14px;
+  }
+  .collection-period-header h3 {
+    font-size: 12px;
+  }
+  .collection-period-header p,
+  .collection-section-heading p {
+    font-size: 8.5px;
+  }
+  .collection-page-button {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 9px;
+  }
+  .collection-total-card {
+    min-height: 92px;
+    padding: 16px 18px;
+  }
+  .collection-total-card span {
+    font-size: 9px;
+  }
+  .collection-total-card strong {
+    font-size: 22px;
+  }
+  .collection-section-heading h4 {
+    font-size: 11px;
+  }
+  .payment-method-list {
+    gap: 9px;
+  }
+  .payment-method-item {
+    min-height: 76px;
+    padding: 12px;
+  }
+  .method-left strong,
+  .payment-method-item > strong {
+    font-size: 10px;
+  }
+  .method-left span {
+    font-size: 8px;
+  }
+}

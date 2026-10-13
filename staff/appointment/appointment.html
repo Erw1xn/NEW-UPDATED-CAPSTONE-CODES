@@ -15,7 +15,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="appointment.css?v=1" />
+    <link rel="stylesheet" href="appointment.css?v=7" />
     <link rel="stylesheet" href="../profile/profile.css" />
   </head>
   <body>
@@ -26,7 +26,7 @@
           <header class="appointments-page-header">
             <div class="appointments-page-header-content">
               <div class="appointments-page-heading">
-                <h1>Appointments</h1>
+                <h3>Appointments</h3>
                 <p>
                   Manage and organize today's patient appointments and
                   schedules.
@@ -86,25 +86,14 @@
                 </div>
                 <div class="calendar-grid-days" id="calGrid"></div>
               </section>
-              <section class="panel side-content-panel">
-                <div class="side-content-header">
-                  <div
-                    class="side-section-header active"
-                    id="waitingQueueHeader"
-                  >
-                    <div class="side-section-title">
-                      <div class="side-section-text">
-                        <div class="side-section-title-line">
-                          <h3>Today's Appointments</h3>
-                        </div>
-                        <span class="side-section-description"
-                          >Today's appointments and current status</span
-                        >
-                      </div>
-                    </div>
+              <section class="panel todays-appointments-panel">
+                <div class="todays-appointments-header">
+                  <div>
+                    <h6>Today's Appointments</h6>
+                    <p>View the day's scheduled appointments.</p>
                   </div>
                 </div>
-                <div class="side-content-body active" id="waitingQueuePage">
+                <div class="todays-appointments-body">
                   <div class="waiting-queue-list" id="waitingQueueList"></div>
                 </div>
               </section>
@@ -523,12 +512,9 @@
     <script>
       function limitWaitingQueueDisplay() {
         const queueList = document.getElementById("waitingQueueList");
-        if (!queueList) {
-          return;
-        }
-        const appointmentItems = Array.from(queueList.children);
-        appointmentItems.forEach((item) => {
-          item.style.display = "";
+        if (!queueList) return;
+        Array.from(queueList.children).forEach((item, index) => {
+          item.style.display = index === 0 ? "" : "none";
         });
       }
       document.addEventListener("DOMContentLoaded", function () {
@@ -538,9 +524,7 @@
           dentistFilter.value = selectedDentistFilter;
         }
         const queueList = document.getElementById("waitingQueueList");
-        if (!queueList) {
-          return;
-        }
+        if (!queueList) return;
         limitWaitingQueueDisplay();
         const queueObserver = new MutationObserver(function () {
           limitWaitingQueueDisplay();

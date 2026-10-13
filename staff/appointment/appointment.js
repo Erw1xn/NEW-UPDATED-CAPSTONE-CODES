@@ -3720,6 +3720,7 @@ function createAppointmentCard(appt) {
   card.addEventListener("click", () => openViewModal(appt.id));
   return card;
 }
+
 function renderWaitingQueue() {
   const list = document.getElementById("waitingQueueList");
   if (!list) return;
@@ -3756,7 +3757,7 @@ function renderWaitingQueue() {
       );
     })
     .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start))
-    .slice(0, 3);
+    .slice(0, 1);
   if (!selectedAppointments.length) {
     const empty = document.createElement("div");
     empty.className = "empty-queue";
@@ -3795,6 +3796,7 @@ function renderWaitingQueue() {
     list.appendChild(item);
   });
 }
+
 function renderRealtimeDentistsDuty() {
   const list = document.getElementById("dentistsDutyList");
   if (!list) return;

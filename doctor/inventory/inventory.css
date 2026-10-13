@@ -2594,3 +2594,117 @@ button {
 .currency-input input {
   padding-left: 28px;
 }
+
+@media (min-width: 1201px) {
+  .panel-header {
+    min-height: 76px;
+    margin-bottom: 16px;
+    padding: 16px 24px;
+  }
+  .panel-header-left h2 {
+    font-size: 1rem;
+  }
+  .panel-header-left p {
+    font-size: 0.64rem;
+  }
+  .panel-header .inventory-header-actions .btn-primary,
+  .panel-header .inventory-header-actions .btn-secondary {
+    min-height: 39px;
+    font-size: 0.66rem;
+  }
+  .item-count {
+    min-height: 30px;
+    font-size: 0.6rem;
+  }
+  .inventory-toolbar {
+    gap: 10px;
+    padding: 15px 22px;
+  }
+  .search-wrapper input,
+  .filter-select {
+    height: 41px;
+    font-size: 0.66rem;
+  }
+  .inventory-table th {
+    height: 42px;
+    font-size: 0.58rem;
+  }
+  .inventory-table td {
+    height: 68px;
+    font-size: 0.66rem;
+  }
+  .item-cell {
+    gap: 11px;
+  }
+  .item-avatar {
+    width: 37px;
+    height: 37px;
+    min-width: 37px;
+  }
+  .item-name {
+    font-size: 0.68rem;
+  }
+  .category-badge {
+    padding: 5px 8px;
+    font-size: 0.57rem;
+  }
+  .inventory-pagination {
+    min-height: 66px;
+    padding: 13px 22px;
+  }
+  .inventory-pagination-summary,
+  .inventory-pagination-page-info {
+    font-size: 0.63rem;
+  }
+  .inventory-pagination-button {
+    min-height: 36px;
+    font-size: 0.61rem;
+  }
+  #inventoryPage2 .forecast-chart-header {
+    gap: 22px;
+    padding: 20px 23px 18px;
+  }
+  #inventoryPage2 .forecast-chart-header h3 {
+    font-size: 0.9rem;
+  }
+  #inventoryPage2 .forecast-chart-header p {
+    font-size: 0.61rem;
+  }
+  #inventoryPage2 .forecast-chart-container {
+    height: 325px;
+    padding: 16px 20px 14px;
+  }
+  #inventoryPage2 .prototype-header {
+    gap: 22px;
+    padding: 19px 22px;
+  }
+  #inventoryPage2 .prototype-header h3 {
+    font-size: 0.89rem;
+  }
+  #inventoryPage2 .prototype-header p {
+    font-size: 0.61rem;
+  }
+  #inventoryPage2 .forecast-header-search {
+    width: 250px;
+  }
+  #inventoryPage2 .forecast-table th {
+    height: 45px;
+    font-size: 0.52rem;
+  }
+  #inventoryPage2 .forecast-table td {
+    height: 63px;
+    font-size: 0.62rem;
+  }
+  #inventoryPage2 .forecast-item-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+  #inventoryPage2 .forecast-item-name {
+    font-size: 0.63rem;
+  }
+  #inventoryPage2 .forecast-pagination {
+    min-height: 66px;
+    padding: 13px 20px;
+  }
+}

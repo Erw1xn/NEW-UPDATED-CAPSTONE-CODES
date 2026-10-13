@@ -88,16 +88,16 @@ textarea:focus-visible {
   width: 100%;
   max-width: 1480px;
   margin: 0 auto;
-  padding: 24px 28px 34px;
+  padding: 28px 34px 38px;
 }
 .page-header {
-  min-height: 78px;
+  min-height: 88px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 17px;
-  padding: 18px 20px;
+  margin-bottom: 20px;
+  padding: 18px 26px;
   background: #ffffff;
   border: 1px solid var(--ink-100);
   border-radius: 14px;
@@ -107,36 +107,37 @@ textarea:focus-visible {
   min-width: 0;
 }
 .page-header h1 {
-  margin-top: 4px;
+  margin-top: 0;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 .page-header p {
   margin-top: 5px;
   color: var(--ink-500);
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .page-header-actions {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
   flex-shrink: 0;
 }
 .btn-primary,
 .btn-secondary,
 .btn-request {
-  min-height: 36px;
+  min-height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 0 13px;
-  border-radius: 8px;
-  font-size: 8.5px;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 9px;
+  font-size: 12px;
   font-weight: 700;
   transition:
     background 0.18s ease,
@@ -146,17 +147,17 @@ textarea:focus-visible {
     box-shadow 0.18s ease;
 }
 .btn-primary {
-  background: #ffffff;
-  color: var(--green-700);
-  border: 1px solid #e2ebe5;
-  box-shadow: 0 5px 16px rgba(20, 57, 36, 0.07);
+  background: var(--green-700);
+  color: #ffffff;
+  border: 1px solid var(--green-700);
+  box-shadow: 0 5px 14px rgba(23, 107, 56, 0.18);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--green-50);
-  border-color: #cfe0d4;
-  color: var(--green-700);
+  background: var(--green-800);
+  border-color: var(--green-800);
+  color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 7px 20px rgba(20, 57, 36, 0.09);
+  box-shadow: 0 7px 18px rgba(23, 107, 56, 0.24);
 }
 .btn-primary:disabled {
   opacity: 0.5;
@@ -183,14 +184,14 @@ textarea:focus-visible {
   border-color: #e5c99c;
 }
 .header-book-btn {
-  min-height: 40px;
+  min-height: 44px;
   width: auto;
-  min-width: 136px;
-  padding: 0 15px;
+  min-width: 170px;
+  padding: 0 22px;
   flex-shrink: 0;
   margin: 0;
   border-radius: 10px;
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 .appointment-info {
@@ -198,8 +199,8 @@ textarea:focus-visible {
   flex-shrink: 0;
 }
 .appointment-info summary {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,7 +210,7 @@ textarea:focus-visible {
   border-radius: 50%;
   cursor: pointer;
   list-style: none;
-  font-size: 12px;
+  font-size: 15px;
 }
 .appointment-info summary::-webkit-details-marker {
   display: none;
@@ -222,32 +223,32 @@ textarea:focus-visible {
 .appointment-info-popover {
   position: absolute;
   z-index: 10;
-  top: calc(100% + 9px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 300px;
+  width: 340px;
   max-width: calc(100vw - 48px);
-  padding: 13px 14px;
+  padding: 16px 18px;
   background: var(--white);
   border: 1px solid #dce7df;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 10px 26px rgba(20, 57, 36, 0.14);
 }
 .appointment-info-popover strong {
   display: block;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13.5px;
 }
 .appointment-info-popover p,
 .appointment-info-popover small {
   display: block;
-  margin-top: 8px;
+  margin-top: 10px;
   color: var(--ink-500);
-  font-size: 8px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .appointment-info-popover p i {
-  width: 13px;
+  width: 16px;
   color: var(--green-700);
 }
 .appointment-info-popover p:nth-of-type(3) i,
@@ -255,16 +256,16 @@ textarea:focus-visible {
   color: var(--amber-500);
 }
 .appointment-info-popover small {
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid var(--ink-100);
 }
 .reschedule-alert {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 13px;
-  margin-bottom: 17px;
-  padding: 13px 15px;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
   background: #fffaf1;
   border: 1px solid #f1dfbd;
   border-radius: 13px;
@@ -274,15 +275,15 @@ textarea:focus-visible {
   display: none;
 }
 .reschedule-alert-icon {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--amber-100);
   color: var(--amber-500);
-  border-radius: 11px;
-  font-size: 15px;
+  border-radius: 12px;
+  font-size: 18px;
 }
 .reschedule-alert-content {
   min-width: 0;
@@ -290,40 +291,40 @@ textarea:focus-visible {
 .reschedule-alert-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .reschedule-alert-title strong {
   color: #67491d;
-  font-size: 10.5px;
+  font-size: 14px;
   font-weight: 700;
 }
 .reschedule-alert-title span {
-  padding: 4px 7px;
+  padding: 5px 10px;
   background: #fff0d2;
   color: #9a641b;
   border-radius: 6px;
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 700;
 }
 .reschedule-alert-content p {
-  margin-top: 4px;
+  margin-top: 5px;
   color: #7c6a4e;
-  font-size: 8.5px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 .reschedule-alert-details {
-  margin-top: 5px;
+  margin-top: 6px;
   color: #8e7956;
-  font-size: 7.5px;
-  line-height: 1.4;
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 .booking-restriction-alert {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 17px;
-  padding: 13px 15px;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
   background: var(--red-100);
   border: 1px solid #f3cccc;
   border-radius: 13px;
@@ -333,34 +334,34 @@ textarea:focus-visible {
   display: none;
 }
 .booking-restriction-icon {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: #f8d9d9;
   color: var(--red-500);
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 11px;
+  font-size: 16px;
 }
 .booking-restriction-alert strong {
   color: #8d272c;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
 }
 .booking-restriction-alert p {
-  margin-top: 4px;
+  margin-top: 5px;
   color: #9c5559;
-  font-size: 8.5px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 .booking-warning-alert {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 17px;
-  padding: 13px 15px;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
   background: var(--amber-100);
   border: 1px solid #efdcb8;
   border-radius: 13px;
@@ -370,40 +371,40 @@ textarea:focus-visible {
   display: none;
 }
 .booking-warning-icon {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: #fff0d2;
   color: var(--amber-500);
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 11px;
+  font-size: 16px;
 }
 .booking-warning-alert strong {
   color: #67491d;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
 }
 .booking-warning-alert p {
-  margin-top: 4px;
+  margin-top: 5px;
   color: #7c6a4e;
-  font-size: 8.5px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 .reschedule-details-modal {
-  max-width: 510px;
+  max-width: 580px;
 }
 .reschedule-details-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 70px;
-  margin-bottom: 13px;
-  padding: 6px 9px;
+  min-width: 80px;
+  margin-bottom: 16px;
+  padding: 7px 11px;
   border-radius: 7px;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 700;
 }
 .reschedule-details-status.pending {
@@ -421,14 +422,14 @@ textarea:focus-visible {
 .reschedule-details-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 .reschedule-detail-item {
   min-width: 0;
-  padding: 10px;
+  padding: 13px;
   background: #f8faf9;
   border: 1px solid #e2ebe5;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 .reschedule-detail-item.full {
   grid-column: 1 / -1;
@@ -436,21 +437,21 @@ textarea:focus-visible {
 .reschedule-detail-item span {
   display: block;
   color: #849087;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 600;
 }
 .reschedule-detail-item strong {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-900);
-  font-size: 8.5px;
+  font-size: 11.5px;
   font-weight: 700;
   line-height: 1.45;
 }
 .reschedule-detail-item p {
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-700);
-  font-size: 8px;
+  font-size: 11px;
   line-height: 1.5;
 }
 @media (max-width: 480px) {
@@ -462,26 +463,45 @@ textarea:focus-visible {
   }
 }
 .alert-action {
-  min-height: 34px;
+  min-height: 40px;
   white-space: nowrap;
 }
+
 .top-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
-  gap: 17px;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.55fr);
+  gap: 20px;
   align-items: stretch;
 }
 .upcoming-panel {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   overflow: hidden;
 }
 .calendar-panel {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
 }
+@media (max-width: 1100px) and (min-width: 851px) {
+  .top-layout {
+    grid-template-columns: minmax(290px, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+@media (max-width: 850px) {
+  .top-layout {
+    grid-template-columns: 1fr;
+  }
+  .upcoming-panel,
+  .calendar-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
 .panel {
   background: #fff;
   border: 1px solid var(--ink-100);
@@ -496,25 +516,24 @@ textarea:focus-visible {
   box-shadow: none;
 }
 .panel-header {
-  min-height: 67px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 13px 17px;
-  border-bottom: 1px solid #edf1ee;
-}
-.panel-header.compact {
-  min-height: 61px;
-}
-.upcoming-panel-header {
   min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  padding: 16px 20px 13px;
-  padding-right: 160px;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #edf1ee;
+}
+.panel-header.compact {
+  min-height: 70px;
+}
+.upcoming-panel-header {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 26px;
   border-bottom: 1px solid #edf1ee;
 }
 .upcoming-panel-heading {
@@ -524,7 +543,7 @@ textarea:focus-visible {
 .panel-kicker {
   display: block;
   color: var(--green-700);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -533,47 +552,52 @@ textarea:focus-visible {
   margin-top: 3px;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.3;
 }
 .panel-header p {
   margin-top: 4px;
   color: var(--ink-500);
-  font-size: 7.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 .upcoming-content {
   width: 100%;
-  min-height: 145px;
+  flex: 1;
+  min-height: 160px;
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 24px 26px;
   background: #ffffff;
+}
+.upcoming-content:has(.upcoming-card-content) {
+  align-items: flex-start;
 }
 .upcoming-card-content {
   position: relative;
   width: 100%;
-  min-height: 82px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto) 1px;
-  align-items: center;
-  gap: 20px;
-  padding: 16px 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 0;
+  row-gap: 18px;
+  padding: 22px 24px;
   background: #f9fcfa;
   border: 1px solid #e3ece6;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 .upcoming-card-content > div:first-child {
+  grid-column: 1 / -1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 16px;
+  padding-right: 150px;
 }
 .upcoming-patient-avatar {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -581,7 +605,7 @@ textarea:focus-visible {
   color: var(--green-700);
   border: 1px solid #dceee2;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
 }
 .upcoming-patient-info {
@@ -591,7 +615,7 @@ textarea:focus-visible {
   display: block;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
@@ -600,9 +624,9 @@ textarea:focus-visible {
 }
 .upcoming-patient-info span {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: var(--ink-500);
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
   white-space: nowrap;
@@ -612,64 +636,69 @@ textarea:focus-visible {
 .upcoming-time {
   margin: 0;
   color: #5f6863;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 .upcoming-schedule {
-  position: relative;
-  left: -25px;
+  grid-column: 1 / -1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+  padding-right: 130px;
+  border-top: 1px solid #e3ece6;
   white-space: nowrap;
-  padding-right: 78px;
 }
 .upcoming-schedule-label {
   display: none;
 }
-.upcoming-date {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-}
-.upcoming-date strong {
-  display: block;
-  color: #34443b;
-  font-size: 9.5px;
-  font-weight: 650;
-  line-height: 1.35;
-  white-space: nowrap;
-  transform: translateY(2px);
-}
-.upcoming-date::after {
-  content: "●";
-  display: inline-block;
-  margin-left: 7px;
-  color: var(--green-700);
-  font-size: 5px;
-  line-height: 1;
-  transform: translateY(2px);
-}
+.upcoming-date,
 .upcoming-time-range {
   display: inline-flex;
   align-items: center;
   gap: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  background: #ffffff;
+  border: 1px solid #e0e9e3;
+  border-radius: 10px;
+}
+.upcoming-date::before,
+.upcoming-time-range::before {
+  margin-right: 9px;
+  color: var(--green-700);
+  font-family: "Font Awesome 6 Free";
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+.upcoming-date::before {
+  content: "\f073";
+}
+.upcoming-time-range::before {
+  content: "\f017";
+}
+.upcoming-date strong,
+.upcoming-time-range strong {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-900);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
 }
 .upcoming-time-range > div:not(.upcoming-time-arrow) {
   min-width: 0;
-}
-.upcoming-time-range strong {
-  display: inline;
-  color: #34443b;
-  font-size: 10px;
-  font-weight: 650;
-  line-height: 1.35;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 .upcoming-time-range > div:first-child strong::after {
   content: " - ";
+  white-space: pre;
   color: #8a958e;
   font-weight: 600;
 }
@@ -677,27 +706,26 @@ textarea:focus-visible {
   display: none;
 }
 .upcoming-divider {
-  width: 1px;
-  height: 38px;
-  background: #dfe7e2;
+  display: none;
 }
 .upcoming-actions {
   position: absolute;
-  top: -84px;
-  right: 18px;
-  z-index: 3;
+  top: 52px;
+  right: 24px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 7px;
+  gap: 10px;
   margin: 0;
+  transform: translateY(-50%);
 }
 .upcoming-actions button {
   min-height: 30px;
-  min-width: 95px;
-  padding: 0 10px;
+  min-width: 50px;
+  padding: 0 14px;
   border-radius: 9px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   background: #e5f3e9;
   border: 1px solid #d5e8db;
@@ -716,42 +744,42 @@ textarea:focus-visible {
 }
 .empty-upcoming {
   width: 100%;
-  min-height: 125px;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 18px;
+  padding: 20px;
   text-align: center;
   color: var(--ink-500);
 }
 .empty-upcoming-icon {
-  width: 42px;
-  height: 42px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 9px;
+  margin: 0 0 12px;
   background: var(--green-50);
   border: 1px solid #e1eee5;
   border-radius: 50%;
   color: var(--green-500);
-  font-size: 17px;
+  font-size: 21px;
 }
 .empty-upcoming h3 {
   display: block;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.4;
 }
 .empty-upcoming p {
   display: block;
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   padding: 0;
   color: var(--ink-500);
-  font-size: 8px;
+  font-size: 12.5px;
   line-height: 1.5;
   font-weight: 500;
 }
@@ -764,23 +792,23 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   text-align: center;
   color: var(--ink-500);
 }
 .empty-state i {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 0 9px;
+  margin: 0 0 12px;
   padding: 0;
   background: var(--green-50);
   border: 1px solid #e1eee5;
   border-radius: 50%;
   color: var(--green-500);
-  font-size: 17px;
+  font-size: 20px;
   font-style: normal;
   line-height: 1;
 }
@@ -788,133 +816,165 @@ textarea:focus-visible {
   margin: 0;
   padding: 0;
   color: var(--ink-500);
-  font-size: 8px;
+  font-size: 12.5px;
   line-height: 1.5;
   font-weight: 500;
 }
+
 .calendar-panel {
-  padding: 17px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e3ebe6;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(20, 57, 36, 0.055);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 .calendar-panel .calendar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 .calendar-panel h4 {
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
 }
 .calendar-nav-btns {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 7px;
+  flex-shrink: 0;
 }
 .calendar-nav-btns button {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #e0e7e2;
-  border-radius: 7px;
-  color: #718078;
-  font-size: 9px;
+  background: #ffffff;
+  border: 1px solid #dfe8e2;
+  border-radius: 11px;
+  color: #68786e;
+  font-size: 12px;
   cursor: pointer;
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
-    color 0.18s ease;
+    color 0.18s ease,
+    transform 0.18s ease;
 }
 .calendar-nav-btns button:hover {
   background: var(--green-50);
-  border-color: #cfe0d4;
+  border-color: #c8dfcf;
   color: var(--green-700);
+  transform: translateY(-1px);
+}
+.calendar-nav-btns button:focus-visible {
+  outline: 3px solid rgba(22, 128, 61, 0.14);
+  outline-offset: 2px;
 }
 .calendar-grid-days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
   text-align: center;
 }
 .dow {
-  margin-bottom: 5px;
-  color: #9aa59e;
-  font-size: 8px;
+  margin-bottom: 7px;
+  color: #95a199;
+  font-size: 10.5px;
   font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
 }
 .day {
   position: relative;
-  min-height: 31px;
+  min-width: 0;
+  min-height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 0;
+  padding: 6px 0 8px;
   background: transparent;
-  border: none;
-  border-radius: 7px;
+  border: 1px solid transparent;
+  border-radius: 11px;
   color: #526058;
-  font-size: 9.5px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 .day:hover {
-  background: #f3f8f5;
+  background: #f1f8f3;
+  border-color: #e5f0e8;
   color: var(--green-700);
 }
 .day.muted {
-  color: #c6cfca;
+  color: #c0cac3;
 }
 .day.past:not(.selected) {
-  color: #aab4ae;
+  color: #aab5ad;
 }
 .day.today {
-  border: 1px solid var(--green-700);
+  background: #ffffff;
+  border-color: var(--green-600);
   color: var(--green-700);
+  box-shadow: inset 0 0 0 1px rgba(25, 121, 63, 0.04);
 }
 .day.selected {
   background: var(--green-700) !important;
-  color: #fff !important;
+  border-color: var(--green-700);
+  color: #ffffff !important;
   font-weight: 700;
+  box-shadow: 0 3px 8px rgba(23, 107, 56, 0.16);
 }
 .day.has-appt::after {
   content: "";
   position: absolute;
-  bottom: 3px;
+  bottom: 4px;
   left: 50%;
   width: 4px;
   height: 4px;
   transform: translateX(-50%);
-  background: var(--green-700);
+  background: var(--green-600);
   border-radius: 50%;
 }
 .day.selected.has-appt::after {
-  background: #fff;
+  background: #ffffff;
 }
 .calendar-legend {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 10px;
-  color: #87938c;
-  font-size: 7px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #edf2ee;
+  color: #7f8d84;
+  font-size: 11px;
   font-weight: 600;
 }
 .calendar-legend span {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 7px;
 }
 .calendar-legend i {
   color: var(--green-700);
-  font-size: 5px;
+  font-size: 7px;
 }
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -936,7 +996,7 @@ textarea:focus-visible {
 }
 .modal-container {
   width: 100%;
-  max-width: 510px;
+  max-width: 560px;
   max-height: calc(100vh - 40px);
   display: flex;
   flex-direction: column;
@@ -954,7 +1014,7 @@ textarea:focus-visible {
   transform: translateY(0) scale(1);
 }
 .cancel-confirm-modal {
-  max-width: 340px;
+  max-width: 390px;
   border-color: #f1d8d8;
   box-shadow:
     0 28px 80px rgba(75, 26, 26, 0.2),
@@ -966,7 +1026,7 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 30px 24px 20px;
+  padding: 34px 28px 22px;
   background: #fffafa;
   border-bottom-color: #f4e2e2;
   text-align: center;
@@ -977,161 +1037,161 @@ textarea:focus-visible {
   align-items: center;
 }
 .cancel-confirm-icon {
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   border-radius: 50%;
   background: #fde8e8;
   color: var(--red-500);
-  font-size: 20px;
+  font-size: 24px;
 }
 .cancel-confirm-modal .modal-kicker {
   color: #b84a4a;
 }
 .cancel-confirm-modal .modal-header h3 {
   margin-top: 6px;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.25;
 }
 .cancel-confirm-modal .modal-header p {
-  max-width: 260px;
+  max-width: 300px;
   margin-top: 8px;
   color: #6f7772;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.6;
 }
 .cancel-confirm-modal .modal-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
 }
 .cancel-confirm-modal .modal-actions {
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
-  padding: 16px 22px 20px;
+  gap: 10px;
+  padding: 18px 26px 24px;
   background: #fff;
 }
 .cancel-confirm-modal .modal-actions .btn-secondary,
 .cancel-confirm-modal .modal-actions .btn-delete {
   flex: none;
   width: 100%;
-  min-height: 40px;
-  padding: 0 15px;
-  font-size: 9px;
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 12px;
 }
 .record-edit-overlay {
   z-index: 1100;
 }
 .record-edit-modal {
-  max-width: 610px;
-  max-height: min(760px, calc(100vh - 28px));
+  max-width: 700px;
+  max-height: min(820px, calc(100vh - 28px));
 }
 .record-edit-body {
-  padding: 15px 17px 8px;
+  padding: 20px 22px 10px;
   background: #f7faf8;
 }
 .record-edit-intro {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 11px;
-  padding: 9px 10px;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
   background: var(--green-50);
   border: 1px solid #dcebe1;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--ink-500);
-  font-size: 7.5px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .record-edit-intro i {
-  margin-top: 1px;
+  margin-top: 2px;
   color: var(--green-700);
 }
 .record-edit-section {
-  margin-bottom: 11px;
-  padding: 12px;
+  margin-bottom: 14px;
+  padding: 16px;
   background: #fff;
   border: 1px solid #e2ebe5;
-  border-radius: 11px;
+  border-radius: 12px;
 }
 .record-edit-section-heading {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .record-edit-section-heading > div {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
 }
 .record-edit-step {
   display: inline-flex;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--green-100);
   color: var(--green-700);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 800;
 }
 .record-edit-section h4 {
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.3;
 }
 .record-edit-section-heading p {
-  margin-top: 2px;
+  margin-top: 3px;
   color: var(--ink-500);
-  font-size: 7px;
+  font-size: 10.5px;
   line-height: 1.4;
 }
 .consent-section-heading {
-  margin: 14px 0 0;
-  padding: 11px 12px;
+  margin: 18px 0 0;
+  padding: 14px 16px;
   background: linear-gradient(135deg, #f2faf5, #fbfdfb);
   border: 1px solid #dcebe1;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .consent-section-heading .record-edit-step {
-  width: 25px;
-  height: 25px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1px solid #d5e8db;
 }
 .consent-section-heading h4 {
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.35;
 }
 .consent-section-heading p {
   margin-top: 3px;
-  font-size: 7.5px;
+  font-size: 11px;
   line-height: 1.5;
 }
 .record-edit-check-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 .record-edit-check-grid > label,
 .record-edit-radio-row > label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
-  min-height: 28px;
-  padding: 5px 7px;
+  min-height: 38px;
+  padding: 7px 11px;
   background: #fbfdfb;
   border: 1px solid #e5ece7;
-  border-radius: 7px;
+  border-radius: 8px;
   color: var(--ink-700);
-  font-size: 7.5px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -1146,12 +1206,12 @@ textarea:focus-visible {
 }
 .record-edit-other > input[type="text"] {
   width: 100%;
-  height: 27px;
-  padding: 0 7px;
+  height: 34px;
+  padding: 0 10px;
   border: 1px solid #dfe7e2;
-  border-radius: 6px;
+  border-radius: 7px;
   color: var(--ink-900);
-  font-size: 7.5px;
+  font-size: 11px;
   outline: none;
 }
 .record-edit-other > input[type="text"]:focus,
@@ -1162,34 +1222,34 @@ textarea:focus-visible {
 }
 .record-edit-field {
   min-width: 0;
-  margin-top: 11px;
+  margin-top: 14px;
 }
 .record-edit-field > label,
 .record-edit-group-label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--ink-700);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.3;
 }
 .record-edit-form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px;
+  gap: 16px;
 }
 .record-edit-field input:not([type="radio"]),
 .record-edit-field textarea,
 .record-edit-field select {
   width: 100%;
-  min-height: 42px;
-  padding: 10px 11px;
+  min-height: 46px;
+  padding: 11px 14px;
   background: #fff;
   border: 1px solid #dfe7e2;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--ink-900);
   font-family: var(--font-body);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 500;
   line-height: 1.4;
   outline: none;
@@ -1215,116 +1275,116 @@ textarea:focus-visible {
   cursor: pointer;
 }
 .record-edit-field textarea {
-  min-height: 70px;
+  min-height: 84px;
 }
 .record-edit-section:first-of-type {
-  padding: 15px;
+  padding: 20px;
 }
 .record-edit-section:first-of-type .record-edit-form-row:first-of-type {
   margin-top: 2px;
 }
 .record-edit-section:first-of-type .record-edit-info {
-  margin-top: 13px;
+  margin-top: 16px;
 }
 .record-edit-info {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-top: 13px;
-  padding: 9px 10px;
-  border-radius: 8px;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 9px;
   background: #f5faf7;
   border: 1px solid #dcebe1;
   color: var(--ink-500);
-  font-size: 8px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .record-edit-info i {
   flex: 0 0 auto;
-  margin-top: 1px;
+  margin-top: 2px;
   color: var(--green-700);
-  font-size: 9px;
+  font-size: 12px;
 }
 .record-edit-info span {
   display: block;
-  font-size: 8px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .record-edit-field textarea {
-  min-height: 57px;
+  min-height: 84px;
 }
 .record-edit-consent {
   display: flex;
   align-items: flex-start;
-  gap: 7px;
-  margin: 2px 1px 3px;
+  gap: 9px;
+  margin: 2px 1px 4px;
   color: var(--ink-500);
-  font-size: 7.5px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .record-edit-consent input {
-  margin-top: 1px;
+  margin-top: 2px;
 }
 .record-edit-actions {
   justify-content: space-between;
 }
 .record-edit-actions #saveRecordEdit {
-  min-width: 124px;
+  min-width: 150px;
 }
 .appointment-detail-modal {
-  max-width: 470px;
+  max-width: 540px;
 }
 .modal-header {
-  min-height: 70px;
+  min-height: 84px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 16px 19px;
+  gap: 16px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e8eeea;
   flex-shrink: 0;
 }
 .modal-kicker {
   display: block;
   color: var(--green-700);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .modal-header h3 {
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 700;
 }
 .modal-header p {
-  margin-top: 3px;
+  margin-top: 4px;
   color: #7e8982;
-  font-size: 7.5px;
+  font-size: 12px;
   line-height: 1.4;
 }
 .modal-subtitle {
   display: block;
   margin-top: 4px;
   color: #8a958e;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.35;
 }
 .modal-close {
-  width: 31px;
-  height: 31px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: #f6f8f7;
   border: 1px solid #e6ece8;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #69766e;
-  font-size: 12px;
+  font-size: 14px;
 }
 .modal-close:hover {
   background: var(--green-50);
@@ -1333,17 +1393,17 @@ textarea:focus-visible {
 .modal-body {
   min-height: 0;
   overflow-y: auto;
-  padding: 18px 19px 8px;
+  padding: 22px 24px 12px;
 }
 .form-group {
   min-width: 0;
-  margin-bottom: 13px;
+  margin-bottom: 16px;
 }
 .form-group label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--ink-700);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 .input-wrapper {
@@ -1352,22 +1412,22 @@ textarea:focus-visible {
 .field-icon {
   position: absolute;
   top: 50%;
-  left: 12px;
+  left: 14px;
   z-index: 1;
   color: #8a958e;
-  font-size: 10px;
+  font-size: 13px;
   transform: translateY(-50%);
   pointer-events: none;
 }
 .form-control {
   width: 100%;
-  height: 39px;
-  padding: 0 12px 0 35px;
+  height: 46px;
+  padding: 0 14px 0 40px;
   background: #fff;
   border: 1px solid #dfe7e2;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--ink-900);
-  font-size: 9px;
+  font-size: 13px;
   outline: none;
   transition:
     border-color 0.18s ease,
@@ -1384,19 +1444,19 @@ textarea:focus-visible {
 }
 .form-group small {
   display: block;
-  margin-top: 5px;
+  margin-top: 6px;
   color: var(--ink-500);
-  font-size: 7.5px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 13px;
+  gap: 16px;
 }
 #bookingModal #dateSelect,
 #bookingModal #dentistSelect {
-  padding-left: 12px;
+  padding-left: 14px;
 }
 .service-select-wrapper,
 .duration-input-wrapper,
@@ -1404,7 +1464,7 @@ textarea:focus-visible {
   position: relative;
 }
 .service-select-input {
-  padding: 0 38px 0 12px;
+  padding: 0 42px 0 14px;
   cursor: text;
 }
 .service-select-input:focus {
@@ -1414,10 +1474,10 @@ textarea:focus-visible {
 .service-select-arrow {
   position: absolute;
   top: 50%;
-  right: 13px;
+  right: 16px;
   transform: translateY(-50%);
   color: #87938c;
-  font-size: 8px;
+  font-size: 11px;
   cursor: pointer;
   pointer-events: none;
   transition:
@@ -1430,16 +1490,16 @@ textarea:focus-visible {
 }
 .service-dropdown {
   position: absolute;
-  top: calc(100% + 5px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
-  max-height: 220px;
+  max-height: 260px;
   overflow-y: auto;
   background: #fff;
   border: 1px solid #d8e2dc;
-  border-radius: 10px;
+  border-radius: 11px;
   box-shadow: 0 12px 28px rgba(10, 35, 20, 0.12);
-  padding: 5px;
+  padding: 6px;
   z-index: 50;
   display: none;
 }
@@ -1450,12 +1510,12 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 7px;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 8px;
   color: #3d4a43;
   background: #fff;
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -1475,13 +1535,13 @@ textarea:focus-visible {
 .service-dropdown-duration {
   flex-shrink: 0;
   color: #7d8982;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 500;
 }
 .service-dropdown-empty {
-  padding: 11px 8px;
+  padding: 14px 10px;
   color: #7d8982;
-  font-size: 8px;
+  font-size: 11px;
   font-style: italic;
   text-align: center;
 }
@@ -1490,43 +1550,43 @@ textarea:focus-visible {
   align-items: center;
 }
 .duration-input-wrapper .form-control {
-  padding: 0 76px 0 12px;
+  padding: 0 84px 0 14px;
 }
 .duration-unit {
   position: absolute;
-  right: 12px;
+  right: 14px;
   color: #87938c;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 600;
   pointer-events: none;
 }
 .duration-help {
   display: block;
-  margin-top: 5px;
+  margin-top: 6px;
   color: #8c9891;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 400;
   line-height: 1.5;
 }
 .available-time-group {
   margin-top: 1px;
-  padding: 12px;
+  padding: 16px;
   background: #f8fbf9;
   border: 1px solid #e2ebe5;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .available-time-group > label {
-  margin-bottom: 7px;
+  margin-bottom: 9px;
   color: #365344;
 }
 .available-time-control {
   width: 100%;
-  height: 39px;
+  height: 46px;
   display: flex;
   align-items: stretch;
   background: #fff;
   border: 1px solid #d7e2db;
-  border-radius: 9px;
+  border-radius: 10px;
   overflow: hidden;
   transition:
     border-color 0.18s ease,
@@ -1555,8 +1615,8 @@ textarea:focus-visible {
   cursor: not-allowed;
 }
 .available-time-icon {
-  width: 40px;
-  min-width: 40px;
+  width: 48px;
+  min-width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1565,16 +1625,16 @@ textarea:focus-visible {
   color: var(--green-700);
 }
 .available-time-icon i {
-  font-size: 12px;
+  font-size: 15px;
 }
 .time-trigger-label {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  padding: 0 34px 0 12px;
+  padding: 0 40px 0 14px;
   color: #25342c;
-  font-size: 9.5px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -1587,10 +1647,10 @@ textarea:focus-visible {
 .time-trigger-arrow {
   position: absolute;
   top: 50%;
-  right: 13px;
+  right: 16px;
   transform: translateY(-50%);
   color: #7f8b84;
-  font-size: 8px;
+  font-size: 11px;
   pointer-events: none;
   transition:
     color 0.18s ease,
@@ -1604,8 +1664,8 @@ textarea:focus-visible {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(100% + 7px);
-  max-height: 220px;
+  bottom: calc(100% + 8px);
+  max-height: 260px;
   overflow-y: auto;
   display: none;
   flex-direction: column;
@@ -1614,18 +1674,18 @@ textarea:focus-visible {
   border: 1px solid #d8e2dc;
   border-radius: 12px;
   box-shadow: 0 14px 32px rgba(10, 35, 20, 0.14);
-  padding: 10px;
+  padding: 12px;
   z-index: 60;
 }
 .time-picker-dropdown.open {
   display: flex;
 }
 .time-picker-group-label {
-  margin-top: 6px;
-  margin-bottom: 5px;
+  margin-top: 8px;
+  margin-bottom: 6px;
   padding-left: 2px;
   color: var(--green-700);
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -1636,19 +1696,19 @@ textarea:focus-visible {
 .time-picker-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 .time-picker-option {
-  min-height: 32px;
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 4px;
+  padding: 7px 6px;
   background: #f8fbf9;
   border: 1px solid #e2ebe5;
   border-radius: 8px;
   color: #33423a;
-  font-size: 8.5px;
+  font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -1691,24 +1751,24 @@ textarea:focus-visible {
 }
 .time-picker-option.scheduled .time-unavailable-icon,
 .time-picker-option.disabled .time-past-icon {
-  margin-right: 5px;
-  font-size: 9px;
+  margin-right: 6px;
+  font-size: 12px;
 }
 .time-picker-option[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 7px);
+  bottom: calc(100% + 8px);
   transform: translateX(-50%) translateY(3px);
   width: max-content;
-  max-width: 180px;
-  padding: 6px 8px;
+  max-width: 200px;
+  padding: 7px 10px;
   background: #27342d;
   color: #fff;
   border-radius: 6px;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.4;
   text-align: center;
   white-space: normal;
   pointer-events: none;
@@ -1726,18 +1786,18 @@ textarea:focus-visible {
   transform: translateX(-50%) translateY(0);
 }
 .time-picker-empty {
-  padding: 14px 8px;
+  padding: 16px 10px;
   color: #7d8982;
-  font-size: 8px;
+  font-size: 11px;
   font-style: italic;
   text-align: center;
 }
 .available-time-summary {
   display: block;
-  min-height: 14px;
-  margin-top: 7px;
+  min-height: 16px;
+  margin-top: 8px;
   color: #718078;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 500;
   line-height: 1.5;
 }
@@ -1750,28 +1810,28 @@ textarea:focus-visible {
 .schedule-conflict-notice {
   display: none;
   align-items: flex-start;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 11px 12px;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
   background: #fff8ef;
   border: 1px solid #f0d8b7;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .schedule-conflict-notice.show {
   display: flex;
 }
 .schedule-conflict-notice > i {
-  width: 18px;
-  min-width: 18px;
+  width: 20px;
+  min-width: 20px;
   margin-top: 2px;
   color: #c7771a;
-  font-size: 11px;
+  font-size: 14px;
   text-align: center;
 }
 .schedule-conflict-notice strong {
   display: block;
   color: #a55f15;
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -1779,7 +1839,7 @@ textarea:focus-visible {
   display: block;
   margin-top: 4px;
   color: #b66d1d;
-  font-size: 7.5px;
+  font-size: 11px;
   line-height: 1.5;
 }
 .time-label-row {
@@ -1787,32 +1847,32 @@ textarea:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 .time-label-row label {
   margin-bottom: 0;
 }
 .time-label-row span {
   color: var(--green-700);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 600;
   text-align: right;
 }
 .time-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-  max-height: 180px;
+  gap: 8px;
+  max-height: 210px;
   overflow-y: auto;
 }
 .time-option {
-  min-height: 36px;
-  padding: 0 5px;
+  min-height: 42px;
+  padding: 0 6px;
   background: #fff;
   border: 1px solid #dfe7e2;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #536159;
-  font-size: 8.5px;
+  font-size: 11.5px;
   font-weight: 600;
   transition:
     background 0.16s ease,
@@ -1834,24 +1894,24 @@ textarea:focus-visible {
 }
 .time-empty {
   grid-column: 1/-1;
-  min-height: 90px;
+  min-height: 104px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 15px;
+  gap: 8px;
+  padding: 18px;
   background: #fbfdfc;
   border: 1px dashed #dfe7e2;
-  border-radius: 10px;
+  border-radius: 11px;
   color: #8a968f;
-  font-size: 8px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
   text-align: center;
 }
 .time-empty i {
   color: #a0aba4;
-  font-size: 17px;
+  font-size: 22px;
 }
 .time-empty.warning {
   color: #9a641b;
@@ -1864,15 +1924,14 @@ textarea:focus-visible {
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 7px;
-  padding: 11px 19px 15px;
+  gap: 10px;
+  padding: 14px 24px 20px;
   border-top: 1px solid #edf1ee;
   flex-shrink: 0;
 }
 .detail-actions {
   justify-content: flex-end;
 }
-/* Locked (within 24h) cancel / reschedule buttons + tooltip */
 .btn-delete.is-locked,
 .btn-request.is-locked {
   opacity: 0.5;
@@ -1886,11 +1945,11 @@ textarea:focus-visible {
 .lock-tooltip {
   position: fixed;
   z-index: 3000;
-  width: 290px;
+  width: 320px;
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  padding: 11px 13px;
+  gap: 10px;
+  padding: 13px 15px;
   background: #1f2d25;
   color: #fff;
   border-radius: 10px;
@@ -1907,11 +1966,11 @@ textarea:focus-visible {
 .lock-tooltip > i {
   margin-top: 2px;
   color: #f5c16c;
-  font-size: 11px;
+  font-size: 14px;
 }
 .lock-tooltip strong {
   display: block;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
 }
@@ -1919,12 +1978,11 @@ textarea:focus-visible {
   display: block;
   margin-top: 5px;
   color: #b9c7bf;
-  font-size: 8.5px;
+  font-size: 11px;
   line-height: 1.5;
 }
-/* Delete confirmation + doctor-unavailable state */
 .delete-confirm-modal .modal-header p {
-  max-width: 280px;
+  max-width: 300px;
 }
 .delete-confirm-modal .modal-actions .btn-delete {
   background: var(--red-500);
@@ -1955,20 +2013,19 @@ textarea:focus-visible {
   background: #fff0f0;
   color: #dc3838;
 }
-/* Delete sits at the far left; Cancel Appointment and Reschedule stay on the right */
 .detail-actions #deleteAppointmentBtn {
   margin-right: auto;
 }
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 .detail-card {
-  padding: 10px;
+  padding: 13px 14px;
   background: #f8faf9;
   border: 1px solid #e2ebe5;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 .detail-card.full {
   grid-column: 1/-1;
@@ -1976,87 +2033,30 @@ textarea:focus-visible {
 .detail-card span {
   display: block;
   color: #849087;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 600;
 }
 .detail-card strong {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-900);
-  font-size: 8.5px;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1.4;
 }
 .detail-status {
   display: inline-flex;
   width: fit-content;
-  min-width: 58px;
-  margin-top: 4px;
-  padding: 4px 7px;
+  min-width: 70px;
+  margin-top: 5px;
+  padding: 5px 10px;
   border-radius: 6px;
-  font-size: 6.5px;
+  font-size: 10px;
   font-weight: 600;
 }
 .status-scheduled {
   background: #e8f5ec;
   color: #19793f;
-}
-.upcoming-patient-info .status-scheduled,
-.upcoming-patient-info .status-consultation,
-.upcoming-patient-info .status-completed,
-.upcoming-patient-info .status-cancelled,
-.upcoming-patient-info .status-no-show {
-  position: absolute;
-  top: calc(45% + 8px);
-  right: 35px;
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  min-width: 85px;
-  margin-top: 0;
-  padding: 8px 12px;
-  border-radius: 7px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1;
-  transform: translateY(-50%);
-}
-.upcoming-patient-info .status-scheduled {
-  background: #e8f5ec;
-  color: #19793f;
-  font-size: 9px;
-}
-.upcoming-patient-info .status-consultation {
-  background: #e8f5ec;
-  color: var(--amber-500);
-  font-size: 8.5px;
-}
-.upcoming-patient-info .status-completed {
-  background: #dff3e5;
-  color: #16803d;
-  font-size: 9px;
-  font-weight: 600;
-  border-radius: 7px;
-}
-.upcoming-patient-info .status-cancelled,
-.upcoming-patient-info .status-no-show {
-  background: var(--red-100);
-  color: var(--red-500);
-  font-size: 9px;
-}
-.upcoming-patient-info .status-scheduled::before,
-.upcoming-patient-info .status-consultation::before,
-.upcoming-patient-info .status-completed::before,
-.upcoming-patient-info .status-cancelled::before,
-.upcoming-patient-info .status-no-show::before {
-  content: "";
-  position: absolute;
-  right: calc(100% + 10px);
-  top: 50%;
-  width: 1px;
-  height: 38px;
-  background: #dfe7e2;
-  transform: translateY(-50%);
 }
 .status-consultation {
   background: var(--blue-100);
@@ -2075,60 +2075,104 @@ textarea:focus-visible {
   background: var(--red-100);
   color: var(--red-500);
 }
+.upcoming-patient-info
+  :is(
+    .status-scheduled,
+    .status-consultation,
+    .status-completed,
+    .status-cancelled,
+    .status-no-show
+  ) {
+  position: absolute;
+  bottom: 41px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 15px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  transform: translateY(50%);
+}
+.upcoming-patient-info .status-scheduled {
+  background: #e8f5ec;
+  color: #19793f;
+}
+.upcoming-patient-info .status-consultation {
+  background: var(--amber-100);
+  color: var(--amber-500);
+}
+.upcoming-patient-info .status-completed {
+  background: #dff3e5;
+  color: #16803d;
+}
+.upcoming-patient-info .status-cancelled,
+.upcoming-patient-info .status-no-show {
+  background: var(--red-100);
+  color: var(--red-500);
+}
 .current-appointment-box {
-  margin-bottom: 14px;
-  padding: 10px 11px;
+  margin-bottom: 18px;
+  padding: 13px 14px;
   background: #f8faf9;
   border: 1px solid #e2ebe5;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .current-appointment-box strong {
   display: block;
   color: var(--ink-900);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 .current-appointment-box span {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: #6f7b74;
-  font-size: 7.5px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .textarea-control {
   height: auto;
-  min-height: 90px;
-  padding: 10px 12px;
+  min-height: 100px;
+  padding: 12px 14px;
   resize: vertical;
 }
 .request-info-box {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 9px 10px;
+  gap: 10px;
+  padding: 12px 14px;
   background: var(--blue-100);
   border: 1px solid #d5e3f8;
-  border-radius: 9px;
+  border-radius: 10px;
   color: #456487;
-  font-size: 7.5px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .request-info-box i {
-  margin-top: 1px;
+  margin-top: 2px;
   color: var(--blue-500);
 }
 .toast {
   position: fixed;
-  right: 22px;
-  bottom: 22px;
+  right: 26px;
+  bottom: 26px;
   z-index: 1200;
-  max-width: 340px;
-  padding: 10px 13px;
+  max-width: 380px;
+  padding: 13px 17px;
   background: #173b25;
   color: #fff;
-  border-radius: 9px;
+  border-radius: 10px;
   box-shadow: 0 10px 28px rgba(13, 44, 25, 0.2);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 600;
   opacity: 0;
   visibility: hidden;
@@ -2144,38 +2188,38 @@ textarea:focus-visible {
   transform: translateY(0);
 }
 .request-staff-message {
-  margin-top: 7px !important;
-  padding-top: 7px;
+  margin-top: 8px !important;
+  padding-top: 8px;
   border-top: 1px solid #e2ebe5;
   color: #6f7b74 !important;
   font-style: italic;
 }
 .staff-request-section {
-  margin-bottom: 13px;
-  padding: 11px 12px;
+  margin-bottom: 16px;
+  padding: 14px 15px;
   background: #f8faf9;
   border: 1px solid #e2ebe5;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .staff-request-label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   color: #849087;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 700;
 }
 .staff-request-section strong {
   display: block;
   color: var(--ink-900);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 .staff-request-message-box {
-  margin-bottom: 13px;
-  padding: 11px 12px;
+  margin-bottom: 16px;
+  padding: 14px 15px;
   background: #fffaf1;
   border: 1px solid #f1dfbd;
-  border-radius: 10px;
+  border-radius: 11px;
 }
 .staff-request-message-box .staff-request-label {
   color: #967044;
@@ -2183,52 +2227,42 @@ textarea:focus-visible {
 .staff-request-message-box p {
   margin: 0;
   color: #66583f;
-  font-size: 8px;
+  font-size: 11.5px;
   line-height: 1.55;
 }
 .staff-schedule-selection {
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
   border-top: 1px solid #e5ebe7;
 }
 .staff-schedule-heading {
-  margin-bottom: 13px;
+  margin-bottom: 16px;
 }
 .staff-schedule-heading strong {
   display: block;
   color: var(--ink-900);
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 .staff-schedule-heading span {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-500);
-  font-size: 7.5px;
+  font-size: 10.5px;
   line-height: 1.4;
 }
 .staff-schedule-selection[hidden],
 #staffScheduleActions[hidden] {
   display: none;
 }
+@media (max-width: 1366px) {
+  .upcoming-card-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 @media (max-width: 1100px) {
   .top-layout {
-    grid-template-columns: minmax(0, 1.2fr) minmax(270px, 0.8fr);
-  }
-  .upcoming-card-content {
-    grid-template-columns: minmax(0, 1fr) minmax(0, auto) 1px;
-    gap: 14px;
-    padding: 14px;
-  }
-  .upcoming-actions {
-    top: -76px;
-    right: 18px;
-  }
-  .upcoming-actions button {
-    min-width: 105px;
-  }
-  .upcoming-schedule {
-    padding-right: 72px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.8fr);
   }
 }
 @media (max-width: 850px) {
@@ -2246,21 +2280,21 @@ textarea:focus-visible {
     grid-row: auto;
   }
   .upcoming-content {
-    min-height: 155px;
+    min-height: 170px;
   }
 }
 @media (max-width: 768px) {
   .page-shell {
-    padding: 14px 14px 24px;
+    padding: 16px 16px 28px;
   }
   .page-header {
     min-height: 0;
-    margin-bottom: 12px;
-    padding: 12px;
-    gap: 12px;
+    margin-bottom: 14px;
+    padding: 14px;
+    gap: 14px;
   }
   .page-heading {
-    min-height: 40px;
+    min-height: 44px;
     padding-left: 52px;
   }
   .page-header h1 {
@@ -2268,11 +2302,6 @@ textarea:focus-visible {
   }
 }
 @media (max-width: 760px) {
-  .upcoming-schedule {
-    grid-column: 1/-1;
-    justify-content: flex-start;
-    padding-right: 70px;
-  }
   .page-header {
     align-items: flex-start;
     flex-direction: column;
@@ -2285,46 +2314,33 @@ textarea:focus-visible {
   }
   .upcoming-panel-header {
     align-items: center;
-    padding-right: 135px;
+    padding: 16px 20px;
   }
   .upcoming-content {
-    min-height: 155px;
-    padding: 16px;
+    min-height: 170px;
+    padding: 18px;
   }
   .upcoming-card-content {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
-    padding: 14px;
-  }
-  .upcoming-divider {
-    display: none;
+    gap: 16px;
+    padding: 18px;
   }
   .upcoming-actions {
-    position: absolute;
-    top: -76px;
+    top: 48px;
     right: 18px;
-    z-index: 3;
   }
-  .upcoming-actions button {
-    min-width: 100px;
-  }
-  .upcoming-time {
-    font-size: 10px;
-  }
-  .upcoming-date strong {
-    font-size: 8.5px;
-  }
-  .upcoming-time-range strong {
-    font-size: 9px;
-  }
-  .upcoming-patient-info .status-scheduled {
-    right: 14px;
-  }
-  .upcoming-patient-info .status-scheduled::before {
-    right: calc(100% + 8px);
+  .upcoming-patient-info
+    :is(
+      .status-scheduled,
+      .status-consultation,
+      .status-completed,
+      .status-cancelled,
+      .status-no-show
+    ) {
+    bottom: 37px;
+    right: 18px;
   }
   .reschedule-alert {
-    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-columns: 44px minmax(0, 1fr);
   }
   .reschedule-alert .alert-action {
     grid-column: 1/-1;
@@ -2337,68 +2353,65 @@ textarea:focus-visible {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+@media (max-width: 600px) {
+  .upcoming-card-content > div:first-child {
+    padding-right: 0;
+  }
+  .upcoming-schedule {
+    padding-right: 0;
+  }
+  .upcoming-patient-info
+    :is(
+      .status-scheduled,
+      .status-consultation,
+      .status-completed,
+      .status-cancelled,
+      .status-no-show
+    ) {
+    position: static;
+    margin-top: 8px;
+    transform: none;
+  }
+  .upcoming-actions {
+    position: static;
+    justify-content: stretch;
+    transform: none;
+  }
+  .upcoming-actions button {
+    width: 100%;
+  }
+}
 @media (max-width: 480px) {
   .page-header h1 {
-    font-size: 18px;
+    font-size: 20px;
   }
   .upcoming-panel-header {
     gap: 10px;
-    padding: 15px;
-    padding-right: 125px;
+    padding: 16px;
   }
   .upcoming-content {
-    min-height: 180px;
-    padding: 12px;
+    min-height: 190px;
+    padding: 14px;
   }
   .upcoming-card-content {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-    gap: 12px;
-    padding: 15px;
+    padding: 16px;
   }
-  .upcoming-card-content > div:first-child {
-    justify-content: flex-start;
+  .upcoming-patient-avatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    font-size: 13px;
   }
   .upcoming-patient-info strong {
-    font-size: 11px;
+    font-size: 15px;
   }
   .upcoming-patient-info span {
-    font-size: 7px;
+    font-size: 12px;
   }
-  .upcoming-time {
-    font-size: 10px;
-  }
-  .upcoming-schedule {
-    grid-column: auto;
-    width: 100%;
-    justify-content: flex-start;
-    overflow: hidden;
-    padding-right: 70px;
-  }
-  .upcoming-date strong {
-    font-size: 8.5px;
-  }
-  .upcoming-time-range strong {
-    font-size: 9px;
-  }
-  .upcoming-actions {
-    top: -76px;
-    right: 15px;
-  }
-  .upcoming-actions button {
-    width: auto;
-    min-width: 90px;
-  }
-  .upcoming-patient-info .status-scheduled {
-    top: auto;
-    right: 15px;
-    bottom: 15px;
-    transform: none;
-  }
-  .upcoming-patient-info .status-scheduled::before {
-    right: calc(100% + 8px);
-    top: 50%;
-    height: 32px;
+  .upcoming-date,
+  .upcoming-time-range {
+    min-height: 36px;
+    padding: 0 12px;
   }
   .modal-overlay {
     padding: 10px;
@@ -2408,13 +2421,13 @@ textarea:focus-visible {
     border-radius: 14px;
   }
   .modal-header {
-    padding: 14px;
+    padding: 16px;
   }
   .modal-body {
-    padding: 15px 14px 5px;
+    padding: 16px 16px 6px;
   }
   .modal-actions {
-    padding: 10px 14px 13px;
+    padding: 12px 16px 16px;
   }
   .modal-actions .btn-primary,
   .modal-actions .btn-secondary,
@@ -2430,19 +2443,13 @@ textarea:focus-visible {
   .detail-card.full {
     grid-column: auto;
   }
-  .upcoming-actions {
-    flex-direction: column;
-  }
-  .upcoming-actions button {
-    width: 100%;
-  }
   .empty-upcoming,
   .empty-state {
-    min-height: 160px;
+    min-height: 170px;
   }
 }
 .booking-modal-container {
-  max-width: 560px;
+  max-width: 640px;
 }
 .booking-step[hidden],
 #backBooking[hidden],
@@ -2452,9 +2459,9 @@ textarea:focus-visible {
 }
 .booking-step-label {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   color: var(--green-700);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2462,8 +2469,8 @@ textarea:focus-visible {
 .booking-progress {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 19px;
+  gap: 10px;
+  padding: 14px 24px;
   background: #f8fbf9;
   border-bottom: 1px solid #edf1ee;
 }
@@ -2471,12 +2478,12 @@ textarea:focus-visible {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   color: #9aa59e;
 }
 .booking-progress-item > span {
-  width: 23px;
-  height: 23px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2485,7 +2492,7 @@ textarea:focus-visible {
   border: 1px solid #dfe7e2;
   border-radius: 50%;
   color: #87938c;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 700;
 }
 .booking-progress-item > div {
@@ -2494,7 +2501,7 @@ textarea:focus-visible {
 .booking-progress-item strong {
   display: block;
   color: #87938c;
-  font-size: 7.5px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -2502,7 +2509,7 @@ textarea:focus-visible {
   display: block;
   margin-top: 2px;
   color: #a0aaa4;
-  font-size: 6.5px;
+  font-size: 9.5px;
   line-height: 1.3;
 }
 .booking-progress-item.active > span {
@@ -2529,17 +2536,17 @@ textarea:focus-visible {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 7px);
+  bottom: calc(100% + 8px);
   transform: translateX(-50%);
   width: max-content;
-  max-width: 180px;
-  padding: 6px 8px;
+  max-width: 200px;
+  padding: 7px 10px;
   background: #27342d;
   color: #fff;
   border-radius: 6px;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.4;
   text-align: center;
   white-space: normal;
   pointer-events: none;
@@ -2561,11 +2568,11 @@ textarea:focus-visible {
   background: #dfe7e2;
 }
 .booking-section {
-  margin-bottom: 14px;
-  padding: 13px;
+  margin-bottom: 16px;
+  padding: 18px;
   background: #fff;
   border: 1px solid #e5ebe7;
-  border-radius: 11px;
+  border-radius: 12px;
 }
 .booking-section:last-child {
   margin-bottom: 0;
@@ -2574,21 +2581,21 @@ textarea:focus-visible {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 13px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 .booking-section-header h4 {
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.35;
 }
 .booking-section-header p {
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-500);
-  font-size: 7px;
-  line-height: 1.45;
+  font-size: 10.5px;
+  line-height: 1.5;
 }
 .patient-information-section,
 .medical-booking-section > .form-group,
@@ -2598,15 +2605,15 @@ textarea:focus-visible {
 .medical-record-update-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   flex-shrink: 0;
-  min-height: 30px;
-  padding: 0 10px;
+  min-height: 36px;
+  padding: 0 13px;
   border: 1px solid var(--green-600);
-  border-radius: 8px;
+  border-radius: 9px;
   background: var(--green-50);
   color: var(--green-700);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
 }
 .medical-record-update-btn:hover {
@@ -2615,25 +2622,25 @@ textarea:focus-visible {
 .patient-summary-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 13px;
-  padding: 10px 11px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 13px 14px;
   background: #f5faf7;
   border: 1px solid #dcebe1;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 .patient-summary-icon {
-  width: 31px;
-  height: 31px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: #e5f3e9;
   border: 1px solid #d5e8db;
-  border-radius: 8px;
+  border-radius: 9px;
   color: var(--green-700);
-  font-size: 11px;
+  font-size: 14px;
 }
 .patient-summary-content {
   min-width: 0;
@@ -2641,34 +2648,34 @@ textarea:focus-visible {
 .patient-summary-content span {
   display: block;
   color: #849087;
-  font-size: 6.5px;
+  font-size: 9.5px;
   font-weight: 600;
 }
 .patient-summary-content strong {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   color: var(--green-700);
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 .medical-record-summary {
-  margin-bottom: 13px;
-  padding: 10px 11px;
+  margin-bottom: 16px;
+  padding: 13px 14px;
   background: #f8fbf9;
   border: 1px solid #e2ebe5;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 .medical-record-summary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  gap: 11px;
 }
 .medical-record-summary-grid > div {
   min-width: 0;
-  padding: 8px;
+  padding: 11px;
   background: #fff;
   border: 1px solid #e6ece8;
-  border-radius: 8px;
+  border-radius: 9px;
 }
 .medical-record-summary-item-wide {
   grid-column: 1 / -1;
@@ -2676,71 +2683,71 @@ textarea:focus-visible {
 .medical-record-summary-grid span {
   display: block;
   color: #849087;
-  font-size: 6.5px;
+  font-size: 9.5px;
   font-weight: 600;
 }
 .medical-record-summary-grid strong {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-900);
-  font-size: 7.5px;
+  font-size: 11px;
   font-weight: 650;
   line-height: 1.45;
 }
 .medical-record-summary-empty {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
 }
 .medical-record-summary-empty > i {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   background: var(--green-50);
   border: 1px solid #e1eee5;
-  border-radius: 8px;
+  border-radius: 9px;
   color: var(--green-700);
-  font-size: 12px;
+  font-size: 15px;
 }
 .medical-record-summary-empty strong {
   display: block;
   color: var(--ink-900);
-  font-size: 8px;
+  font-size: 11.5px;
   font-weight: 700;
 }
 .medical-record-summary-empty span {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--ink-500);
-  font-size: 7px;
-  line-height: 1.45;
+  font-size: 10.5px;
+  line-height: 1.5;
 }
 .medical-record-summary-status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 10px;
+  gap: 7px;
+  margin-top: 12px;
   color: var(--green-700);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
 }
 .booking-consent {
-  margin-top: 12px;
-  padding: 10px 11px;
+  margin-top: 16px;
+  padding: 13px 14px;
   background: #f8fbf9;
   border: 1px solid #e2ebe5;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 .booking-consent label {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: #657169;
-  font-size: 7.5px;
+  font-size: 10.5px;
   font-weight: 500;
   line-height: 1.5;
 }
@@ -2756,17 +2763,17 @@ textarea:focus-visible {
 }
 #continueBooking,
 #confirmBooking {
-  min-width: 120px;
+  min-width: 140px;
 }
 @media (max-width: 480px) {
   .booking-progress {
-    padding: 10px 14px;
+    padding: 12px 16px;
   }
   .booking-progress-item small {
     display: none;
   }
   .booking-progress-item strong {
-    font-size: 7px;
+    font-size: 10px;
   }
   .booking-progress-line {
     min-width: 10px;
@@ -2778,31 +2785,31 @@ textarea:focus-visible {
     max-height: calc(100vh - 20px);
   }
   .record-edit-body {
-    padding: 13px 12px 6px;
+    padding: 15px 14px 8px;
   }
   .record-edit-check-grid,
   .record-edit-form-row {
     grid-template-columns: 1fr;
   }
   .record-edit-section {
-    padding: 10px;
+    padding: 13px;
   }
   #backBooking {
     margin-right: 0;
   }
 }
 .btn-delete {
-  min-height: 36px;
+  min-height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 0 13px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 9px;
   background: var(--red-100);
   color: var(--red-500);
   border: 1px solid #f0d2d2;
-  font-size: 8.5px;
+  font-size: 12px;
   font-weight: 700;
   transition:
     background 0.18s ease,
@@ -2820,64 +2827,10 @@ textarea:focus-visible {
   .appointment-info-popover {
     left: 0;
     right: auto;
-    width: min(300px, calc(100vw - 56px));
+    width: min(340px, calc(100vw - 56px));
     max-width: none;
   }
 }
-/* ===== Mobile fix: upcoming appointment schedule row ===== */
-@media (max-width: 760px) {
-  .upcoming-schedule {
-    left: 0;
-    min-width: 0;
-    flex-wrap: wrap;
-    row-gap: 3px;
-  }
-
-  .upcoming-date strong {
-    transform: none;
-  }
-
-  .upcoming-date::after {
-    transform: none;
-  }
-
-  .upcoming-time-range > div:first-child strong::after {
-    white-space: pre;
-  }
-}
-
-@media (max-width: 480px) {
-  .upcoming-card-content {
-    /* room at the bottom for date + time + badge stacked on the right */
-    padding-bottom: 15px;
-    min-height: 150px;
-  }
-
-  .upcoming-schedule {
-    position: absolute; /* take it out of the grid flow */
-    right: 15px;
-    bottom: 58px; /* sits just above the Scheduled badge */
-    left: auto;
-    width: auto;
-    padding-right: 0;
-    flex-direction: column;
-    align-items: flex-end; /* right-align date and time */
-    gap: 3px;
-    overflow: visible;
-    text-align: right;
-  }
-
-  .upcoming-date::after {
-    display: none;
-  }
-
-  .upcoming-date strong,
-  .upcoming-time-range strong {
-    font-size: 9px;
-  }
-}
-
-/* Delete button: intentionally low-key (still clickable, no confirmation) */
 .detail-actions #deleteAppointmentBtn {
   background: transparent;
   border-color: transparent;
