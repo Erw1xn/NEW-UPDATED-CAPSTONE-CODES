@@ -121,6 +121,8 @@ function setActivePage() {
     pageKey = "appointment";
   } else if (currentPath.includes("patient")) {
     pageKey = "patients";
+  } else if (currentPath.includes("inventory")) {
+    pageKey = "inventory";
   } else if (currentPath.includes("finance")) {
     pageKey = "finance";
   }

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="../profile/profile.css" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
     <link rel="stylesheet" href="dashboard.css?v=1" />
-    <link rel="stylesheet" href="forecast-widget.css" />
+    <link rel="stylesheet" href="todays_appointment.css" />
   </head>
   <body>
     <div class="dashboard-layout">
@@ -133,150 +133,14 @@
             <section class="panel forecast-panel" id="forecastPanel">
               <div class="panel-header">
                 <div class="panel-heading">
-                  <h3>
-                    Inventory Demand Forecast
-                    <span class="fc-ai-badge" id="fcAiBadge" data-state="idle">
-                      <i class="fa-solid fa-wand-magic-sparkles"></i>
-                      <span id="fcAiBadgeText"></span>
-                    </span>
-                  </h3>
-                  <p class="panel-subtitle">
-                    AI-predicted supply usage based on past treatments
-                  </p>
+                  <h3>Today's Appointments</h3>
+                  <p class="panel-subtitle">Patients scheduled for today</p>
                 </div>
-                <div class="fc-select-wrap">
-                  <div class="fc-control-row">
-                    <div class="fc-select custom-select" id="fcItemSelect">
-                      <button
-                        type="button"
-                        class="fc-select-button"
-                        id="fcItemSelectButton"
-                        aria-haspopup="listbox"
-                        aria-expanded="false"
-                      >
-                        <span id="fcSelectedItem">Select item</span>
-                        <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                      <div
-                        class="fc-select-menu"
-                        id="fcItemSelectMenu"
-                        role="listbox"
-                        hidden
-                      ></div>
-                    </div>
-                    <a
-                      href="../inventory/inventory.html?page=2"
-                      class="fc-view-link"
-                      id="fcViewFullForecast"
-                      >View Forecast</a
-                    >
-                  </div>
-                </div>
+                <a href="../appointment/appointment.html" class="btn-link"
+                  >View Appointments <i class="fa-solid fa-arrow-right"></i
+                ></a>
               </div>
-              <div class="panel-body fc-body">
-                <div class="fc-stats">
-                  <div class="fc-stat">
-                    <span class="fc-stat-label">Predicted Demand</span>
-                    <span class="fc-stat-value" id="fcPredicted">—</span>
-                    <span class="fc-stat-sub" id="fcPredictedSub"
-                      >Next period</span
-                    >
-                  </div>
-                  <div
-                    class="fc-stat fc-stat-modelcard"
-                    id="fcModelCard"
-                    data-model="none"
-                  >
-                    <span class="fc-stat-label">Selected Model</span>
-                    <span class="fc-stat-value fc-stat-model" id="fcModel"
-                      >—</span
-                    >
-                    <span class="fc-stat-sub" id="fcModelSub"
-                      >Best model picked</span
-                    >
-                  </div>
-                  <div class="fc-stat">
-                    <span class="fc-stat-label">Forecast Status</span>
-                    <span
-                      class="fc-stat-value"
-                      id="fcForecastStatus"
-                      data-tone="muted"
-                      >—</span
-                    >
-                    <span class="fc-stat-sub" id="fcForecastStatusSub"
-                      >Model status</span
-                    >
-                  </div>
-                </div>
-                <div class="fc-compare" id="fcCompare">
-                  <div
-                    class="fc-compare-item"
-                    id="fcCmpSma"
-                    data-selected="false"
-                    data-available="false"
-                  >
-                    <span class="fc-compare-dot fc-dot-sma"></span>
-                    <div class="fc-compare-text">
-                      <small>SMA · Baseline</small>
-                      <strong id="fcCmpSmaValue">—</strong>
-                    </div>
-                    <span class="fc-compare-tag" id="fcCmpSmaTag"></span>
-                  </div>
-                  <div
-                    class="fc-compare-item fc-compare-ai"
-                    id="fcCmpRf"
-                    data-selected="false"
-                    data-available="false"
-                  >
-                    <span class="fc-compare-dot fc-dot-rf"></span>
-                    <div class="fc-compare-text">
-                      <small
-                        ><i class="fa-solid fa-wand-magic-sparkles"></i> AI ·
-                        Random Forest</small
-                      >
-                      <strong id="fcCmpRfValue">—</strong>
-                    </div>
-                    <span class="fc-compare-tag" id="fcCmpRfTag"></span>
-                  </div>
-                </div>
-                <div class="fc-insight" id="fcInsight" data-tone="info">
-                  <i class="fa-solid fa-circle-info"></i>
-                  <span id="fcInsightText">Loading forecast...</span>
-                </div>
-                <div class="fc-chart-wrap">
-                  <canvas id="fcChart"></canvas>
-                  <div class="fc-empty" id="fcEmpty" hidden>
-                    <i class="fa-solid fa-chart-line"></i>
-                    <p id="fcEmptyText">No forecast data available yet.</p>
-                  </div>
-                </div>
-                <div class="fc-data-note" id="fcDataNote"></div>
-                <div class="fc-how">
-                  <div class="fc-how-step">
-                    <span class="fc-how-num">1</span>
-                    <div>
-                      <strong>Usage history</strong>
-                      <small>Treatment usage</small>
-                    </div>
-                  </div>
-                  <i class="fa-solid fa-arrow-right fc-how-arrow"></i>
-                  <div class="fc-how-step">
-                    <span class="fc-how-num">2</span>
-                    <div>
-                      <strong>AI forecast</strong>
-                      <small>SMA + Random Forest</small>
-                    </div>
-                  </div>
-                  <i class="fa-solid fa-arrow-right fc-how-arrow"></i>
-                  <div class="fc-how-step">
-                    <span class="fc-how-num">3</span>
-                    <div>
-                      <strong>Stock decision</strong>
-                      <small>Check if stock is enough</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <div class="ta-list" id="todaysAppointmentsList"></div>
             </section>
           </div>
           <div class="stacked-panel-column">
@@ -307,8 +171,7 @@
     </div>
     <script src="../../navigation_bar/sidebar.js"></script>
     <script src="dashboard.js"></script>
+    <script src="todays_appointment.js"></script>
     <script src="../profile/profile.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="forecast-widget.js"></script>
   </body>
 </html>

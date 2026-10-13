@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory | DentaNueva Dental Clinic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../profile/profile.css" />
+    <link rel="stylesheet" href="../navigationbar/sidebar.css" />
+    <link rel="stylesheet" href="inventory.css?v=1" />
+    <style>
+      #inventoryPage2 .forecast-chart-select-wrapper {
+        position: relative;
+        width: 240px;
+        min-width: 220px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      #inventoryPage2 .forecast-chart-search {
+        position: relative;
+        width: 100%;
+      }
+      #inventoryPage2 .forecast-chart-search i {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        z-index: 2;
+        transform: translateY(-50%);
+        color: #98a49e;
+        font-size: 0.65rem;
+        pointer-events: none;
+      }
+      #inventoryPage2 .forecast-chart-search input {
+        width: 100%;
+        height: 40px;
+        padding: 0 34px 0 34px;
+        border: 1px solid #dfe7e2;
+        border-radius: 8px;
+        background: #fff;
+        color: #26352d;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.62rem;
+        outline: none;
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      #inventoryPage2 .forecast-chart-search input:focus {
+        border-color: #5aa879;
+        box-shadow: 0 0 0 3px rgba(23, 107, 56, 0.07);
+      }
+      #inventoryPage2 .forecast-chart-search input::placeholder {
+        color: #a0aaa5;
+      }
+      #inventoryPage2 .forecast-chart-search-chevron {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        z-index: 2;
+        transform: translateY(-50%);
+        color: #68756d;
+        font-size: 0.62rem;
+        pointer-events: none;
+      }
+      #inventoryPage2 .forecast-chart-item-dropdown {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        z-index: 50;
+        width: 100%;
+        max-height: 330px;
+        overflow-y: auto;
+        padding: 5px;
+        border: 1px solid #dfe7e2;
+        border-radius: 9px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(20, 32, 26, 0.12);
+        display: none;
+      }
+      #inventoryPage2 .forecast-chart-item-dropdown.open {
+        display: block;
+      }
+      #inventoryPage2 .forecast-chart-item-option {
+        width: 100%;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #4d5b53;
+        font-family: "Poppins", sans-serif;
+        font-size: 0.61rem;
+        font-weight: 400;
+        text-align: left;
+        cursor: pointer;
+      }
+      #inventoryPage2 .forecast-chart-item-option:hover,
+      #inventoryPage2 .forecast-chart-item-option.active {
+        background: #f1f7f3;
+        color: #176b38;
+      }
+      #inventoryPage2 .forecast-chart-item-empty {
+        padding: 12px 10px;
+        color: #929d96;
+        font-size: 0.58rem;
+        text-align: center;
+      }
+      #inventoryPage2 #forecastChartItem {
+        display: none;
+      }
+      @media (max-width: 800px) {
+        #inventoryPage2 .forecast-chart-select-wrapper {
+          width: 100%;
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar-container"></div>
+    <main class="inventory-main">
+      <div class="inventory-page">
+        <section class="inventory-panel">
+          <div
+            class="inventory-page-section active"
+            id="inventoryPage1"
+            data-page-section="1"
+          >
+            <div class="panel-header">
+              <div class="panel-header-left">
+                <div>
+                  <h2>Inventory Items</h2>
+                  <p>View and manage your dental supplies.</p>
+                </div>
+              </div>
+              <div class="panel-header-right">
+                <span class="item-count" id="itemCount">0 items</span>
+                <div class="inventory-header-actions">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    id="exportInventoryPdfButton"
+                    title="Download a full PDF report of inventory usage and stock"
+                  >
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Export PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary inventory-notification-btn"
+                    id="inventoryNotificationBtn"
+                    aria-label="Treatment stock notifications"
+                  >
+                    <i class="fa-regular fa-bell"></i>
+                    <span>Notifications</span>
+                    <strong id="inventoryNotificationCount" hidden>0</strong>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    id="stockMovementBtn"
+                  >
+                    <i class="fa-solid fa-right-left"></i>
+                    <span>Stock Movement</span>
+                  </button>
+                  <button type="button" class="btn-primary" id="addItemBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Item</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="inventory-toolbar">
+              <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="inventorySearch"
+                  placeholder="Search item name, SKU or category..."
+                  autocomplete="off"
+                />
+              </div>
+              <select id="categoryFilter" class="filter-select">
+                <option value="all">All Categories</option>
+              </select>
+              <select id="statusFilter" class="filter-select">
+                <option value="all">All Stock Status</option>
+                <option value="normal">Normal</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+              </select>
+              <select id="expiryFilter" class="filter-select">
+                <option value="all">All Expiry Status</option>
+                <option value="no-expiry">No Expiry</option>
+                <option value="normal">Normal</option>
+                <option value="expiring-soon">Expiring Soon</option>
+                <option value="expired">Expired</option>
+              </select>
+              <select id="sortFilter" class="filter-select">
+                <option value="name-asc">Name A–Z</option>
+                <option value="name-desc">Name Z–A</option>
+                <option value="stock-low">Stock Low–High</option>
+                <option value="stock-high">Stock High–Low</option>
+                <option value="expiry">Expiry Soonest</option>
+                <option value="id-asc">ID Low–High</option>
+              </select>
+            </div>
+            <div class="table-wrapper">
+              <table class="inventory-table">
+                <thead>
+                  <tr>
+                    <th>ITEM</th>
+                    <th>CATEGORY</th>
+                    <th>MINIMUM</th>
+                    <th>STOCK</th>
+                    <th>UNIT</th>
+                    <th>EXPIRY</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+              <div class="empty-state" id="emptyState" hidden>
+                <div class="empty-icon">
+                  <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h3>No inventory items found</h3>
+                <p>
+                  Try changing your search or filter, or add a new inventory
+                  item.
+                </p>
+                <button type="button" class="btn-primary" id="emptyAddItemBtn">
+                  <i class="fa-solid fa-plus"></i>
+                  Add Item
+                </button>
+              </div>
+            </div>
+            <div
+              class="inventory-pagination"
+              id="inventoryPagination"
+              style="display: none"
+            >
+              <div
+                class="inventory-pagination-summary"
+                id="inventoryPaginationSummary"
+              >
+                Showing 1–10 of 0 items
+              </div>
+              <div class="inventory-pagination-controls">
+                <button
+                  type="button"
+                  class="inventory-pagination-button"
+                  id="inventoryPrevPageBtn"
+                  disabled
+                >
+                  <i class="fa-solid fa-chevron-left"></i>
+                  <span>Previous</span>
+                </button>
+                <span
+                  class="inventory-pagination-page-info"
+                  id="inventoryPaginationPageInfo"
+                  >Page 1 of 1</span
+                >
+                <button
+                  type="button"
+                  class="inventory-pagination-button"
+                  id="inventoryNextPageBtn"
+                  disabled
+                >
+                  <span>Next</span>
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="inventory-page-section"
+            id="inventoryPage2"
+            data-page-section="2"
+          >
+            <div class="forecasting-prototype">
+              <div class="forecast-chart-header">
+                <div>
+                  <h3>Demand Data and Forecast</h3>
+                  <p>
+                    Uses aggregated historical consumption, not raw movement
+                    ledger rows, as the training data for the SMA and Random
+                    Forest forecast models.
+                  </p>
+                </div>
+                <div class="forecast-chart-select-wrapper">
+                  <label for="forecastChartItemSearch">Select Item</label>
+                  <div class="forecast-chart-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input
+                      type="text"
+                      id="forecastChartItemSearch"
+                      placeholder="Search item..."
+                      autocomplete="off"
+                      role="combobox"
+                      aria-expanded="false"
+                      aria-controls="forecastChartItemDropdown"
+                    />
+                    <i
+                      class="fa-solid fa-chevron-down forecast-chart-search-chevron"
+                    ></i>
+                    <div
+                      class="forecast-chart-item-dropdown"
+                      id="forecastChartItemDropdown"
+                      role="listbox"
+                    ></div>
+                  </div>
+                  <select
+                    id="forecastChartItem"
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    <option value="">Select item</option>
+                  </select>
+                </div>
+              </div>
+              <div class="forecast-chart-container">
+                <canvas id="forecastDemandChart"></canvas>
+              </div>
+              <div class="forecast-chart-empty" id="forecastChartEmpty" hidden>
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>No chart data available</h3>
+                <p>
+                  Select an inventory item with historical demand data to
+                  display the chart.
+                </p>
+              </div>
+            </div>
+            <div class="prototype-header">
+              <div class="prototype-header-content">
+                <h3>Inventory Demand Forecast</h3>
+                <p>
+                  Python + scikit-learn pipeline using the last 4 months of
+                  aggregated usage demand to compare a simple moving average
+                  baseline with a Random Forest Regressor forecast.
+                </p>
+              </div>
+              <div class="forecast-header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="demandForecastSearch"
+                  placeholder="Search forecast item..."
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <div class="forecast-table-wrapper">
+              <table class="forecast-table">
+                <thead>
+                  <tr>
+                    <th>ITEM</th>
+                    <th>FORECAST DATE</th>
+                    <th>SMA FORECAST</th>
+                    <th>RF FORECAST</th>
+                    <th>MAPE</th>
+                    <th>RMSE</th>
+                    <th>ACCURACY</th>
+                    <th>SELECTED FORECAST</th>
+                    <th>MODEL</th>
+                    <th>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody id="demandForecastTableBody"></tbody>
+              </table>
+              <div class="forecast-empty" id="demandForecastEmpty" hidden>
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>No historical usage data</h3>
+                <p>
+                  Record stock-out movements to build historical usage data for
+                  demand forecasting.
+                </p>
+              </div>
+            </div>
+            <div
+              class="forecast-pagination"
+              id="demandForecastPagination"
+              style="display: none"
+            >
+              <div
+                class="forecast-pagination-summary"
+                id="demandForecastPaginationSummary"
+              >
+                Showing 1–10 of 0 items
+              </div>
+              <div class="forecast-pagination-controls">
+                <button
+                  type="button"
+                  class="forecast-pagination-button"
+                  id="demandForecastPrevPageBtn"
+                  disabled
+                >
+                  <i class="fa-solid fa-chevron-left"></i>
+                  <span>Previous</span>
+                </button>
+                <span
+                  class="forecast-pagination-page-info"
+                  id="demandForecastPaginationPageInfo"
+                  >Page 1 of 1</span
+                >
+                <button
+                  type="button"
+                  class="forecast-pagination-button"
+                  id="demandForecastNextPageBtn"
+                  disabled
+                >
+                  <span>Next</span>
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div
+          class="inventory-page-navigation"
+          id="inventoryPageNavigation"
+          aria-label="Inventory sections"
+        >
+          <button
+            type="button"
+            class="inventory-page-btn active"
+            data-page="1"
+            aria-label="Inventory Items"
+            aria-current="page"
+          >
+            <span>1</span>
+          </button>
+          <button
+            type="button"
+            class="inventory-page-btn"
+            data-page="2"
+            aria-label="Demand Forecasting"
+          >
+            <span>2</span>
+          </button>
+        </div>
+      </div>
+    </main>
+    <div
+      class="inventory-notification-popover"
+      id="inventoryNotificationPopover"
+      aria-hidden="true"
+    >
+      <div class="inventory-notification-header">
+        <div>
+          <span class="modal-eyebrow">INVENTORY ALERTS</span>
+          <h3>Treatment Stock-Outs</h3>
+        </div>
+        <button
+          type="button"
+          class="modal-close"
+          id="inventoryNotificationClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div
+        class="inventory-notification-list"
+        id="inventoryNotificationList"
+      ></div>
+    </div>
+    <div class="modal-backdrop" id="itemModal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">INVENTORY</span>
+            <h3 id="itemModalTitle">Add Inventory Item</h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            id="itemModalClose"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="itemForm">
+          <input type="hidden" id="itemId" />
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label for="itemName">Item Name</label>
+              <input
+                type="text"
+                id="itemName"
+                placeholder="e.g. Composite Resin"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="itemCategory">Category</label>
+              <select id="itemCategory" required>
+                <option value="">Select category</option>
+                <option value="Restorative Materials">
+                  Restorative Materials
+                </option>
+                <option value="Preventive Materials">
+                  Preventive Materials
+                </option>
+                <option value="Disposable Supplies">Disposable Supplies</option>
+                <option value="Infection Control">Infection Control</option>
+                <option value="Sterilization Supplies">
+                  Sterilization Supplies
+                </option>
+                <option value="Dental Instruments">Dental Instruments</option>
+                <option value="Oral Care Supplies">Oral Care Supplies</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="itemUnit">Unit</label>
+              <input
+                type="text"
+                id="itemUnit"
+                placeholder="e.g. Box, Tube, Piece"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="itemStock">Current Stock</label>
+              <input
+                type="number"
+                id="itemStock"
+                min="0"
+                step="1"
+                value="0"
+                readonly
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="itemMinimum">Minimum Stock</label>
+              <input
+                type="number"
+                id="itemMinimum"
+                min="0"
+                step="1"
+                value="5"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="itemExpiry">Expiry Date</label>
+              <input type="date" id="itemExpiry" />
+            </div>
+            <div class="form-group">
+              <label for="itemSku">SKU</label>
+              <input type="text" id="itemSku" value="Auto-generated" readonly />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-modal-cancel" id="itemCancelBtn">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-check"></i>
+              Save Item
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="movementModal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">STOCK MOVEMENT</span>
+            <h3>Record Stock Movement</h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            id="movementModalClose"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="movementForm">
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label for="movementItem">Inventory Item</label>
+              <select id="movementItem" required>
+                <option value="">Select item</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="movementType">Movement Type</label>
+              <select id="movementType" required>
+                <option value="stock-in">Stock In</option>
+                <option value="stock-out">Stock Out</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="movementQuantity">Quantity</label>
+              <input
+                type="number"
+                id="movementQuantity"
+                min="1"
+                step="1"
+                value="1"
+                required
+              />
+            </div>
+            <div class="form-group" id="movementBatchGroup">
+              <label for="movementBatchNumber">Batch / Lot No.</label>
+              <input
+                type="text"
+                id="movementBatchNumber"
+                placeholder="Auto-generated if empty"
+                maxlength="60"
+              />
+            </div>
+            <div class="form-group" id="movementExpiryGroup">
+              <label for="movementExpiry">Batch Expiry Date</label>
+              <input type="date" id="movementExpiry" />
+            </div>
+            <div
+              class="form-group form-full"
+              id="movementStockOutNote"
+              style="display: none"
+            >
+              <p
+                style="
+                  margin: 0;
+                  color: #7d8982;
+                  font-size: 0.58rem;
+                  line-height: 1.5;
+                "
+              >
+                Stock out is deducted automatically from the batch with the
+                earliest expiry date first, then the oldest received batch.
+              </p>
+            </div>
+            <div class="form-group form-full">
+              <label for="movementReason">Reason</label>
+              <input
+                type="text"
+                id="movementReason"
+                placeholder="e.g. Restock, Patient Treatment, Damaged"
+              />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-modal-cancel"
+              id="movementCancelBtn"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-right-left"></i>
+              Record Movement
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="deleteItemModal" aria-hidden="true">
+      <div class="modal-card delete-item-modal-card">
+        <div class="delete-item-icon">
+          <i class="fa-solid fa-trash"></i>
+        </div>
+        <div class="delete-item-content">
+          <span class="modal-eyebrow">INVENTORY</span>
+          <h3>Delete Inventory Item?</h3>
+          <p id="deleteItemMessage">
+            This item and its stock movement history will be permanently
+            removed.
+          </p>
+        </div>
+        <div class="modal-actions delete-item-actions">
+          <button
+            type="button"
+            class="btn-modal-cancel"
+            id="deleteItemCancelBtn"
+          >
+            Cancel
+          </button>
+          <button type="button" class="btn-danger" id="deleteItemConfirmBtn">
+            <i class="fa-solid fa-trash"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop" id="viewItemModal" aria-hidden="true">
+      <div class="modal-card view-item-modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">INVENTORY</span>
+            <h3>Inventory Item Details</h3>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            id="viewItemModalClose"
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="view-item-details" id="viewItemDetails"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="viewItemCloseBtn">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="action-menu" id="actionMenu">
+      <button type="button" data-action="view">
+        <i class="fa-solid fa-eye"></i>
+        View Item
+      </button>
+      <button type="button" data-action="edit">
+        <i class="fa-solid fa-pen"></i>
+        Edit Item
+      </button>
+      <button type="button" data-action="movement">
+        <i class="fa-solid fa-right-left"></i>
+        Stock Movement
+      </button>
+      <button type="button" class="danger-action" data-action="delete">
+        <i class="fa-solid fa-trash"></i>
+        Delete Item
+      </button>
+    </div>
+    <div class="inventory-toast" id="inventoryToast">
+      <i id="inventoryToastIcon" class="fa-solid fa-circle-check"></i>
+      <span id="inventoryToastMessage">Inventory updated successfully.</span>
+    </div>
+    <script src="../navigationbar/sidebar.js"></script>
+    <script src="../../shared/inventory/treatment_materials.js"></script>
+    <script src="../../shared/inventory/inventory_service.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="inventory.js"></script>
+    <script src="inventory_report.js"></script>
+    <script src="../profile/profile.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const hiddenSelect = document.getElementById("forecastChartItem");
+        const searchInput = document.getElementById("forecastChartItemSearch");
+        const dropdown = document.getElementById("forecastChartItemDropdown");
+        if (!hiddenSelect || !searchInput || !dropdown) return;
+        const MAX_VISIBLE_ITEMS = 8;
+        let allItems = [];
+        let selectedItemValue = "";
+        function normalize(value) {
+          return String(value || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, " ");
+        }
+        function readItems() {
+          allItems = [...hiddenSelect.options]
+            .filter((option) => option.value)
+            .map((option) => ({
+              value: option.value,
+              label: option.textContent.trim(),
+            }));
+        }
+        function getFilteredItems() {
+          const query = normalize(searchInput.value);
+          if (!query) return allItems.slice(0, MAX_VISIBLE_ITEMS);
+          return allItems.filter((item) =>
+            normalize(item.label).includes(query),
+          );
+        }
+        function renderDropdown() {
+          const items = getFilteredItems();
+          dropdown.innerHTML = "";
+          if (!items.length) {
+            dropdown.innerHTML =
+              '<div class="forecast-chart-item-empty">No matching item found</div>';
+            dropdown.classList.add("open");
+            searchInput.setAttribute("aria-expanded", "true");
+            return;
+          }
+          items.forEach((item) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "forecast-chart-item-option";
+            button.setAttribute("role", "option");
+            button.dataset.value = item.value;
+            button.textContent = item.label;
+            if (normalize(item.value) === normalize(selectedItemValue)) {
+              button.classList.add("active");
+            }
+            button.addEventListener("click", () => {
+              selectItem(item);
+            });
+            dropdown.appendChild(button);
+          });
+          dropdown.classList.add("open");
+          searchInput.setAttribute("aria-expanded", "true");
+        }
+        function selectItem(item) {
+          selectedItemValue = item.value;
+          hiddenSelect.value = item.value;
+          searchInput.value = item.label;
+          dropdown.classList.remove("open");
+          searchInput.setAttribute("aria-expanded", "false");
+          hiddenSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        function syncFromSelect() {
+          readItems();
+          const selectedOption =
+            hiddenSelect.options[hiddenSelect.selectedIndex];
+          if (selectedOption && selectedOption.value) {
+            selectedItemValue = selectedOption.value;
+            searchInput.value = selectedOption.textContent.trim();
+          }
+        }
+        searchInput.addEventListener("focus", () => {
+          readItems();
+          renderDropdown();
+        });
+        searchInput.addEventListener("click", () => {
+          readItems();
+          renderDropdown();
+        });
+        searchInput.addEventListener("input", () => {
+          readItems();
+          renderDropdown();
+        });
+        searchInput.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            dropdown.classList.remove("open");
+            searchInput.setAttribute("aria-expanded", "false");
+            return;
+          }
+          if (event.key === "Enter") {
+            const firstOption = dropdown.querySelector(
+              ".forecast-chart-item-option",
+            );
+            if (firstOption) {
+              event.preventDefault();
+              const item = allItems.find(
+                (entry) => entry.value === firstOption.dataset.value,
+              );
+              if (item) selectItem(item);
+            }
+          }
+        });
+        document.addEventListener("click", (event) => {
+          if (!event.target.closest(".forecast-chart-select-wrapper")) {
+            dropdown.classList.remove("open");
+            searchInput.setAttribute("aria-expanded", "false");
+          }
+        });
+        const observer = new MutationObserver(() => {
+          readItems();
+          syncFromSelect();
+        });
+        observer.observe(hiddenSelect, { childList: true, subtree: true });
+        readItems();
+        syncFromSelect();
+      });
+    </script>
+  </body>
+</html>

@@ -2,6 +2,7 @@ const APPOINTMENTS_API = "../../api/appointments.php";
 const PATIENT_RECORDS_API = "../../api/patient_records.php";
 const FINANCE_API = "../../api/finance/transactions.php";
 const CURRENT_USER_API = "../profile/profile.php";
+const INVENTORY_API = "../../api/inventory.php?action=list";
 const DAILY_GOAL = 5000;
 const WEEKLY_GOAL = 25000;
 const SERVICE_COLORS = [
@@ -27,6 +28,7 @@ let appointments = [];
 let patients = [];
 let transactions = [];
 let serviceTransactions = [];
+let inventoryItems = [];
 let currentUser = null;
 let doctorAppointmentIds = new Set();
 let doctorPatientIds = new Set();
@@ -42,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateDateTime();
   setInterval(updateDateTime, 1000);
   bindDashboardControls();
+  setupInventoryInteractions();
   void refreshDashboardData();
   setInterval(() => void refreshDashboardData(), 2000);
 });
@@ -314,6 +317,18 @@ async function refreshDashboardData() {
       transactions = [];
       serviceTransactions = [];
     }
+    try {
+      const inventoryResponse = await fetch(INVENTORY_API, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      const inventoryResult = await inventoryResponse.json();
+      inventoryItems = Array.isArray(inventoryResult?.data?.items)
+        ? inventoryResult.data.items
+        : [];
+    } catch (error) {
+      inventoryItems = [];
+    }
     renderDashboard();
   } catch (error) {
     console.error("Unable to load dashboard data from database:", error);
@@ -561,6 +576,7 @@ function renderDashboard() {
   updateProduction(transactions);
   renderWeeklyChart(transactions);
   renderProcedureChart(dashboardSampleTransactions);
+  renderInventoryAlerts();
 }
 function updatePatientCount(patients) {
   const element = document.getElementById("totalPatients");
@@ -1005,4 +1021,176 @@ function setText(id, value) {
 }
 function goToAppointments() {
   window.location.href = "Appointment.html";
+}
+function formatNumber(number) {
+  return Number(number || 0).toLocaleString("en-US");
+}
+function createEmptyState(icon, message) {
+  return `<div class="empty-state"><i class="fa-solid ${escapeHtml(icon)}"></i><p>${escapeHtml(message)}</p></div>`;
+}
+function renderInventoryAlerts() {
+  const container = document.getElementById("inventoryAlerts");
+  if (!container) {
+    return;
+  }
+  const inventory = inventoryItems;
+  if (!Array.isArray(inventory) || inventory.length === 0) {
+    container.innerHTML = createEmptyState(
+      "fa-box-open",
+      "All inventory levels are normal",
+    );
+    return;
+  }
+  const getUpdatedTime = (item) => {
+    const value =
+      item.updated_at ||
+      item.updatedAt ||
+      item.modified_at ||
+      item.modifiedAt ||
+      item.created_at ||
+      item.createdAt ||
+      "";
+    const time = value ? new Date(value).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
+  };
+  const alerts = inventory
+    .filter((item) => {
+      const status = getInventoryStatus(item);
+      return status === "out" || status === "critical" || status === "low";
+    })
+    .sort((a, b) => {
+      const priority = {
+        out: 0,
+        critical: 1,
+        low: 2,
+      };
+      const statusDifference =
+        priority[getInventoryStatus(a)] - priority[getInventoryStatus(b)];
+      if (statusDifference !== 0) {
+        return statusDifference;
+      }
+      return getUpdatedTime(b) - getUpdatedTime(a);
+    });
+  const normalItems = inventory
+    .filter((item) => getInventoryStatus(item) === "normal")
+    .sort((a, b) => {
+      const stockA = Number(
+        a.quantity ?? a.stock ?? a.current_stock ?? a.currentStock ?? 0,
+      );
+      const stockB = Number(
+        b.quantity ?? b.stock ?? b.current_stock ?? b.currentStock ?? 0,
+      );
+      const reorderA = Number(
+        a.reorder_level ??
+          a.reorderLevel ??
+          a.minimum_stock ??
+          a.minimumStock ??
+          0,
+      );
+      const reorderB = Number(
+        b.reorder_level ??
+          b.reorderLevel ??
+          b.minimum_stock ??
+          b.minimumStock ??
+          0,
+      );
+      return stockA - reorderA - (stockB - reorderB);
+    });
+  const selectedItems = [
+    ...alerts.slice(0, 2),
+    ...normalItems.slice(0, Math.max(0, 2 - alerts.length)),
+  ];
+  if (selectedItems.length === 0) {
+    container.innerHTML = createEmptyState(
+      "fa-box-open",
+      "All inventory levels are normal",
+    );
+    return;
+  }
+  container.innerHTML = selectedItems.map(createInventoryHTML).join("");
+}
+function createInventoryHTML(item) {
+  const name = String(
+    item.name ??
+      item.item_name ??
+      item.itemName ??
+      item.product_name ??
+      item.productName ??
+      "Inventory Item",
+  ).trim();
+  const stock = Number(
+    item.quantity ?? item.stock ?? item.current_stock ?? item.currentStock ?? 0,
+  );
+  const reorderLevel = Number(
+    item.reorder_level ??
+      item.reorderLevel ??
+      item.minimum_stock ??
+      item.minimumStock ??
+      0,
+  );
+  const status = getInventoryStatus(item);
+  const priority = getInventoryPriority(status);
+  return `<div class="inv-item"><div class="inv-left"><div class="inv-icon"><i class="fa-solid fa-box"></i></div><div class="inv-info"><div class="inv-name">${escapeHtml(name)}</div><div class="inv-sub">Stock: ${formatNumber(stock)} · Minimum: ${formatNumber(reorderLevel)}</div></div></div><span class="badge ${priority.className}">${escapeHtml(priority.label)}</span></div>`;
+}
+function getInventoryStatus(item) {
+  const stock = Number(
+    item.quantity ?? item.stock ?? item.current_stock ?? item.currentStock ?? 0,
+  );
+  const reorderLevel = Number(
+    item.reorder_level ??
+      item.reorderLevel ??
+      item.minimum_stock ??
+      item.minimumStock ??
+      0,
+  );
+  if (stock <= 0) {
+    return "out";
+  }
+  if (stock <= Math.max(1, reorderLevel * 0.5)) {
+    return "critical";
+  }
+  if (stock <= reorderLevel) {
+    return "low";
+  }
+  return "normal";
+}
+function getInventoryPriority(status) {
+  if (status === "out") {
+    return {
+      label: "Out of Stock",
+      className: "status-out",
+    };
+  }
+  if (status === "critical") {
+    return {
+      label: "Critical",
+      className: "status-critical",
+    };
+  }
+  if (status === "low") {
+    return {
+      label: "Low Stock",
+      className: "status-low",
+    };
+  }
+  return {
+    label: "Normal",
+    className: "status-normal",
+  };
+}
+function setupInventoryInteractions() {
+  document.addEventListener("click", (event) => {
+    const item = event.target.closest(".inv-item");
+    if (!item) {
+      return;
+    }
+    openInventoryItem(item);
+  });
+}
+function openInventoryItem(item) {
+  const name = item.querySelector(".inv-name")?.textContent?.trim();
+  if (!name) {
+    return;
+  }
+  window.location.href = `../inventory/inventory.html?search=${encodeURIComponent(name)}`;
 }

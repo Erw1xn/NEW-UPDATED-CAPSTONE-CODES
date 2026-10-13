@@ -16,7 +16,8 @@
     />
     <link rel="stylesheet" href="../navigationbar/sidebar.css" />
     <link rel="stylesheet" href="../profile/profile.css" />
-    <link rel="stylesheet" href="dashboard.css?v=2" />
+    <link rel="stylesheet" href="dashboard.css?v=3" />
+    <link rel="stylesheet" href="forecast-widget.css" />
   </head>
   <body>
     <div class="dashboard-wrapper">
@@ -110,6 +111,193 @@
           </div>
           <div class="progress-label" id="productionPercent">0% Complete</div>
         </section>
+        <section class="two-col-grid">
+          <div class="stacked-panel-column">
+            <section class="panel forecast-panel" id="forecastPanel">
+              <div class="panel-header">
+                <div class="panel-heading">
+                  <h3>
+                    Inventory Demand Forecast
+                    <span class="fc-ai-badge" id="fcAiBadge" data-state="idle">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i>
+                      <span id="fcAiBadgeText"></span>
+                    </span>
+                  </h3>
+                  <p class="panel-subtitle">
+                    AI-predicted supply usage based on past treatments
+                  </p>
+                </div>
+                <div class="fc-select-wrap">
+                  <div class="fc-control-row">
+                    <div class="fc-select custom-select" id="fcItemSelect">
+                      <button
+                        type="button"
+                        class="fc-select-button"
+                        id="fcItemSelectButton"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                      >
+                        <span id="fcSelectedItem">Select item</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                      </button>
+                      <div
+                        class="fc-select-menu"
+                        id="fcItemSelectMenu"
+                        role="listbox"
+                        hidden
+                      ></div>
+                    </div>
+                    <a
+                      href="../inventory/inventory.html?page=2"
+                      class="fc-view-link"
+                      id="fcViewFullForecast"
+                      >View Forecast</a
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body fc-body">
+                <div class="fc-stats">
+                  <div class="fc-stat">
+                    <span class="fc-stat-label">Predicted Demand</span>
+                    <span class="fc-stat-value" id="fcPredicted">—</span>
+                    <span class="fc-stat-sub" id="fcPredictedSub"
+                      >Next period</span
+                    >
+                  </div>
+                  <div
+                    class="fc-stat fc-stat-modelcard"
+                    id="fcModelCard"
+                    data-model="none"
+                  >
+                    <span class="fc-stat-label">Selected Model</span>
+                    <span class="fc-stat-value fc-stat-model" id="fcModel"
+                      >—</span
+                    >
+                    <span class="fc-stat-sub" id="fcModelSub"
+                      >Best model picked</span
+                    >
+                  </div>
+                  <div class="fc-stat">
+                    <span class="fc-stat-label">Forecast Status</span>
+                    <span
+                      class="fc-stat-value"
+                      id="fcForecastStatus"
+                      data-tone="muted"
+                      >—</span
+                    >
+                    <span class="fc-stat-sub" id="fcForecastStatusSub"
+                      >Model status</span
+                    >
+                  </div>
+                </div>
+                <div class="fc-compare" id="fcCompare">
+                  <div
+                    class="fc-compare-item"
+                    id="fcCmpSma"
+                    data-selected="false"
+                    data-available="false"
+                  >
+                    <span class="fc-compare-dot fc-dot-sma"></span>
+                    <div class="fc-compare-text">
+                      <small>SMA · Baseline</small>
+                      <strong id="fcCmpSmaValue">—</strong>
+                    </div>
+                    <span class="fc-compare-tag" id="fcCmpSmaTag"></span>
+                  </div>
+                  <div
+                    class="fc-compare-item fc-compare-ai"
+                    id="fcCmpRf"
+                    data-selected="false"
+                    data-available="false"
+                  >
+                    <span class="fc-compare-dot fc-dot-rf"></span>
+                    <div class="fc-compare-text">
+                      <small
+                        ><i class="fa-solid fa-wand-magic-sparkles"></i> AI ·
+                        Random Forest</small
+                      >
+                      <strong id="fcCmpRfValue">—</strong>
+                    </div>
+                    <span class="fc-compare-tag" id="fcCmpRfTag"></span>
+                  </div>
+                </div>
+                <div class="fc-insight" id="fcInsight" data-tone="info">
+                  <i class="fa-solid fa-circle-info"></i>
+                  <span id="fcInsightText">Loading forecast...</span>
+                </div>
+                <div class="fc-chart-wrap">
+                  <canvas id="fcChart"></canvas>
+                  <div class="fc-empty" id="fcEmpty" hidden>
+                    <i class="fa-solid fa-chart-line"></i>
+                    <p id="fcEmptyText">No forecast data available yet.</p>
+                  </div>
+                </div>
+                <div class="fc-data-note" id="fcDataNote"></div>
+                <div class="fc-how">
+                  <div class="fc-how-step">
+                    <span class="fc-how-num">1</span>
+                    <div>
+                      <strong>Usage history</strong>
+                      <small>Treatment usage</small>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-arrow-right fc-how-arrow"></i>
+                  <div class="fc-how-step">
+                    <span class="fc-how-num">2</span>
+                    <div>
+                      <strong>AI forecast</strong>
+                      <small>SMA + Random Forest</small>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-arrow-right fc-how-arrow"></i>
+                  <div class="fc-how-step">
+                    <span class="fc-how-num">3</span>
+                    <div>
+                      <strong>Stock decision</strong>
+                      <small>Check if stock is enough</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div class="stacked-panel-column">
+            <section class="panel">
+              <div class="panel-header">
+                <div class="panel-heading">
+                  <h3>Inventory Alerts</h3>
+                  <p class="panel-subtitle">Items that need staff attention</p>
+                </div>
+                <a href="../inventory/inventory.html" class="btn-link"
+                  >View Inventory <i class="fa-solid fa-arrow-right"></i
+                ></a>
+              </div>
+              <div class="panel-body" id="inventoryAlerts"></div>
+            </section>
+            <div
+              class="dashboard-card procedure-card"
+              title="Shows how your collected revenue is distributed across the dental services of your patients."
+            >
+              <div class="card-header">
+                <div>
+                  <h2>Revenue by Service</h2>
+                  <p>
+                    Share of your collected revenue per service. Click a slice
+                    to see its amount
+                  </p>
+                </div>
+              </div>
+              <div class="procedure-chart-wrapper">
+                <div class="donut-chart" id="procedureDonut">
+                  <div class="donut-center" id="procedureTotal">₱0</div>
+                </div>
+                <div class="procedure-legend" id="procedureLegend"></div>
+                <div class="procedure-detail" id="procedureDetail"></div>
+              </div>
+            </div>
+          </div>
+        </section>
         <section class="charts-grid">
           <div
             class="dashboard-card chart-card"
@@ -171,107 +359,13 @@
               </span>
             </div>
           </div>
-          <div
-            class="dashboard-card procedure-card"
-            title="Shows how your collected revenue is distributed across the dental services of your patients."
-          >
-            <div class="card-header">
-              <div>
-                <h2>Revenue by Service</h2>
-                <p>
-                  Share of your collected revenue per service. Click a slice to
-                  see its amount
-                </p>
-              </div>
-            </div>
-            <div class="procedure-chart-wrapper">
-              <div class="donut-chart" id="procedureDonut">
-                <div class="donut-center" id="procedureTotal">₱0</div>
-              </div>
-              <div class="procedure-legend" id="procedureLegend"></div>
-              <div class="procedure-detail" id="procedureDetail"></div>
-            </div>
-          </div>
-        </section>
-        <section class="lower-grid">
-          <div
-            class="dashboard-card appointments-card"
-            title="Shows today's scheduled patients, their appointment time, service, and current appointment status."
-          >
-            <div class="card-header appointment-header">
-              <div>
-                <h2>Today's Appointments</h2>
-                <p>Today's scheduled patients</p>
-              </div>
-            </div>
-            <div class="appointments-list" id="todayAppointmentsList"></div>
-          </div>
-          <div
-            class="dashboard-card clinic-summary-card"
-            title="Provides a quick overview of today's appointment workflow, including scheduled, in-consultation, completed, and no-show patients."
-          >
-            <div class="card-header">
-              <div>
-                <h2>Today's Clinic Summary</h2>
-                <p>Real-time overview of today's operations</p>
-              </div>
-            </div>
-            <div class="summary-grid">
-              <div
-                class="summary-item"
-                title="Shows the number of patients who have appointments scheduled today but have not yet entered the clinic workflow."
-              >
-                <div class="summary-icon scheduled-icon">
-                  <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div>
-                  <span>Scheduled</span>
-                  <strong id="summaryScheduled">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of patients currently being attended to by the dentist."
-              >
-                <div class="summary-icon consultation-icon">
-                  <i class="fa-solid fa-tooth"></i>
-                </div>
-                <div>
-                  <span>In Consultation</span>
-                  <strong id="summaryConsultation">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of appointments completed today."
-              >
-                <div class="summary-icon completed-icon">
-                  <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <div>
-                  <span>Completed</span>
-                  <strong id="summaryCompleted">0</strong>
-                </div>
-              </div>
-              <div
-                class="summary-item"
-                title="Shows the number of appointments automatically marked as no-show today."
-              >
-                <div class="summary-icon no-show-icon">
-                  <i class="fa-solid fa-user-xmark"></i>
-                </div>
-                <div>
-                  <span>No Show</span>
-                  <strong id="summaryNoShow">0</strong>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
       </main>
     </div>
     <script src="../navigationbar/sidebar.js"></script>
     <script src="../profile/profile.js"></script>
     <script src="dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="forecast-widget.js"></script>
   </body>
 </html>
