@@ -60,6 +60,7 @@ button:focus-visible {
   display: flex;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
 }
 .main-content {
@@ -400,6 +401,7 @@ button:focus-visible {
   background: var(--white);
   color: var(--green-700);
   font-size: 10px;
+  touch-action: manipulation;
   transition:
     background 0.15s ease,
     border-color 0.15s ease;
@@ -444,6 +446,7 @@ button:focus-visible {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
   border-left: 1px solid #cbd3d0;
   border-bottom: 1px solid #cbd3d0;
 }
@@ -727,6 +730,7 @@ button:focus-visible {
   max-height: 340px;
   padding: 16px 18px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .appointments-list::-webkit-scrollbar {
   width: 6px;
@@ -999,6 +1003,35 @@ button:focus-visible {
     justify-content: space-between;
   }
 }
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+  .main-content {
+    width: 100%;
+    margin: 0 auto;
+  }
+  .dashboard-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 11px;
+  }
+  .dashboard-header .mobile-menu-toggle {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .dashboard-header .header-left {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .dashboard-header .header-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+  }
+}
 @media (max-width: 700px) {
   .stats-grid {
     grid-template-columns: 1fr;
@@ -1039,14 +1072,14 @@ button:focus-visible {
     align-items: flex-start;
     flex-direction: column;
   }
+  .patient-info {
+    width: 100%;
+  }
   .status-badge {
     align-self: flex-start;
   }
 }
 @media (max-width: 640px) {
-  .dashboard-wrapper {
-    flex-direction: column;
-  }
   .main-content {
     width: 100%;
     max-width: 700px;
@@ -1170,7 +1203,11 @@ button:focus-visible {
     font-size: 0.56rem;
   }
   .date-time-card {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 6px 10px;
     font-size: 0.54rem;
+    white-space: normal;
   }
   .header-btn {
     font-size: 0.54rem;
@@ -1191,7 +1228,12 @@ button:focus-visible {
   .production-card {
     padding: 13px;
   }
+  .production-header {
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
   .card-header {
+    flex-wrap: wrap;
     padding: 13px 14px;
   }
   .card-header h2 {
@@ -1199,6 +1241,10 @@ button:focus-visible {
   }
   .card-header p {
     font-size: 9.5px;
+  }
+  .week-nav {
+    width: 100%;
+    justify-content: center;
   }
   .bar-chart {
     min-height: 205px;
@@ -1232,11 +1278,23 @@ button:focus-visible {
     height: 35px;
     font-size: 9px;
   }
+  .patient-details {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1px;
+  }
   .patient-name {
+    grid-column: 1;
+    grid-row: 1;
     font-size: 11px;
   }
-  .patient-time,
   .patient-service {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 9px;
+  }
+  .patient-time {
+    grid-column: 1;
+    grid-row: 3;
     font-size: 9px;
   }
   .status-badge {
@@ -1244,5 +1302,36 @@ button:focus-visible {
     min-width: 72px;
     font-size: 8px;
     padding: 3px 6px;
+  }
+}
+@media (max-width: 360px) {
+  .main-content {
+    padding: 10px 8px 18px;
+  }
+  .stat-card {
+    gap: 10px;
+    padding: 12px;
+  }
+  .stat-content strong {
+    font-size: 17px;
+  }
+  .chart-y-axis {
+    width: 28px;
+    font-size: 6.5px;
+  }
+  .bar {
+    width: 12px;
+  }
+  .donut-chart {
+    width: 115px;
+    height: 115px;
+  }
+  .donut-chart::after {
+    width: 60px;
+    height: 60px;
+  }
+  .summary-item {
+    gap: 9px;
+    padding: 9px;
   }
 }

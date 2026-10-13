@@ -1883,7 +1883,39 @@ button {
     min-width: 1120px;
   }
 }
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    display: block;
+  }
+  .mobile-header {
+    position: absolute;
+    top: 33px;
+    left: 34px;
+    z-index: 10;
+    width: auto;
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+    box-shadow: none;
+  }
+  .finance-page {
+    width: 100%;
+    padding: 16px 14px 24px;
+  }
+  .card-header-left {
+    min-height: 40px;
+    padding-left: 52px;
+  }
+  .transactions-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
 @media (max-width: 650px) {
+  .mobile-header {
+    top: 29px;
+    left: 27px;
+  }
   .finance-page {
     width: 100%;
     padding: 14px 12px 20px;
@@ -1963,7 +1995,11 @@ button {
     padding: 12px;
   }
   .collection-period-header {
+    flex-wrap: wrap;
     padding: 12px;
+  }
+  .collection-period-actions {
+    flex-wrap: wrap;
   }
   .collection-period-icon {
     width: 33px;
@@ -2018,6 +2054,7 @@ button {
     padding: 18px;
   }
   .details-actions {
+    flex-wrap: wrap;
     padding: 13px 18px;
   }
   .finance-toast {
@@ -2121,6 +2158,30 @@ button {
   }
   .bank-info-box strong {
     text-align: left;
+  }
+}
+@media (max-width: 480px) {
+  .mobile-header {
+    top: 26px;
+    left: 24px;
+  }
+  .finance-page {
+    padding: 12px 10px 18px;
+  }
+  .card-header {
+    padding: 14px;
+  }
+}
+@media (max-width: 360px) {
+  .mobile-header {
+    top: 23px;
+    left: 21px;
+  }
+  .finance-page {
+    padding: 10px 8px 16px;
+  }
+  .card-header {
+    padding: 13px;
   }
 }
 .appointment-payment-info {
@@ -3267,7 +3328,6 @@ button {
     height: 50px;
   }
 }
-/* APPEND to the end of finance.css */
 .payment-step[hidden] {
   display: none;
 }

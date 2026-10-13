@@ -2,6 +2,7 @@ const FINANCE_TRANSACTIONS_API = "../../api/finance/transactions.php";
 const XENDIT_CREATE_PAYMENT_API = "../../api/xendit/create_payment.php";
 let CURRENT_PATIENT_ID = "";
 let CURRENT_PATIENT_NAME = "";
+let CURRENT_PATIENT = null;
 let payments = [];
 let currentFilter = "all";
 let currentPayTransaction = null;
@@ -22,6 +23,7 @@ window.addEventListener("focus", async function () {
 async function resolveCurrentPatient() {
   CURRENT_PATIENT_ID = "";
   CURRENT_PATIENT_NAME = "";
+  CURRENT_PATIENT = null;
   try {
     const response = await fetch("../../api/patient_records.php", {
       method: "GET",
@@ -37,6 +39,7 @@ async function resolveCurrentPatient() {
     if (!patient || typeof patient !== "object") {
       throw new Error("Patient record was not found.");
     }
+    CURRENT_PATIENT = patient;
     CURRENT_PATIENT_ID = String(
       patient.patientId || patient.patient_id || patient.id || "",
     ).trim();
@@ -127,6 +130,7 @@ function normalizeDatabaseTransaction(transaction) {
         payment.patient_id || transaction.patient_id || CURRENT_PATIENT_ID,
       patientName,
       transactionId,
+      appointmentId: transaction.appointment_id || "",
       date:
         payment.paid_at ||
         payment.created_at ||
@@ -170,6 +174,7 @@ function normalizePayment(payment) {
     patientId: payment.patientId || CURRENT_PATIENT_ID,
     patientName: payment.patientName || CURRENT_PATIENT_NAME || "Patient",
     transactionId: payment.transactionId || "",
+    appointmentId: payment.appointmentId || "",
     date: payment.date || new Date().toISOString(),
     service: payment.service || "Dental Service",
     amount: Number(payment.amount) || 0,
@@ -300,6 +305,7 @@ function getTransactionGroups() {
     if (!groups[id]) {
       groups[id] = {
         transactionId: id,
+        appointmentId: payment.appointmentId || "",
         patientId: payment.patientId || CURRENT_PATIENT_ID,
         patientName: payment.patientName || CURRENT_PATIENT_NAME || "Patient",
         service: payment.service,

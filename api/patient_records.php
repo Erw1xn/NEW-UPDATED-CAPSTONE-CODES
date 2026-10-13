@@ -4,6 +4,7 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 require_once __DIR__ . '/../php/db_connect.php';
+require_once __DIR__ . '/inventory_batch_helpers.php';
 function jsonResponse(bool $success, string $message = '', $data = null, int $status = 200): void
 {
     http_response_code($status);
@@ -342,6 +343,8 @@ function syncTreatmentInventory(mysqli $conn, int $treatmentId, string $patientI
             throw new RuntimeException('Unable to record inventory reversal.');
         }
         $movementStmt->close();
+        restoreTreatmentBatchStock($conn, $treatmentId, $oldItemId, $oldQuantity);
+        syncItemExpiryFromBatches($conn, $oldItemId);
         updateInventoryDemandHistory($conn, $itemName, $demandDate, -$oldQuantity);
     }
     if ($existing) {
@@ -395,6 +398,8 @@ function syncTreatmentInventory(mysqli $conn, int $treatmentId, string $patientI
         }
         $movementId = (int) $movementStmt->insert_id;
         $movementStmt->close();
+        allocateBatchStock($conn, $itemId, $quantity, $movementId, $treatmentId);
+        syncItemExpiryFromBatches($conn, $itemId);
         $usageStmt = $conn->prepare('INSERT INTO tbl_inventory_treatment_usage (treatment_id, treatment_key, item_id, quantity) VALUES (?, ?, ?, ?)');
         $usageStmt->bind_param('isid', $treatmentId, $treatmentKey, $itemId, $quantity);
         if (!$usageStmt->execute()) {
@@ -680,6 +685,8 @@ if ($role === 'doctor') {
 }
 $patient = $input['patient'] ?? $input;
 $medical = $input['medicalForm'] ?? null;
+ensureInventorySchema($conn);
+reconcileInventoryBatches($conn);
 $conn->begin_transaction();
 try {
     if (is_array($patient)) {
@@ -724,7 +731,7 @@ try {
         $stmt->execute();
         $stmt->close();
     }
-    if ($role === 'doctor' && is_array($patient)) {
+    if (in_array($role, ['doctor', 'staff'], true) && is_array($patient)) {
         if (array_key_exists('treatments', $patient)) {
             $stmt = $conn->prepare('INSERT INTO tbl_patient_treatments (patient_id, doctor_id, appointment_id, tooth_number, procedure_name, treatment_date, notes, consumed_materials) VALUES (?, ?, NULLIF(?, 0), ?, ?, NULLIF(?, ""), ?, ?)');
             if (!$stmt) {
@@ -743,19 +750,33 @@ try {
                     throw new RuntimeException('Unable to encode consumed treatment materials.');
                 }
                 $appointmentDbId = $appointmentId !== '' ? (int) $appointmentId : 0;
+                $treatmentDoctorId = $role === 'doctor' ? $userId : null;
+                if ($role === 'staff' && $appointmentDbId > 0) {
+                    $doctorLookupStmt = $conn->prepare('SELECT doctor_id FROM tbl_patient_appointments WHERE appointment_id = ? LIMIT 1');
+                    if (!$doctorLookupStmt) {
+                        throw new RuntimeException('Unable to prepare appointment doctor lookup.');
+                    }
+                    $doctorLookupStmt->bind_param('i', $appointmentDbId);
+                    $doctorLookupStmt->execute();
+                    $doctorLookupRow = $doctorLookupStmt->get_result()->fetch_assoc();
+                    $doctorLookupStmt->close();
+                    if ($doctorLookupRow && $doctorLookupRow['doctor_id'] !== null) {
+                        $treatmentDoctorId = (int) $doctorLookupRow['doctor_id'];
+                    }
+                }
                 if ($treatmentId > 0) {
-                    $updateStmt = $conn->prepare('UPDATE tbl_patient_treatments SET doctor_id = ?, appointment_id = NULLIF(?, 0), tooth_number = ?, procedure_name = ?, treatment_date = NULLIF(?, ""), notes = ?, consumed_materials = ? WHERE treatment_id = ? AND patient_id = ?');
+                    $updateStmt = $conn->prepare('UPDATE tbl_patient_treatments SET doctor_id = COALESCE(?, doctor_id), appointment_id = NULLIF(?, 0), tooth_number = ?, procedure_name = ?, treatment_date = NULLIF(?, ""), notes = ?, consumed_materials = ? WHERE treatment_id = ? AND patient_id = ?');
                     if (!$updateStmt) {
                         throw new RuntimeException('Unable to prepare treatment update.');
                     }
-                    $updateStmt->bind_param('iisssssis', $userId, $appointmentDbId, $toothNumber, $procedureName, $treatmentDate, $treatmentNotes, $consumedMaterials, $treatmentId, $patientId);
+                    $updateStmt->bind_param('iisssssis', $treatmentDoctorId, $appointmentDbId, $toothNumber, $procedureName, $treatmentDate, $treatmentNotes, $consumedMaterials, $treatmentId, $patientId);
                     if (!$updateStmt->execute()) {
                         $updateStmt->close();
                         throw new RuntimeException('Unable to update treatment record.');
                     }
                     $updateStmt->close();
                 } else {
-                    $stmt->bind_param('siisssss', $patientId, $userId, $appointmentDbId, $toothNumber, $procedureName, $treatmentDate, $treatmentNotes, $consumedMaterials);
+                    $stmt->bind_param('siisssss', $patientId, $treatmentDoctorId, $appointmentDbId, $toothNumber, $procedureName, $treatmentDate, $treatmentNotes, $consumedMaterials);
                     if (!$stmt->execute()) {
                         throw new RuntimeException('Unable to save treatment record.');
                     }

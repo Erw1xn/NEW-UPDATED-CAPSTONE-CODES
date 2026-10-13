@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="../navigationbar/sidebar.css" />
     <link rel="stylesheet" href="../profile/profile.css" />
-    <link rel="stylesheet" href="finance.css?v=20261008-audit-limit" />
+    <link rel="stylesheet" href="finance.css?v=1" />
   </head>
   <body>
     <div class="dashboard-wrapper">
@@ -43,6 +43,15 @@
             >
               <i class="fa-regular fa-calendar-days"></i>
               Monthly Expenses
+            </button>
+            <button
+              type="button"
+              class="header-action-btn"
+              id="exportPdfBtn"
+              title="Download a full PDF report of your finance and collections"
+            >
+              <i class="fa-regular fa-file-lines"></i>
+              <span>Export PDF</span>
             </button>
             <button type="button" class="primary-btn" id="recordPaymentButton">
               <i class="fa-solid fa-plus"></i>
@@ -522,6 +531,9 @@
     <script src="../navigationbar/sidebar.js"></script>
     <script src="../profile/profile.js"></script>
     <script src="../../shared/receipt/receipt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="finance.js"></script>
+    <script src="finance_report.js"></script>
   </body>
 </html>

@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="../profile/profile.css" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="inventory.css" />
+    <link rel="stylesheet" href="inventory.css?v=1" />
     <style>
       #inventoryPage2 .forecast-chart-select-wrapper {
         position: relative;
@@ -150,6 +150,15 @@
                 <div class="inventory-header-actions">
                   <button
                     type="button"
+                    class="btn-secondary"
+                    id="exportInventoryPdfButton"
+                    title="Download a full PDF report of inventory usage and stock"
+                  >
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Export PDF</span>
+                  </button>
+                  <button
+                    type="button"
                     class="btn-secondary inventory-notification-btn"
                     id="inventoryNotificationBtn"
                     aria-label="Treatment stock notifications"
@@ -157,14 +166,6 @@
                     <i class="fa-regular fa-bell"></i>
                     <span>Notifications</span>
                     <strong id="inventoryNotificationCount" hidden>0</strong>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    id="exportInventoryCsvBtn"
-                  >
-                    <i class="fa-solid fa-download"></i>
-                    <span>Export CSV</span>
                   </button>
                   <button
                     type="button"
@@ -187,7 +188,7 @@
                 <input
                   type="text"
                   id="inventorySearch"
-                  placeholder="Search item name or category..."
+                  placeholder="Search item name, SKU or category..."
                   autocomplete="off"
                 />
               </div>
@@ -561,6 +562,10 @@
               <label for="itemExpiry">Expiry Date</label>
               <input type="date" id="itemExpiry" />
             </div>
+            <div class="form-group">
+              <label for="itemSku">SKU</label>
+              <input type="text" id="itemSku" value="Auto-generated" readonly />
+            </div>
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-modal-cancel" id="itemCancelBtn">
@@ -615,6 +620,36 @@
                 value="1"
                 required
               />
+            </div>
+            <div class="form-group" id="movementBatchGroup">
+              <label for="movementBatchNumber">Batch / Lot No.</label>
+              <input
+                type="text"
+                id="movementBatchNumber"
+                placeholder="Auto-generated if empty"
+                maxlength="60"
+              />
+            </div>
+            <div class="form-group" id="movementExpiryGroup">
+              <label for="movementExpiry">Batch Expiry Date</label>
+              <input type="date" id="movementExpiry" />
+            </div>
+            <div
+              class="form-group form-full"
+              id="movementStockOutNote"
+              style="display: none"
+            >
+              <p
+                style="
+                  margin: 0;
+                  color: #7d8982;
+                  font-size: 0.58rem;
+                  line-height: 1.5;
+                "
+              >
+                Stock out is deducted automatically from the batch with the
+                earliest expiry date first, then the oldest received batch.
+              </p>
             </div>
             <div class="form-group form-full">
               <label for="movementReason">Reason</label>
@@ -719,7 +754,10 @@
     <script src="../../shared/inventory/treatment_materials.js"></script>
     <script src="../../shared/inventory/inventory_service.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="inventory.js"></script>
+    <script src="inventory_report.js"></script>
     <script src="../profile/profile.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", () => {

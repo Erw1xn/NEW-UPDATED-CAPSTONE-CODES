@@ -1872,6 +1872,93 @@ textarea:focus-visible {
 .detail-actions {
   justify-content: flex-end;
 }
+/* Locked (within 24h) cancel / reschedule buttons + tooltip */
+.btn-delete.is-locked,
+.btn-request.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.35);
+}
+.btn-delete.is-locked:hover,
+.btn-request.is-locked:hover {
+  transform: none;
+}
+.lock-tooltip {
+  position: fixed;
+  z-index: 3000;
+  width: 290px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  background: #1f2d25;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(10, 35, 20, 0.28);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.lock-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+}
+.lock-tooltip > i {
+  margin-top: 2px;
+  color: #f5c16c;
+  font-size: 11px;
+}
+.lock-tooltip strong {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.lock-tooltip span {
+  display: block;
+  margin-top: 5px;
+  color: #b9c7bf;
+  font-size: 8.5px;
+  line-height: 1.5;
+}
+/* Delete confirmation + doctor-unavailable state */
+.delete-confirm-modal .modal-header p {
+  max-width: 280px;
+}
+.delete-confirm-modal .modal-actions .btn-delete {
+  background: var(--red-500);
+  border-color: var(--red-500);
+  color: #fff;
+}
+.delete-confirm-modal .modal-actions .btn-delete:hover {
+  background: #c42c2c;
+  border-color: #c42c2c;
+  color: #fff;
+}
+.delete-confirm-modal .modal-actions .btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.empty-upcoming.is-unavailable .empty-upcoming-icon {
+  background: var(--red-100);
+  border-color: #f2caca;
+  color: var(--red-500);
+}
+.empty-upcoming.is-unavailable h3 {
+  color: #b82e2e;
+}
+.empty-upcoming.is-unavailable p {
+  color: #9c5559;
+}
+.day.has-unavailable:not(.selected):not(.muted) {
+  background: #fff0f0;
+  color: #dc3838;
+}
+/* Delete sits at the far left; Cancel Appointment and Reschedule stay on the right */
+.detail-actions #deleteAppointmentBtn {
+  margin-right: auto;
+}
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2788,4 +2875,23 @@ textarea:focus-visible {
   .upcoming-time-range strong {
     font-size: 9px;
   }
+}
+
+/* Delete button: intentionally low-key (still clickable, no confirmation) */
+.detail-actions #deleteAppointmentBtn {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: rgba(23, 34, 27, 0.16);
+  transition: color 0.2s ease;
+}
+.detail-actions #deleteAppointmentBtn:hover,
+.detail-actions #deleteAppointmentBtn:focus-visible {
+  background: transparent;
+  border-color: transparent;
+  color: rgba(23, 34, 27, 0.4);
+  transform: none;
+}
+.detail-actions #deleteAppointmentBtn:disabled {
+  cursor: progress;
 }

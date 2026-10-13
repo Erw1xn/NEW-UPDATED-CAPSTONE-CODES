@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="../profile/profile.css" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="finance.css" />
+    <link rel="stylesheet" href="finance.css?v=1" />
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       .payment-method-form-group {
@@ -186,23 +186,18 @@
       .balance-top-group {
         grid-column: 2;
       }
-
       .discount-type-group {
         grid-column: 1;
       }
-
       .discount-top-group {
         grid-column: 2;
       }
-
       .payment-paid-group {
         grid-column: 1;
       }
-
       .payment-change-group {
         grid-column: 2;
       }
-
       .discount-type-group select {
         width: 100%;
         height: 39px;
@@ -217,23 +212,19 @@
         outline: none;
         cursor: pointer;
       }
-
       .discount-type-group select:focus {
         border-color: #a9d2ba;
         box-shadow: 0 0 0 3px rgba(8, 120, 63, 0.06);
       }
-
       .payment-change-group .calculated-input {
         background: #f3faf6;
         border-color: #d4e9dc;
       }
-
       .payment-change-group .calculated-input input {
         background: #f3faf6;
         color: #08783f;
         font-weight: 800;
       }
-
       #paymentDiscount {
         cursor: default;
       }
@@ -731,11 +722,9 @@
         .payment-method-options {
           grid-template-columns: 1fr;
         }
-
         .payment-method-option {
           min-height: 78px;
         }
-
         .balance-top-group,
         .discount-type-group,
         .discount-top-group,
@@ -743,7 +732,6 @@
         .payment-change-group {
           grid-column: 1;
         }
-
         .patient-cell {
           min-width: 145px;
         }
@@ -915,10 +903,11 @@
                 >
                 <button
                   class="secondary-button"
-                  id="exportCsvBtn"
+                  id="exportPdfBtn"
                   type="button"
+                  title="Download a full PDF report of finance and collections"
                 >
-                  <i data-lucide="download"></i><span>Export CSV</span>
+                  <i data-lucide="file-text"></i><span>Export PDF</span>
                 </button>
                 <button
                   class="collection-header-button"
@@ -1354,8 +1343,6 @@
         </div>
       </div>
     </aside>
-    <!-- REPLACE the whole block: <div class="modal-overlay" id="paymentModal"> ... </div>
-     (the one that ends right before <div class="payment-verification-overlay" ...>) -->
     <div class="modal-overlay" id="paymentModal">
       <div class="payment-modal">
         <div class="modal-header">
@@ -1369,12 +1356,9 @@
             <i data-lucide="x"></i>
           </button>
         </div>
-
         <form id="paymentForm" novalidate>
           <input type="hidden" id="transactionId" />
           <input type="hidden" id="paymentStatus" value="Unpaid" />
-
-          <!-- ===================== STEP 1 : DISCOUNT ===================== -->
           <div class="payment-step" id="paymentStep1">
             <div class="form-grid">
               <div class="form-group">
@@ -1401,7 +1385,6 @@
                   selected.</small
                 >
               </div>
-
               <div class="form-group">
                 <label for="serviceName">Service <span>*</span></label>
                 <div class="service-select-wrapper" id="serviceSelectWrapper">
@@ -1423,12 +1406,10 @@
                   ></div>
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="paymentDate">Payment Date <span>*</span></label>
                 <input type="date" id="paymentDate" required />
               </div>
-
               <div class="form-group">
                 <label for="paymentTotal">Total Amount <span>*</span></label>
                 <div class="amount-input">
@@ -1443,7 +1424,6 @@
                   />
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="discountType">Discount Type <span>*</span></label>
                 <select id="discountType">
@@ -1454,7 +1434,6 @@
                   <option value="other">Other Authorized</option>
                 </select>
               </div>
-
               <div class="form-group">
                 <label for="discountRate">Discount Rate</label>
                 <div class="amount-input">
@@ -1471,7 +1450,6 @@
                   <span class="rate-suffix">%</span>
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="paymentDiscount">Discount Amount</label>
                 <div class="amount-input calculated-input">
@@ -1484,7 +1462,6 @@
                   />
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="paymentNet">Net Amount</label>
                 <div class="amount-input calculated-input">
@@ -1492,7 +1469,6 @@
                   <input type="text" id="paymentNet" value="0.00" readonly />
                 </div>
               </div>
-
               <small
                 class="field-help payment-status-hidden"
                 id="discountLockedNote"
@@ -1503,8 +1479,6 @@
               </small>
             </div>
           </div>
-
-          <!-- ===================== STEP 2 : PAYMENT ===================== -->
           <div class="payment-step payment-status-hidden" id="paymentStep2">
             <div class="payment-summary">
               <span class="payment-summary-title">Payment Summary</span>
@@ -1529,7 +1503,6 @@
                 </div>
               </div>
             </div>
-
             <div class="form-grid">
               <div class="form-group payment-method-form-group">
                 <label class="payment-method-selector-label" for="paymentMethod"
@@ -1597,7 +1570,6 @@
                   </button>
                 </div>
               </div>
-
               <div
                 class="form-group full-width-process"
                 id="paymentProcessWrapper"
@@ -1605,7 +1577,6 @@
               >
                 <div class="payment-process-box" id="paymentProcessBox"></div>
               </div>
-
               <div class="form-group" id="paymentDueGroup">
                 <label for="paymentAmountDue">Amount to Pay</label>
                 <div class="amount-input calculated-input">
@@ -1618,7 +1589,6 @@
                   />
                 </div>
               </div>
-
               <div class="form-group payment-received-group">
                 <label for="paymentPaid">Amount Received <span>*</span></label>
                 <div class="amount-input">
@@ -1633,7 +1603,6 @@
                   />
                 </div>
               </div>
-
               <div class="form-group" id="paymentChangeGroup">
                 <label for="paymentChange">Change</label>
                 <div class="amount-input calculated-input">
@@ -1641,7 +1610,6 @@
                   <input type="text" id="paymentChange" value="0.00" readonly />
                 </div>
               </div>
-
               <div class="form-group">
                 <label for="paymentBalance">Balance After Payment</label>
                 <div class="amount-input calculated-input">
@@ -1656,8 +1624,6 @@
               </div>
             </div>
           </div>
-
-          <!-- ===================== FOOTERS ===================== -->
           <div class="modal-actions" id="paymentActionsStep1">
             <button
               type="button"
@@ -1794,7 +1760,10 @@
     </div>
     <script src="../../navigation_bar/sidebar.js"></script>
     <script src="../../shared/receipt/receipt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="finance.js?v=20261007"></script>
+    <script src="finance_report.js"></script>
     <script src="../profile/profile.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

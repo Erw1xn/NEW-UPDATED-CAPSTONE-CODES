@@ -10,6 +10,7 @@
   top: 0;
   width: 248px;
   height: 100vh;
+  height: 100dvh;
   background:
     radial-gradient(
       circle at 100% 0%,
@@ -52,6 +53,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
 }
 .sidebar-top {
   display: flex;
@@ -284,6 +286,7 @@
 .mobile-menu-toggle {
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,6 +296,8 @@
   font-size: 1.15rem;
   color: #073b2c;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color 0.2s ease;
 }
 .mobile-menu-toggle:hover {
@@ -304,6 +309,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background-color: rgba(7, 59, 44, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -390,6 +396,7 @@ body.logout-modal-open {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;
   transition: all 0.2s ease;
 }
 .btn-modal-cancel {
@@ -410,6 +417,12 @@ body.logout-modal-open {
 @media (min-width: 769px) {
   .sidebar {
     transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: none;
   }
   .sidebar.collapsed {
     width: 76px;
@@ -462,7 +475,9 @@ body.logout-modal-open {
     display: flex;
   }
   #sidebar-container {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     height: auto;
     min-height: 0;
     flex-direction: column;
@@ -473,17 +488,30 @@ body.logout-modal-open {
     left: 0;
     width: 264px;
     height: 100vh;
+    height: 100dvh;
     padding: 16px 0;
     transform: translateX(-100%);
+    box-shadow: none;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     justify-content: flex-start;
     overflow: hidden !important;
   }
   .sidebar.mobile-open {
     transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(7, 59, 44, 0.18);
   }
   .sidebar .toggle-btn {
     display: none !important;
+  }
+  .sidebar-top {
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar-top::-webkit-scrollbar {
+    display: none;
+    width: 0;
   }
   .sidebar-footer {
     display: none !important;

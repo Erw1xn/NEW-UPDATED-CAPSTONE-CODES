@@ -4427,3 +4427,504 @@ body {
   font-weight: 600;
   line-height: 1.4;
 }
+.appointments-shell,
+.main-col-stack,
+.side-col-stack,
+.appointments-page-heading,
+.appointments-page-actions {
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  .main-content {
+    padding: 12px 12px 18px;
+  }
+  .appointments-page-header-content {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+  .appointments-page-heading {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 58px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 17px;
+    line-height: 1.2;
+  }
+  .appointments-page-heading p {
+    margin-top: 3px;
+    font-size: 9.5px;
+    line-height: 1.35;
+  }
+  .appointments-page-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: stretch;
+    gap: 8px;
+  }
+  .appointments-page-actions .dentist-filter-wrapper,
+  .appointments-page-actions .search-box-wrapper {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 140px;
+    width: auto;
+  }
+  .page-header-new-appointment {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .appointments-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .side-col-stack {
+    display: flex;
+    flex-direction: column;
+  }
+  .main-col-stack {
+    order: -1;
+  }
+  .side-content-panel {
+    min-height: 0;
+  }
+  .side-content-body {
+    min-height: 0;
+  }
+  .waiting-queue-list {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .empty-queue {
+    height: auto;
+    min-height: 150px;
+  }
+  .schedule-panel,
+  .schedule-panel.schedule-panel--expanded {
+    height: 600px;
+    min-height: 0;
+  }
+  .schedule-main-header {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+  .schedule-heading-group {
+    width: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .time-slots-container {
+    padding: 6px 14px 16px 16px;
+  }
+}
+@media (max-width: 640px) {
+  .main-content {
+    padding: 8px 8px 14px;
+  }
+  .appointments-shell {
+    padding: 14px 12px 16px;
+    gap: 14px;
+    border-radius: 18px;
+  }
+  .appointments-page-header-content {
+    gap: 12px;
+  }
+  .appointments-page-heading {
+    min-height: 44px;
+    padding-left: 54px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 16px;
+  }
+  .appointments-page-heading p {
+    font-size: 8.5px;
+  }
+  .appointments-page-actions .dentist-filter-wrapper,
+  .appointments-page-actions .search-box-wrapper {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .appointments-page-actions .dentist-filter,
+  .appointments-page-actions .patient-search-input {
+    height: 40px;
+  }
+  .page-header-new-appointment {
+    height: 40px;
+    min-height: 40px;
+  }
+  .calendar-panel {
+    padding: 14px;
+  }
+  .day {
+    min-height: 36px;
+  }
+  .schedule-panel,
+  .schedule-panel.schedule-panel--expanded {
+    height: 560px;
+  }
+  .schedule-main-header {
+    padding: 12px 14px;
+  }
+  .schedule-main-header h3 {
+    font-size: 15px;
+  }
+  .tl-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+    min-height: 66px;
+  }
+  .tl-time {
+    padding-top: 14px;
+    font-size: 8.5px;
+  }
+  .appt-card {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+  }
+  .appt-info {
+    flex: 1 1 calc(100% - 52px);
+    min-width: 0;
+  }
+  .ptype {
+    white-space: normal;
+  }
+  .appt-status-area {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .appt-status-btn {
+    flex: 1 1 auto;
+    min-height: 32px;
+  }
+  .queue-item {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .queue-type {
+    max-width: 100%;
+  }
+  .modal-overlay,
+  .reschedule-request-overlay,
+  .reschedule-review-overlay {
+    padding: 10px;
+  }
+  .modal-container,
+  .reschedule-request-box,
+  .reschedule-review-box {
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px;
+  }
+  .modal-header,
+  .reschedule-request-header,
+  .reschedule-review-header {
+    padding: 14px 16px;
+  }
+  .modal-header {
+    align-items: flex-start;
+  }
+  .modal-header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .modal-body,
+  .reschedule-request-body,
+  .reschedule-review-body {
+    padding: 16px 16px 6px;
+  }
+  .reschedule-review-actions {
+    padding: 11px 16px 15px;
+  }
+  .reschedule-review-actions button {
+    flex: 1;
+  }
+  .modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .modal-left-actions,
+  .modal-right-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .modal-left-actions > *,
+  .modal-right-actions > * {
+    flex: 1;
+  }
+  .time-picker-dropdown {
+    max-height: 230px;
+  }
+  .toast {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    text-align: center;
+  }
+}
+@media (max-width: 480px) {
+  .reschedule-review-schedules {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .reschedule-review-arrow {
+    transform: rotate(90deg);
+    height: 18px;
+  }
+  .reschedule-review-info-row strong {
+    max-width: 60%;
+  }
+}
+@media (max-width: 400px) {
+  .main-content {
+    padding: 6px 6px 12px;
+  }
+  .appointments-shell {
+    padding: 12px 10px 14px;
+    border-radius: 16px;
+  }
+  .appointments-page-heading {
+    padding-left: 52px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 15px;
+  }
+  .appointments-page-heading p {
+    font-size: 8px;
+  }
+  .page-header-new-appointment span {
+    display: inline;
+  }
+  .schedule-panel,
+  .schedule-panel.schedule-panel--expanded {
+    height: 540px;
+  }
+  .tl-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .schedule-stat {
+    min-width: 0;
+  }
+}
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    position: relative;
+    flex-direction: column;
+  }
+  #sidebar-container {
+    width: 100%;
+    height: 0;
+    min-height: 0;
+    position: static;
+    flex-shrink: 0;
+  }
+  .mobile-header {
+    position: absolute;
+    top: 34px;
+    left: 28px;
+    width: auto;
+    padding: 0;
+    background: transparent;
+    border-bottom: 0;
+    box-shadow: none;
+    z-index: 1000;
+  }
+  .mobile-menu-toggle {
+    border: 1px solid #e1e9e4;
+  }
+  .main-content {
+    width: 100%;
+  }
+}
+@media (max-width: 640px) {
+  .mobile-header {
+    top: 24px;
+    left: 20px;
+  }
+}
+@media (max-width: 400px) {
+  .mobile-header {
+    top: 20px;
+    left: 16px;
+  }
+}
+@media (min-width: 769px) and (max-width: 800px) {
+  .appointments-page-heading {
+    min-height: 0;
+    padding-left: 0;
+  }
+}
+@media (max-width: 800px) {
+  .side-col-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .side-col-stack > .panel,
+  .calendar-panel {
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+    grid-column: 1 / -1;
+  }
+  .calendar-panel {
+    padding: 16px;
+  }
+  .calendar-panel .calendar-header {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .calendar-grid-days {
+    width: 100%;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .dow {
+    font-size: 8.5px;
+    margin-bottom: 6px;
+  }
+  .day {
+    min-height: 40px;
+    font-size: 10.5px;
+  }
+}
+@media (max-width: 400px) {
+  .calendar-panel {
+    padding: 12px;
+  }
+  .calendar-grid-days {
+    gap: 3px;
+  }
+  .day {
+    min-height: 36px;
+    font-size: 10px;
+  }
+}
+.time-slots-container > .schedule-empty-state,
+.time-slots-container > [class*="empty-state"],
+.time-slots-container > [class*="unavailable-state"] {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 16px;
+}
+@media (max-width: 800px) {
+  .appointments-page-actions .dentist-filter {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 38px;
+    text-overflow: ellipsis;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2387938c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 10px 6px;
+  }
+}
+@media (max-width: 640px) {
+  .appt-card {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+  }
+  .appt-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .appt-info .pname,
+  .appt-info .ptype {
+    max-width: 100%;
+  }
+  .appt-status-area {
+    width: auto;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 0;
+    min-width: 96px;
+  }
+  .appt-status-btn,
+  .appt-status-badge {
+    flex: 0 0 auto;
+    width: 100%;
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: 7.5px;
+    justify-content: center;
+  }
+}
+@media (max-width: 400px) {
+  .appt-card {
+    gap: 8px;
+    padding: 9px 8px;
+  }
+  .appt-status-area {
+    min-width: 88px;
+  }
+  .appt-status-btn,
+  .appt-status-badge {
+    padding: 5px 8px;
+    font-size: 7px;
+  }
+}
+
+.schedule-unavailable-notice {
+  min-width: 0;
+  max-width: 60%;
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.schedule-unavailable-notice[hidden] {
+  display: none;
+}
+.schedule-unavailable-pill {
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #fff0f0;
+  border: 1px solid #f2caca;
+  border-radius: 999px;
+  color: #dc3838;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.schedule-unavailable-pill i {
+  flex-shrink: 0;
+  font-size: 9px;
+}
+.schedule-unavailable-pill span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 800px) {
+  .schedule-unavailable-notice {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}

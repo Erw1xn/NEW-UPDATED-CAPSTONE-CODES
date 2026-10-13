@@ -1776,3 +1776,48 @@ button {
     margin-bottom: 3px;
   }
 }
+
+.payment-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.export-pdf-btn {
+  min-height: 28px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--green);
+  border-radius: var(--radius-sm);
+  background: var(--green);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.export-pdf-btn i {
+  font-size: 9px;
+}
+.export-pdf-btn:hover:not(:disabled) {
+  border-color: var(--green-dark);
+  background: var(--green-dark);
+  transform: translateY(-1px);
+}
+.export-pdf-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+@media (max-width: 480px) {
+  .payment-history-actions {
+    align-self: flex-start;
+    justify-content: flex-start;
+  }
+}

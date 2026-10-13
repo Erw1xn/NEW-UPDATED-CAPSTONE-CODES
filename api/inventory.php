@@ -23,6 +23,7 @@ function normalizeItemRow(array $row): array
     return [
         'id' => $itemId,
         'item_id' => $itemId,
+        'sku' => (string) ($row['sku'] ?? ''),
         'name' => $itemName,
         'itemName' => $itemName,
         'category' => (string) ($row['category'] ?? 'Other'),
@@ -58,9 +59,250 @@ function normalizeMovementRow(array $row): array
         'createdAt' => $row['created_at'] ?? $row['createdAt'] ?? $row['movement_date'] ?? null,
     ];
 }
+function normalizeBatchRow(array $row): array
+{
+    return [
+        'id' => (string) ($row['batch_id'] ?? ''),
+        'batchId' => (string) ($row['batch_id'] ?? ''),
+        'itemId' => (string) ($row['item_id'] ?? ''),
+        'batchNumber' => (string) ($row['batch_number'] ?? ''),
+        'received' => (float) ($row['quantity_received'] ?? 0),
+        'remaining' => (float) ($row['quantity_remaining'] ?? 0),
+        'expiry' => $row['expiry_date'] ?? null,
+        'receivedDate' => $row['received_date'] ?? null,
+        'movementId' => isset($row['movement_id']) && $row['movement_id'] !== null ? (string) $row['movement_id'] : null,
+    ];
+}
+function normalizeBatchUsageRow(array $row): array
+{
+    return [
+        'id' => (string) ($row['batch_usage_id'] ?? ''),
+        'batchId' => (string) ($row['batch_id'] ?? ''),
+        'batchNumber' => (string) ($row['batch_number'] ?? ''),
+        'itemId' => (string) ($row['item_id'] ?? ''),
+        'movementId' => isset($row['movement_id']) && $row['movement_id'] !== null ? (string) $row['movement_id'] : null,
+        'treatmentId' => isset($row['treatment_id']) && $row['treatment_id'] !== null ? (string) $row['treatment_id'] : null,
+        'quantity' => (float) ($row['quantity'] ?? 0),
+        'reversed' => !empty($row['reversed_at']),
+    ];
+}
+function categorySkuCode(string $category): string
+{
+    $map = [
+        'restorative materials' => 'RST',
+        'preventive materials' => 'PRV',
+        'disposable supplies' => 'DSP',
+        'infection control' => 'INF',
+        'sterilization supplies' => 'STR',
+        'dental instruments' => 'INS',
+        'oral care supplies' => 'ORL',
+    ];
+    $key = strtolower(trim($category));
+    return $map[$key] ?? 'OTH';
+}
+function buildSku(string $category, int $itemId): string
+{
+    return 'DNT-' . categorySkuCode($category) . '-' . str_pad((string) $itemId, 3, '0', STR_PAD_LEFT);
+}
+function nextBatchNumber(mysqli $conn, int $itemId): string
+{
+    $skuStmt = $conn->prepare('SELECT sku FROM tbl_inventory_items WHERE item_id = ? LIMIT 1');
+    $skuStmt->bind_param('i', $itemId);
+    $skuStmt->execute();
+    $skuRow = $skuStmt->get_result()->fetch_assoc();
+    $skuStmt->close();
+    $sku = trim((string) ($skuRow['sku'] ?? ''));
+    if ($sku === '') {
+        $sku = 'ITEM-' . str_pad((string) $itemId, 3, '0', STR_PAD_LEFT);
+    }
+    $countStmt = $conn->prepare('SELECT COUNT(*) AS total FROM tbl_inventory_batches WHERE item_id = ?');
+    $countStmt->bind_param('i', $itemId);
+    $countStmt->execute();
+    $countRow = $countStmt->get_result()->fetch_assoc();
+    $countStmt->close();
+    $sequence = (int) ($countRow['total'] ?? 0) + 1;
+    do {
+        $candidate = $sku . '-B' . str_pad((string) $sequence, 2, '0', STR_PAD_LEFT);
+        $checkStmt = $conn->prepare('SELECT batch_id FROM tbl_inventory_batches WHERE item_id = ? AND batch_number = ? LIMIT 1');
+        $checkStmt->bind_param('is', $itemId, $candidate);
+        $checkStmt->execute();
+        $exists = (bool) $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
+        $sequence++;
+    } while ($exists);
+    return $candidate;
+}
+function createInventoryBatch(mysqli $conn, int $itemId, float $quantity, ?string $expiry, string $batchNumber, ?string $receivedAt, ?int $movementId): int
+{
+    $batchNumber = trim($batchNumber);
+    if ($batchNumber === '') {
+        $batchNumber = nextBatchNumber($conn, $itemId);
+    } else {
+        $dupStmt = $conn->prepare('SELECT batch_id FROM tbl_inventory_batches WHERE item_id = ? AND batch_number = ? LIMIT 1');
+        $dupStmt->bind_param('is', $itemId, $batchNumber);
+        $dupStmt->execute();
+        $duplicate = $dupStmt->get_result()->fetch_assoc();
+        $dupStmt->close();
+        if ($duplicate) {
+            throw new RuntimeException('Batch number already exists for this item.');
+        }
+    }
+    $receivedValue = $receivedAt !== null && $receivedAt !== '' ? $receivedAt : date('Y-m-d H:i:s');
+    $expiryValue = $expiry !== null && $expiry !== '' ? $expiry : null;
+    $stmt = $conn->prepare('INSERT INTO tbl_inventory_batches (item_id, batch_number, quantity_received, quantity_remaining, expiry_date, received_date, movement_id) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    $stmt->bind_param('isddssi', $itemId, $batchNumber, $quantity, $quantity, $expiryValue, $receivedValue, $movementId);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        throw new RuntimeException('Unable to create inventory batch.');
+    }
+    $batchId = (int) $stmt->insert_id;
+    $stmt->close();
+    return $batchId;
+}
+function allocateBatchStock(mysqli $conn, int $itemId, float $quantity, ?int $movementId, ?int $treatmentId): void
+{
+    $stmt = $conn->prepare('SELECT batch_id, quantity_remaining FROM tbl_inventory_batches WHERE item_id = ? AND quantity_remaining > 0 ORDER BY (expiry_date IS NULL) ASC, expiry_date ASC, received_date ASC, batch_id ASC FOR UPDATE');
+    $stmt->bind_param('i', $itemId);
+    $stmt->execute();
+    $batches = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    $remaining = $quantity;
+    foreach ($batches as $batch) {
+        if ($remaining <= 0.00001) {
+            break;
+        }
+        $batchId = (int) $batch['batch_id'];
+        $available = (float) $batch['quantity_remaining'];
+        $take = min($available, $remaining);
+        $updateStmt = $conn->prepare('UPDATE tbl_inventory_batches SET quantity_remaining = quantity_remaining - ? WHERE batch_id = ?');
+        $updateStmt->bind_param('di', $take, $batchId);
+        if (!$updateStmt->execute()) {
+            $updateStmt->close();
+            throw new RuntimeException('Unable to deduct batch stock.');
+        }
+        $updateStmt->close();
+        $usageStmt = $conn->prepare('INSERT INTO tbl_inventory_batch_usage (batch_id, item_id, movement_id, treatment_id, quantity) VALUES (?, ?, ?, ?, ?)');
+        $usageStmt->bind_param('iiiid', $batchId, $itemId, $movementId, $treatmentId, $take);
+        if (!$usageStmt->execute()) {
+            $usageStmt->close();
+            throw new RuntimeException('Unable to record batch usage.');
+        }
+        $usageStmt->close();
+        $remaining -= $take;
+    }
+    if ($remaining > 0.00001) {
+        throw new RuntimeException('Batch records do not have enough stock for this deduction.');
+    }
+}
+function restoreTreatmentBatchStock(mysqli $conn, int $treatmentId, int $itemId, float $quantity): void
+{
+    $stmt = $conn->prepare('SELECT batch_usage_id, batch_id, quantity FROM tbl_inventory_batch_usage WHERE treatment_id = ? AND item_id = ? AND reversed_at IS NULL FOR UPDATE');
+    $stmt->bind_param('ii', $treatmentId, $itemId);
+    $stmt->execute();
+    $usageRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    $restored = 0.0;
+    foreach ($usageRows as $usageRow) {
+        $batchId = (int) $usageRow['batch_id'];
+        $usageQuantity = (float) $usageRow['quantity'];
+        $restoreStmt = $conn->prepare('UPDATE tbl_inventory_batches SET quantity_remaining = quantity_remaining + ? WHERE batch_id = ?');
+        $restoreStmt->bind_param('di', $usageQuantity, $batchId);
+        if (!$restoreStmt->execute()) {
+            $restoreStmt->close();
+            throw new RuntimeException('Unable to restore batch stock.');
+        }
+        $restoreStmt->close();
+        $restored += $usageQuantity;
+    }
+    if ($usageRows) {
+        $markStmt = $conn->prepare('UPDATE tbl_inventory_batch_usage SET reversed_at = NOW() WHERE treatment_id = ? AND item_id = ? AND reversed_at IS NULL');
+        $markStmt->bind_param('ii', $treatmentId, $itemId);
+        if (!$markStmt->execute()) {
+            $markStmt->close();
+            throw new RuntimeException('Unable to update batch usage history.');
+        }
+        $markStmt->close();
+    }
+    $leftover = $quantity - $restored;
+    if ($leftover > 0.00001) {
+        createInventoryBatch($conn, $itemId, $leftover, null, '', null, null);
+    }
+}
+function syncItemExpiryFromBatches(mysqli $conn, int $itemId): void
+{
+    $stmt = $conn->prepare('SELECT COUNT(*) AS total, MIN(expiry_date) AS nearest FROM tbl_inventory_batches WHERE item_id = ? AND quantity_remaining > 0');
+    $stmt->bind_param('i', $itemId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ((int) ($row['total'] ?? 0) <= 0) {
+        return;
+    }
+    $nearest = $row['nearest'] ?? null;
+    $updateStmt = $conn->prepare('UPDATE tbl_inventory_items SET expiry_date = ? WHERE item_id = ?');
+    $updateStmt->bind_param('si', $nearest, $itemId);
+    $updateStmt->execute();
+    $updateStmt->close();
+}
+function ensureInventorySchema(mysqli $conn): void
+{
+    $conn->query("ALTER TABLE tbl_inventory_items ADD COLUMN IF NOT EXISTS sku VARCHAR(30) NULL AFTER item_id");
+    $conn->query("ALTER TABLE tbl_inventory_items ADD UNIQUE INDEX IF NOT EXISTS uq_inventory_sku (sku)");
+    $conn->query("CREATE TABLE IF NOT EXISTS tbl_inventory_batches (
+        batch_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        item_id BIGINT UNSIGNED NOT NULL,
+        batch_number VARCHAR(80) NOT NULL,
+        quantity_received DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        quantity_remaining DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        expiry_date DATE NULL,
+        received_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        movement_id BIGINT UNSIGNED NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_item_batch (item_id, batch_number),
+        KEY idx_item_remaining (item_id, quantity_remaining)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $conn->query("CREATE TABLE IF NOT EXISTS tbl_inventory_batch_usage (
+        batch_usage_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        batch_id BIGINT UNSIGNED NOT NULL,
+        item_id BIGINT UNSIGNED NOT NULL,
+        movement_id BIGINT UNSIGNED NULL,
+        treatment_id BIGINT UNSIGNED NULL,
+        quantity DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        reversed_at DATETIME NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_usage_batch (batch_id),
+        KEY idx_usage_movement (movement_id),
+        KEY idx_usage_treatment (treatment_id, item_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $skuResult = $conn->query("SELECT item_id, category FROM tbl_inventory_items WHERE sku IS NULL OR sku = ''");
+    if ($skuResult) {
+        while ($skuRow = $skuResult->fetch_assoc()) {
+            $skuItemId = (int) $skuRow['item_id'];
+            $skuValue = buildSku((string) ($skuRow['category'] ?? ''), $skuItemId);
+            $skuUpdate = $conn->prepare('UPDATE tbl_inventory_items SET sku = ? WHERE item_id = ?');
+            $skuUpdate->bind_param('si', $skuValue, $skuItemId);
+            $skuUpdate->execute();
+            $skuUpdate->close();
+        }
+    }
+    $gapResult = $conn->query("SELECT i.item_id, i.stock_quantity, i.expiry_date, i.created_at, COALESCE(SUM(b.quantity_remaining), 0) AS batch_total FROM tbl_inventory_items i LEFT JOIN tbl_inventory_batches b ON b.item_id = i.item_id GROUP BY i.item_id, i.stock_quantity, i.expiry_date, i.created_at HAVING i.stock_quantity > COALESCE(SUM(b.quantity_remaining), 0)");
+    if ($gapResult) {
+        $gaps = $gapResult->fetch_all(MYSQLI_ASSOC);
+        foreach ($gaps as $gap) {
+            $gapItemId = (int) $gap['item_id'];
+            $difference = (float) $gap['stock_quantity'] - (float) $gap['batch_total'];
+            if ($difference <= 0.00001) {
+                continue;
+            }
+            $gapExpiry = $gap['expiry_date'] ?? null;
+            $gapReceived = $gap['created_at'] ?? null;
+            createInventoryBatch($conn, $gapItemId, $difference, $gapExpiry, '', $gapReceived, null);
+        }
+    }
+}
 function loadInventoryData(mysqli $conn): array
 {
-    $itemsResult = $conn->query("SELECT item_id, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items ORDER BY item_name ASC");
+    $itemsResult = $conn->query("SELECT item_id, sku, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items ORDER BY item_name ASC");
     $items = [];
     while ($row = $itemsResult ? $itemsResult->fetch_assoc() : null) {
         $items[] = normalizeItemRow($row);
@@ -70,7 +312,17 @@ function loadInventoryData(mysqli $conn): array
     while ($row = $movementsResult ? $movementsResult->fetch_assoc() : null) {
         $movements[] = normalizeMovementRow($row);
     }
-    return ['items' => $items, 'movements' => $movements];
+    $batchesResult = $conn->query("SELECT batch_id, item_id, batch_number, quantity_received, quantity_remaining, expiry_date, received_date, movement_id FROM tbl_inventory_batches ORDER BY received_date ASC, batch_id ASC");
+    $batches = [];
+    while ($row = $batchesResult ? $batchesResult->fetch_assoc() : null) {
+        $batches[] = normalizeBatchRow($row);
+    }
+    $batchUsageResult = $conn->query("SELECT u.batch_usage_id, u.batch_id, b.batch_number, u.item_id, u.movement_id, u.treatment_id, u.quantity, u.reversed_at FROM tbl_inventory_batch_usage u INNER JOIN tbl_inventory_batches b ON b.batch_id = u.batch_id ORDER BY u.batch_usage_id ASC");
+    $batchUsage = [];
+    while ($row = $batchUsageResult ? $batchUsageResult->fetch_assoc() : null) {
+        $batchUsage[] = normalizeBatchUsageRow($row);
+    }
+    return ['items' => $items, 'movements' => $movements, 'batches' => $batches, 'batchUsage' => $batchUsage];
 }
 function normalizeTreatmentMaterial(array $material): array
 {
@@ -194,6 +446,7 @@ if (empty($_SESSION['logged_in']) || empty($_SESSION['user_id'])) {
     jsonResponse(false, 'Authentication required.', null, 401);
 }
 $conn->query("ALTER TABLE tbl_inventory_items ADD COLUMN IF NOT EXISTS expiry_date DATE NULL AFTER reorder_level");
+ensureInventorySchema($conn);
 $method = $_SERVER['REQUEST_METHOD'];
 $raw = file_get_contents('php://input');
 $input = is_string($raw) && $raw !== '' ? json_decode($raw, true) : [];
@@ -275,8 +528,14 @@ if ($action === 'save_item') {
         $stmt->execute();
         $itemId = (string) $stmt->insert_id;
         $stmt->close();
+        $newSku = buildSku($category, (int) $itemId);
+        $newItemIdInt = (int) $itemId;
+        $skuStmt = $conn->prepare('UPDATE tbl_inventory_items SET sku = ? WHERE item_id = ?');
+        $skuStmt->bind_param('si', $newSku, $newItemIdInt);
+        $skuStmt->execute();
+        $skuStmt->close();
     }
-    $updated = $conn->query("SELECT item_id, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items WHERE item_id = " . (int) $itemId . " LIMIT 1");
+    $updated = $conn->query("SELECT item_id, sku, item_name, category, unit, stock_quantity, reorder_level, expiry_date, created_at, updated_at FROM tbl_inventory_items WHERE item_id = " . (int) $itemId . " LIMIT 1");
     $row = $updated ? $updated->fetch_assoc() : null;
     jsonResponse(true, 'Inventory item saved.', $row ? normalizeItemRow($row) : null);
 }
@@ -343,6 +602,10 @@ if ($action === 'delete_item') {
             409
         );
     }
+    $deleteBatchStmt = $conn->prepare('DELETE FROM tbl_inventory_batches WHERE item_id = ?');
+    $deleteBatchStmt->bind_param('i', $itemId);
+    $deleteBatchStmt->execute();
+    $deleteBatchStmt->close();
     $deleteStmt = $conn->prepare(
         'DELETE FROM tbl_inventory_items
          WHERE item_id = ?'
@@ -378,6 +641,12 @@ if ($action === 'record_movement') {
     $reason = trim((string) ($input['reason'] ?? 'Inventory adjustment'));
     $patientId = $input['patientId'] ?? null;
     $appointmentId = $input['appointmentId'] ?? null;
+    $batchNumber = trim((string) ($input['batchNumber'] ?? $input['batch_number'] ?? ''));
+    $batchExpiryRaw = trim((string) ($input['expiry'] ?? $input['batchExpiry'] ?? ''));
+    $batchExpiry = $batchExpiryRaw !== '' ? $batchExpiryRaw : null;
+    if ($batchExpiry !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $batchExpiry)) {
+        jsonResponse(false, 'Batch expiry date is invalid.', null, 422);
+    }
     if ($itemIdentifier === '' && $itemName === '') {
         jsonResponse(false, 'Inventory item is required.', null, 422);
     }
@@ -411,15 +680,34 @@ if ($action === 'record_movement') {
     }
     $itemIdForUpdate = (int) $item['item_id'];
     $itemNameForMovement = (string) $item['item_name'];
-    $updateStmt = $conn->prepare('UPDATE tbl_inventory_items SET stock_quantity = ?, updated_at = NOW() WHERE item_id = ?');
-    $updateStmt->bind_param('di', $newStock, $itemIdForUpdate);
-    $updateStmt->execute();
-    $updateStmt->close();
-    $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
     $movementType = $type === 'stock-out' ? 'stock-out' : 'stock-in';
-    $movementStmt->bind_param('issdsddsss', $itemIdForUpdate, $itemNameForMovement, $movementType, $quantity, $unit, $previousStock, $newStock, $reason, $appointmentId, $patientId);
-    $movementStmt->execute();
-    $movementStmt->close();
+    $conn->begin_transaction();
+    try {
+        $updateStmt = $conn->prepare('UPDATE tbl_inventory_items SET stock_quantity = ?, updated_at = NOW() WHERE item_id = ?');
+        $updateStmt->bind_param('di', $newStock, $itemIdForUpdate);
+        $updateStmt->execute();
+        $updateStmt->close();
+        $movementStmt = $conn->prepare('INSERT INTO tbl_inventory_movements (item_id, item_name, movement_type, quantity, unit, previous_stock, new_stock, source, appointment_id, patient_id, movement_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())');
+        $movementStmt->bind_param('issdsddsss', $itemIdForUpdate, $itemNameForMovement, $movementType, $quantity, $unit, $previousStock, $newStock, $reason, $appointmentId, $patientId);
+        if (!$movementStmt->execute()) {
+            $movementStmt->close();
+            throw new RuntimeException('Unable to record inventory movement.');
+        }
+        $movementId = (int) $movementStmt->insert_id;
+        $movementStmt->close();
+        if ($movementType === 'stock-out') {
+            allocateBatchStock($conn, $itemIdForUpdate, $quantity, $movementId, null);
+        } else {
+            createInventoryBatch($conn, $itemIdForUpdate, $quantity, $batchExpiry, $batchNumber, null, $movementId);
+        }
+        syncItemExpiryFromBatches($conn, $itemIdForUpdate);
+        $conn->commit();
+    } catch (Throwable $error) {
+        $conn->rollback();
+        $message = $error->getMessage();
+        $status = str_contains(strtolower($message), 'already exists') ? 422 : 500;
+        jsonResponse(false, $message !== '' ? $message : 'Unable to record inventory movement.', null, $status);
+    }
     jsonResponse(true, 'Inventory movement recorded.', loadInventoryData($conn));
 }
 if ($action === 'deduct_for_treatment') {
@@ -586,6 +874,8 @@ if ($action === 'deduct_for_treatment') {
                 throw new RuntimeException('Unable to record inventory reversal movement.');
             }
             $reverseMovementStmt->close();
+            restoreTreatmentBatchStock($conn, $treatmentId, $oldItemId, $oldQuantity);
+            syncItemExpiryFromBatches($conn, $oldItemId);
             updateDemandHistory($conn, $oldItemName, $treatmentDate, -$oldQuantity);
         }
         if ($existingUsage) {
@@ -640,6 +930,8 @@ if ($action === 'deduct_for_treatment') {
             }
             $movementId = $movementStmt->insert_id;
             $movementStmt->close();
+            allocateBatchStock($conn, $itemId, $quantity, (int) $movementId, $treatmentId);
+            syncItemExpiryFromBatches($conn, $itemId);
             $usageStmt = $conn->prepare('INSERT INTO tbl_inventory_treatment_usage (treatment_id, treatment_key, item_id, quantity) VALUES (?, ?, ?, ?)');
             $usageStmt->bind_param('isid', $treatmentId, $treatmentKey, $itemId, $quantity);
             if (!$usageStmt->execute()) {

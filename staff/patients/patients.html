@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="../profile/profile.css" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="patients.css" />
+    <link rel="stylesheet" href="patients.css?v=1" />
   </head>
   <body>
     <div class="patients-layout">
@@ -89,6 +89,38 @@
                 </div>
                 <h3>No patients found</h3>
                 <p>Try changing your search or add a new patient.</p>
+              </div>
+            </div>
+            <div
+              class="pagination-bar"
+              id="paginationBar"
+              style="display: none"
+            >
+              <div class="pagination-summary" id="paginationSummary">
+                Showing 1–10 of 0 patients
+              </div>
+              <div class="pagination-controls">
+                <button
+                  type="button"
+                  class="pagination-button"
+                  id="prevPageBtn"
+                  disabled
+                >
+                  <i class="fa-solid fa-chevron-left"></i>
+                  <span>Previous</span>
+                </button>
+                <span class="pagination-page-info" id="paginationPageInfo"
+                  >Page 1 of 1</span
+                >
+                <button
+                  type="button"
+                  class="pagination-button"
+                  id="nextPageBtn"
+                  disabled
+                >
+                  <span>Next</span>
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
               </div>
             </div>
           </section>
@@ -905,6 +937,8 @@
         <span>Delete Patient</span>
       </button>
     </div>
+    <script src="../../shared/inventory/treatment_materials.js"></script>
+    <script src="../../shared/inventory/inventory_service.js"></script>
     <script src="patients.js"></script>
     <script src="../../navigation_bar/sidebar.js"></script>
     <script src="../profile/profile.js"></script>

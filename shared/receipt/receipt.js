@@ -1,5 +1,9 @@
 (function () {
   "use strict";
+  const CLINIC_ADDRESS =
+    "Blk36 Lot3, Ph3, F1 Langaray Ext, Dagat-Dagatan, Caloocan, Metro Manila";
+  // TODO: palitan ng actual TIN ng clinic
+  const CLINIC_TIN = "XXX-XXX-XXX-XXX";
   function escapeHtml(value) {
     return String(value ?? "")
       .replace(/&/g, "&amp;")
@@ -301,8 +305,21 @@ body {
   font-weight: 700;
   line-height: 1.2;
 }
+.clinic-address {
+  margin: 6px 0 0;
+  color: #5f6b64;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.clinic-tin {
+  margin: 3px 0 0;
+  color: #3f4c45;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
 .clinic-subtitle {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   color: #78837d;
   font-size: 10px;
   line-height: 1.3;
@@ -478,6 +495,10 @@ body {
   .clinic-subtitle {
     font-size: 12px;
   }
+  .clinic-address,
+  .clinic-tin {
+    font-size: 11px;
+  }
   .receipt-title {
     font-size: 13px;
   }
@@ -519,6 +540,8 @@ body {
 <article class="receipt-page">
 <header class="receipt-header">
 <h1 class="clinic-name">DentaNueva Dental Clinic</h1>
+<p class="clinic-address">${escapeHtml(CLINIC_ADDRESS)}</p>
+<p class="clinic-tin">TIN: ${escapeHtml(CLINIC_TIN)}</p>
 <p class="clinic-subtitle">Official Payment Receipt</p>
 <p class="receipt-title">Payment Receipt</p>
 </header>

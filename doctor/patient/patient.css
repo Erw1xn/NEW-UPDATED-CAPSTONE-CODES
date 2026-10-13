@@ -5576,3 +5576,143 @@ textarea:focus-visible {
     grid-column: auto;
   }
 }
+@media (max-width: 850px) {
+  .patient-card-header-right {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+    gap: 10px;
+  }
+  .patient-search {
+    order: 1;
+    grid-column: 1 / -1;
+    width: 100%;
+    flex: none;
+  }
+  .patient-count-label {
+    order: 2;
+    justify-self: start;
+  }
+  .patient-select {
+    order: 3;
+    width: 130px;
+  }
+  .patient-table-wrapper {
+    overflow: visible;
+  }
+  .patient-table {
+    display: block;
+    min-width: 0;
+  }
+  .patient-table thead {
+    display: none;
+  }
+  .patient-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+  .patient-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .patient-table th,
+  .patient-table td {
+    width: auto;
+  }
+  .patient-table td {
+    display: block;
+    height: auto;
+    min-width: 0;
+    padding: 0;
+    border-bottom: 0;
+  }
+  .patient-table td:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .patient-table td:nth-child(6) {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+  }
+  .patient-table td:nth-child(2),
+  .patient-table td:nth-child(3),
+  .patient-table td:nth-child(4),
+  .patient-table td:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+  .patient-table td:nth-child(5) .medical-form-button {
+    width: 100%;
+  }
+  .contact-primary,
+  .contact-secondary {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .medform-step-actions {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 768px) {
+  #sidebar-container {
+    position: absolute;
+    top: 12px;
+    left: 7px;
+    width: 0;
+    height: 0;
+    background: transparent;
+    z-index: 1200;
+  }
+  .patients-main {
+    padding: 11px;
+  }
+  .patient-card-header {
+    padding: 16px;
+    align-items: stretch;
+  }
+  .patient-card-title {
+    min-height: 50px;
+    padding-left: 62px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .patient-card-title h1 {
+    font-size: 17px;
+  }
+  .patient-card-title p {
+    font-size: 10px;
+    white-space: normal;
+  }
+  .patient-record-page-tabs {
+    min-height: 82px;
+    padding-left: 76px;
+    padding-right: 10px;
+    align-items: center;
+  }
+  .patient-record-page-content {
+    min-height: 0;
+  }
+  .patient-record-section {
+    padding: 16px;
+  }
+}
+@media (max-width: 768px) {
+  #sidebar-container,
+  #sidebar-container > header,
+  #sidebar-container > nav,
+  #sidebar-container > div:first-child {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+}

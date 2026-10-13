@@ -214,6 +214,7 @@ function setupEvents() {
       selectedTime = "";
       await loadCalendarUnavailability();
       renderCalendar();
+      renderUpcomingAppointment();
       updateAvailableTimeSlots();
       updateBookingButton();
     });
@@ -972,6 +973,22 @@ function getCalendarUnavailabilityForDate(dateKey) {
     )
     .sort((a, b) => unavTimeToMinutes(a.start) - unavTimeToMinutes(b.start));
 }
+function getAllDayUnavailabilityForDate(dateKey) {
+  return (
+    getCalendarUnavailabilityForDate(dateKey).find((b) => b.allDay) || null
+  );
+}
+function getDoctorUnavailableText(dateKey) {
+  const block = getAllDayUnavailabilityForDate(dateKey);
+  if (!block) return "";
+  const dentist = getCalendarDentistId();
+  const name =
+    block.doctorName ||
+    block.doctor_name ||
+    DENTISTS[dentist]?.name ||
+    "The doctor";
+  return `${name} is unavailable all day on ${formatDate(dateKey)}${block.reason ? ` (${block.reason})` : ""}.`;
+}
 function updateDateUnavailableState() {
   const dateInput = document.getElementById("dateSelect");
   if (!dateInput) return;
@@ -1043,6 +1060,10 @@ function renderCalendar() {
     if (cellKey === todayKey) cell.classList.add("today");
     if (cellKey === selectedKey) cell.classList.add("selected");
     if (appointmentKeys.has(cellKey)) cell.classList.add("has-appt");
+    if (getAllDayUnavailabilityForDate(cellKey)) {
+      cell.classList.add("has-unavailable");
+      cell.title = getDoctorUnavailableText(cellKey);
+    }
     cell.setAttribute("data-date", cellKey);
     cell.addEventListener("click", () => {
       selectedDate = keyToDate(cellKey);
@@ -1096,6 +1117,19 @@ function renderUpcomingAppointment() {
       <i class="fa-solid fa-door-closed"></i>
       </div>
       <p><strong>Clinic is closed</strong><br>The clinic is closed on Sundays. Open Monday to Saturday, 10:00 AM to 6:00 PM.</p>
+      </div>
+      `;
+      return;
+    }
+    const unavailableBlock = getAllDayUnavailabilityForDate(selectedKey);
+    if (unavailableBlock) {
+      container.innerHTML = `
+      <div class="empty-upcoming is-unavailable">
+      <div class="empty-upcoming-icon">
+      <i class="fa-solid fa-user-slash"></i>
+      </div>
+      <h3>Doctor unavailable</h3>
+      <p>${escapeHtml(getDoctorUnavailableText(selectedKey))}</p>
       </div>
       `;
       return;
@@ -1460,10 +1494,16 @@ function openServiceDropdown() {
 function closeServiceDropdown() {
   document.getElementById("serviceSelectWrapper")?.classList.remove("open");
 }
-function toggleTimePicker() {
+async function toggleTimePicker() {
   const trigger = document.getElementById("timeTrigger");
   const dropdown = document.getElementById("timeDropdown");
   if (!trigger || !dropdown || trigger.disabled) return;
+  if (!dropdown.classList.contains("open")) {
+    // Refresh first so freed-up times (cancelled / rescheduled / re-opened by
+    // the doctor) show up again and newly taken ones disappear.
+    await updateAvailableTimeSlots();
+    if (trigger.disabled) return;
+  }
   dropdown.classList.toggle("open");
   trigger.classList.toggle("open");
 }
@@ -1802,7 +1842,7 @@ async function updateAvailableTimeSlots() {
   const availableSlots = slots.filter(
     (slot) => !slot.isPast && !slot.isScheduled,
   );
-  if (!slots.length) {
+  if (!availableSlots.length) {
     triggerLabel.textContent = "No available time";
     dropdown.innerHTML = `<div class="time-picker-empty">No available time slots for this date.</div>`;
     if (summary) {
@@ -1833,22 +1873,14 @@ async function updateAvailableTimeSlots() {
         "No available slots for this dentist, date, and duration.";
     }
   }
-  const morning = slots.filter((slot) => slot.period === "Morning");
-  const afternoon = slots.filter((slot) => slot.period === "Afternoon");
-  const evening = slots.filter((slot) => slot.period === "Evening");
-  const dayBlocks = getUnavailabilityBlocks(date, dentist);
-  if (dayBlocks.length) {
-    const noteDentistName = DENTISTS[dentist]?.name || "The dentist";
-    const note = document.createElement("div");
-    note.className = "time-picker-unavailable-note";
-    note.innerHTML = `<i class="fa-solid fa-user-slash"></i><span>${dayBlocks
-      .map(
-        (block) =>
-          `${escapeHtml(noteDentistName)} is unavailable ${escapeHtml(formatUnavailabilityRange(block))}${block.reason ? ` · ${escapeHtml(block.reason)}` : ""}`,
-      )
-      .join("<br>")}</span>`;
-    dropdown.appendChild(note);
-  }
+  // Only truly bookable times are listed. Booked, past, and doctor-unavailable
+  // slots are hidden, and they reappear automatically once they free up
+  // (cancelled / rescheduled appointments or a re-opened doctor schedule).
+  const morning = availableSlots.filter((slot) => slot.period === "Morning");
+  const afternoon = availableSlots.filter(
+    (slot) => slot.period === "Afternoon",
+  );
+  const evening = availableSlots.filter((slot) => slot.period === "Evening");
   if (morning.length) appendBookingTimeGroup(dropdown, "Morning", morning);
   if (afternoon.length)
     appendBookingTimeGroup(dropdown, "Afternoon", afternoon);
@@ -2648,6 +2680,75 @@ function handleDocumentClick(event) {
       openAppointmentDetail(appointmentId);
   }
 }
+const LOCK_MESSAGE_MAIN =
+  "Your appointment is within 24 hours of the scheduled time. Online cancellation and rescheduling are no longer available.";
+const LOCK_MESSAGE_HELP =
+  "If you have an emergency or an unavoidable conflict, please contact the clinic for assistance.";
+function isWithin24HoursOfAppointment(appointment) {
+  const date = getAppointmentDate(appointment);
+  const time = String(getAppointmentTime(appointment) || "");
+  if (!date || !time) return false;
+  const start = keyToDate(dateToKey(keyToDate(date)));
+  const [hour, minute] = time.split(":").map(Number);
+  start.setHours(hour || 0, minute || 0, 0, 0);
+  return start.getTime() - Date.now() < 24 * 60 * 60 * 1000;
+}
+function setActionLocked(button, locked) {
+  button.classList.toggle("is-locked", locked);
+  if (locked) {
+    button.setAttribute("aria-disabled", "true");
+    button.removeAttribute("title");
+  } else {
+    button.removeAttribute("aria-disabled");
+  }
+}
+function getLockTooltip() {
+  let tip = document.getElementById("lockTooltip");
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.id = "lockTooltip";
+    tip.className = "lock-tooltip";
+    tip.setAttribute("role", "tooltip");
+    tip.innerHTML = `<i class="fa-solid fa-clock"></i><div><strong>${LOCK_MESSAGE_MAIN}</strong><span>${LOCK_MESSAGE_HELP}</span></div>`;
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+function showLockTooltip(button) {
+  const tip = getLockTooltip();
+  tip.classList.add("show");
+  const rect = button.getBoundingClientRect();
+  const tipRect = tip.getBoundingClientRect();
+  const left = Math.min(
+    Math.max(12, rect.left + rect.width / 2 - tipRect.width / 2),
+    window.innerWidth - tipRect.width - 12,
+  );
+  tip.style.left = `${left}px`;
+  tip.style.top = `${Math.max(12, rect.top - tipRect.height - 10)}px`;
+}
+function hideLockTooltip() {
+  document.getElementById("lockTooltip")?.classList.remove("show");
+}
+document.addEventListener("mouseover", (event) => {
+  const locked = event.target.closest?.(".is-locked");
+  if (locked) showLockTooltip(locked);
+});
+document.addEventListener("mouseout", (event) => {
+  if (event.target.closest?.(".is-locked")) hideLockTooltip();
+});
+document.addEventListener("focusin", (event) => {
+  const locked = event.target.closest?.(".is-locked");
+  if (locked) showLockTooltip(locked);
+});
+document.addEventListener("focusout", hideLockTooltip);
+function blockIfLocked() {
+  const appointment = findAppointmentById(detailAppointmentId);
+  if (appointment && isWithin24HoursOfAppointment(appointment)) {
+    showToast(LOCK_MESSAGE_MAIN);
+    return true;
+  }
+  return false;
+}
 function openAppointmentDetail(appointmentId) {
   const appointment = findAppointmentById(appointmentId);
   if (!appointment) {
@@ -2708,14 +2809,18 @@ function openAppointmentDetail(appointmentId) {
   const normalizedStatus = normalizeStatus(status);
   const isCancelled =
     normalizedStatus === "cancelled" || normalizedStatus === "canceled";
+  const lockedWithin24h = isWithin24HoursOfAppointment(appointment);
   if (cancelButton) {
     cancelButton.style.display = isCancelled ? "none" : "inline-flex";
+    setActionLocked(cancelButton, lockedWithin24h);
   }
   if (deleteButton) {
-    deleteButton.style.display = isCancelled ? "inline-flex" : "none";
-    deleteButton.title = isCancelled
-      ? "Delete this cancelled appointment for testing."
-      : "Delete appointment";
+    // The server refuses to delete completed / no-show appointments for patients.
+    const canDelete =
+      normalizedStatus !== "completed" && normalizedStatus !== "noshow";
+    deleteButton.style.display = canDelete ? "inline-flex" : "none";
+    deleteButton.disabled = false;
+    deleteButton.removeAttribute("title");
   }
   if (requestButton) {
     const limitReached = hasReachedAppointmentRescheduleLimit(appointment);
@@ -2732,6 +2837,7 @@ function openAppointmentDetail(appointmentId) {
     requestButton.title = limitReached
       ? "This appointment has reached the maximum of 2 approved reschedules."
       : "Request a different schedule for this appointment.";
+    setActionLocked(requestButton, lockedWithin24h);
     if (
       normalizedStatus === "completed" ||
       isCancelled ||
@@ -2749,6 +2855,7 @@ function cancelAppointment() {
     showToast("Appointment could not be identified.");
     return;
   }
+  if (blockIfLocked()) return;
   const appointment = findAppointmentById(detailAppointmentId);
   if (!appointment) {
     showToast("Appointment could not be found.");
@@ -2831,7 +2938,7 @@ function confirmCancelAppointment() {
   renderAll();
   showToast("Appointment cancelled successfully.");
 }
-function deleteAppointment() {
+async function deleteAppointment() {
   if (!detailAppointmentId) {
     showToast("Appointment could not be identified.");
     return;
@@ -2842,19 +2949,24 @@ function deleteAppointment() {
     return;
   }
   const appointmentId = getAppointmentId(appointment);
-  const appointmentLabel = `${getAppointmentService(appointment)} on ${formatDate(getAppointmentDate(appointment))} at ${formatTime(getAppointmentTime(appointment))}`;
-  const confirmed = window.confirm(
-    `Delete this appointment permanently?\n\n${appointmentLabel}\n\nThis removes it from the appointment history for testing.`,
-  );
-  if (!confirmed) return;
+  const deleteButton = document.getElementById("deleteAppointmentBtn");
+  if (deleteButton) deleteButton.disabled = true;
+  // Delete from the database first; only update the page once the DB confirms.
+  try {
+    if (!window.DentaNuevaAppointmentDatabase) {
+      throw new Error("Appointment database module is unavailable.");
+    }
+    await window.DentaNuevaAppointmentDatabase.remove(
+      appointment.databaseAppointmentId || appointmentId,
+    );
+  } catch (error) {
+    console.error("Unable to delete appointment from database:", error);
+    if (deleteButton) deleteButton.disabled = false;
+    showToast(error?.message || "Appointment could not be deleted.");
+    return;
+  }
   appointments = appointments.filter(
     (item) => getAppointmentId(item) !== appointmentId,
-  );
-  saveAppointments();
-  void window.DentaNuevaAppointmentDatabase?.remove(appointmentId).catch(
-    (error) => {
-      console.error("Unable to delete appointment from database:", error);
-    },
   );
   if (currentPatient) {
     currentPatient.appointments = Array.isArray(currentPatient.appointments)
@@ -2875,10 +2987,10 @@ function deleteAppointment() {
       String(request?.appointment_id || request?.appointmentId || "") !==
       appointmentId,
   );
+  if (deleteButton) deleteButton.disabled = false;
   detailAppointmentId = null;
   closeAppointmentDetail();
   renderAll();
-  showToast("Appointment deleted successfully.");
 }
 function closeAppointmentDetail() {
   const modal = document.getElementById("appointmentModal");
@@ -2890,6 +3002,7 @@ function closeAppointmentDetail() {
 }
 function openRescheduleRequestModal() {
   if (!detailAppointmentId) return;
+  if (blockIfLocked()) return;
   const appointment = findAppointmentById(detailAppointmentId);
   if (!appointment) {
     showToast("Appointment could not be found.");

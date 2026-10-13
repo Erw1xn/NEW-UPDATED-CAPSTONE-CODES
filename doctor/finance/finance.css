@@ -3113,3 +3113,251 @@ select {
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 850px) {
+  .table-wrapper {
+    overflow: visible;
+  }
+  .transaction-table {
+    display: block;
+    min-width: 0;
+  }
+  .transaction-table thead {
+    display: none;
+  }
+  .transaction-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+  .transaction-table tbody tr {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .transaction-table td:nth-child(n) {
+    display: block;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    padding: 0;
+    border-bottom: 0;
+    text-align: left;
+  }
+  .transaction-table td:nth-child(n)::before {
+    display: block;
+    margin-bottom: 3px;
+    color: #89958f;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .transaction-table td:nth-child(1) {
+    grid-column: 1 / -1;
+    padding-right: 44px;
+  }
+  .transaction-table td:nth-child(2)::before {
+    content: "SERVICE";
+  }
+  .transaction-table td:nth-child(3)::before {
+    content: "DATE";
+  }
+  .transaction-table td:nth-child(4)::before {
+    content: "TOTAL";
+  }
+  .transaction-table td:nth-child(5)::before {
+    content: "DISCOUNT";
+  }
+  .transaction-table td:nth-child(6)::before {
+    content: "PAID";
+  }
+  .transaction-table td:nth-child(7)::before {
+    content: "BALANCE";
+  }
+  .transaction-table td:nth-child(8)::before {
+    content: "STATUS";
+  }
+  .transaction-table td:nth-child(8) {
+    grid-column: 1 / -1;
+  }
+  .transaction-table td:nth-child(9) {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+  }
+  .transaction-table td:nth-child(9) .action-buttons {
+    width: auto;
+  }
+  .date-main,
+  .date-time {
+    white-space: normal;
+  }
+  .transaction-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .transaction-pagination-summary {
+    white-space: normal;
+    text-align: center;
+  }
+  .transaction-pagination-controls {
+    justify-content: space-between;
+  }
+  .chart-header {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    position: relative;
+  }
+  #sidebar-container {
+    position: absolute;
+    top: 12px;
+    left: 7px;
+    width: 0;
+    height: 0;
+    background: transparent;
+    z-index: 1200;
+  }
+  #sidebar-container,
+  #sidebar-container > header,
+  #sidebar-container > nav,
+  #sidebar-container > div:first-child {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+  .main-content {
+    padding: 11px 11px 30px;
+  }
+  .finance-header {
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+  }
+  .finance-header > *:not(.finance-header-main):not(.header-actions) {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    margin: 0;
+    z-index: 2;
+  }
+  .finance-header-main {
+    flex: none;
+    min-height: 50px;
+    margin: 0;
+    padding-left: 62px;
+    align-items: center;
+  }
+  .finance-header h1 {
+    font-size: 17px;
+  }
+  .finance-header-info p {
+    max-width: none;
+    font-size: 9.5px;
+  }
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .header-actions .transaction-count {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+  .header-actions .header-action-btn {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+  .header-actions .primary-btn {
+    flex: 1 1 100%;
+  }
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .finance-card {
+    min-height: 100px;
+    padding: 16px;
+  }
+  .card-information strong {
+    font-size: 20px;
+  }
+  .transaction-filters {
+    padding: 12px;
+  }
+  .charts-grid,
+  .lower-grid {
+    gap: 12px;
+  }
+}
+@media (max-width: 480px) {
+  .procedure-row {
+    grid-template-columns: 82px minmax(0, 1fr) 72px;
+    gap: 8px;
+  }
+  .procedure-chart {
+    padding: 16px;
+  }
+  .chart-header {
+    padding: 16px 16px 12px;
+  }
+  .line-chart-wrapper {
+    height: 220px;
+    padding: 10px 10px 14px;
+  }
+  .expense-chart-layout {
+    padding: 18px 16px 20px;
+  }
+  .expense-pie-chart {
+    width: 150px;
+    height: 150px;
+  }
+  .expense-pie-chart::after {
+    width: 95px;
+    height: 95px;
+  }
+  .expense-category {
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+  }
+  .expense-category-percent {
+    display: none;
+  }
+  .audit-title {
+    padding: 16px;
+  }
+  #auditTrail {
+    padding: 4px 16px 12px;
+  }
+  .audit-item {
+    flex-wrap: wrap;
+  }
+  .audit-item-meta {
+    width: 100%;
+    padding-left: 41px;
+    text-align: left;
+  }
+  .expenses-modal .modal-header {
+    flex-wrap: wrap;
+  }
+  .expenses-header-tools {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .expenses-header-tools select {
+    flex: 1;
+    max-width: none;
+  }
+}

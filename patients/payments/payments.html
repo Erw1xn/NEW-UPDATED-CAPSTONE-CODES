@@ -71,9 +71,20 @@
                 <h2>Payment History</h2>
                 <p>Your recorded payments and transaction details.</p>
               </div>
-              <span class="transaction-count" id="transactionCount"
-                >0 transactions</span
-              >
+              <div class="payment-history-actions">
+                <button
+                  type="button"
+                  class="export-pdf-btn"
+                  id="exportPdfButton"
+                  title="Download a full PDF report of your transactions"
+                >
+                  <i class="fa-solid fa-file-pdf"></i>
+                  <span>Export PDF</span>
+                </button>
+                <span class="transaction-count" id="transactionCount"
+                  >0 transactions</span
+                >
+              </div>
             </div>
             <div class="payment-filters">
               <button
@@ -278,6 +289,9 @@
     </div>
     <script src="../navigation_bar/sidebar.js"></script>
     <script src="../../shared/receipt/receipt.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="payments.js"></script>
+    <script src="payment_report.js"></script>
   </body>
 </html>

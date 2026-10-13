@@ -88,6 +88,33 @@ function appointmentDoctorUnavailable(mysqli $conn, int $doctorUserId, string $d
     $stmt->close();
     return $blocked;
 }
+const APPOINTMENT_LOCK_MESSAGE = 'Your appointment is within 24 hours of the scheduled time. Online cancellation and rescheduling are no longer available. If you have an emergency or an unavoidable conflict, please contact the clinic for assistance.';
+function appointmentWithin24Hours(string $date, string $time): bool
+{
+    if ($date === '' || $time === '') {
+        return false;
+    }
+    try {
+        $zone = new DateTimeZone('Asia/Manila');
+        $start = new DateTime($date . ' ' . substr($time, 0, 5), $zone);
+        $now = new DateTime('now', $zone);
+    } catch (Throwable $exception) {
+        return false;
+    }
+    return ($start->getTimestamp() - $now->getTimestamp()) < 86400;
+}
+function appointmentHasClinicRescheduleRequest(mysqli $conn, int $appointmentId): bool
+{
+    $stmt = $conn->prepare("SELECT reschedule_request_id FROM tbl_reschedule_requests WHERE appointment_id = ? AND requested_by IN ('staff', 'doctor') AND status IN ('pending', 'approved') LIMIT 1");
+    if (!$stmt) {
+        return false;
+    }
+    $stmt->bind_param('i', $appointmentId);
+    $stmt->execute();
+    $found = $stmt->get_result()->num_rows > 0;
+    $stmt->close();
+    return $found;
+}
 function appointmentValidateSchedule(string $date, string $time): bool
 {
     $dateObject = DateTime::createFromFormat('!Y-m-d', $date);
@@ -381,7 +408,8 @@ if ($method === 'DELETE') {
         appointmentResponse(true, 'Appointment already removed.');
     }
     appointmentPatientAccess($conn, (string) $row['patient_id'], $userId, $role);
-    if ($role === 'user' && in_array(strtolower((string) $row['status']), ['completed', 'no_show'], true)) {
+    $deleteStatusKey = strtolower(str_replace([' ', '-', '_'], '', (string) $row['status']));
+    if ($role === 'user' && in_array($deleteStatusKey, ['completed', 'noshow'], true)) {
         appointmentResponse(false, 'Completed or missed appointments cannot be deleted.', null, 409);
     }
     $stmt = $conn->prepare('DELETE FROM tbl_patient_appointments WHERE appointment_id = ? LIMIT 1');
@@ -430,6 +458,11 @@ if (isset($input['reschedule']) && is_array($input['reschedule'])) {
     }
     $duration = max(1, (int) $existing['duration_minutes']);
     $databaseAppointmentId = (int) $existing['appointment_id'];
+    // Patients cannot reschedule within 24 hours of the current schedule,
+    // unless the clinic itself asked for the schedule change.
+    if ($role === 'user' && appointmentWithin24Hours((string) $existing['appointment_date'], (string) $existing['appointment_time']) && !appointmentHasClinicRescheduleRequest($conn, $databaseAppointmentId)) {
+        appointmentResponse(false, APPOINTMENT_LOCK_MESSAGE, null, 403);
+    }
     $scheduleChanged = (string) $existing['appointment_date'] !== $date || substr((string) $existing['appointment_time'], 0, 5) !== substr($time, 0, 5);
     if ($scheduleChanged && $existing['doctor_id'] !== null) {
         $doctorUserId = (int) $existing['doctor_id'];
@@ -547,7 +580,7 @@ try {
         $duration = max(1, (int) ($appointment['duration'] ?? $appointment['duration_minutes'] ?? 30));
         $status = strtolower(str_replace(' ', '_', (string) ($appointment['status'] ?? 'scheduled')));
         $numericAppointmentId = ctype_digit($appointmentId) ? (int) $appointmentId : 0;
-        $existingStmt = $conn->prepare('SELECT appointment_id, patient_id, doctor_id, appointment_date, appointment_time FROM tbl_patient_appointments WHERE appointment_uid = ? OR appointment_id = ? LIMIT 1');
+        $existingStmt = $conn->prepare('SELECT appointment_id, patient_id, doctor_id, appointment_date, appointment_time, status FROM tbl_patient_appointments WHERE appointment_uid = ? OR appointment_id = ? LIMIT 1');
         if (!$existingStmt) {
             throw new RuntimeException('Appointment could not be verified.');
         }
@@ -559,6 +592,12 @@ try {
             throw new RuntimeException('The appointment does not belong to the supplied patient.');
         }
         $isNewAppointment = !$existingRow;
+        // Patients cannot cancel within 24 hours of the scheduled time.
+        $existingStatusKey = $existingRow ? strtolower(str_replace([' ', '-', '_'], '', (string) $existingRow['status'])) : '';
+        $becomingCancelled = in_array($status, ['cancelled', 'canceled'], true);
+        if ($role === 'user' && $existingRow && $becomingCancelled && !in_array($existingStatusKey, ['cancelled', 'canceled'], true) && appointmentWithin24Hours((string) $existingRow['appointment_date'], (string) $existingRow['appointment_time'])) {
+            throw new RuntimeException(APPOINTMENT_LOCK_MESSAGE);
+        }
         if ($role === 'user' && $isNewAppointment) {
             $restriction = appointmentBookingRestriction($conn, $patientId);
             if (!empty($restriction['isRestricted'])) {

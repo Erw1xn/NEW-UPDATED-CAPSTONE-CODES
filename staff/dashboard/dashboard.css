@@ -687,9 +687,30 @@ a:focus-visible {
     padding: 18px 20px 30px;
   }
   .dash-header {
+    position: static;
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+    min-height: 0;
+  }
+  .dash-header-left {
+    position: absolute;
+    top: 16px;
+    left: 72px;
+    right: 12px;
+    z-index: 1000;
+    width: auto;
+    pointer-events: none;
+  }
+  .page-heading {
+    width: 100%;
+  }
+  .dashboard-title,
+  .dashboard-subtitle {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .dash-header-right {
     width: 100%;
@@ -770,6 +791,11 @@ a:focus-visible {
   }
   .dash-header {
     padding: 13px;
+  }
+  .dash-header-left {
+    top: 16px;
+    left: 70px;
+    right: 10px;
   }
   .dashboard-title {
     font-size: 0.96rem;

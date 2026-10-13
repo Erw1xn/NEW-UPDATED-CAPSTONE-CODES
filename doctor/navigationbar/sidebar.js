@@ -21,6 +21,18 @@ async function loadSidebar() {
     if (logoutModal && logoutModal.parentElement !== document.body) {
       document.body.appendChild(logoutModal);
     }
+    const mobileHeader = container.querySelector(".mobile-header");
+    const mobileToggle = document.getElementById("mobileMenuToggle");
+    const pageHeader = document.querySelector(
+      ".main-content header, main header",
+    );
+    if (mobileHeader && mobileToggle && pageHeader) {
+      pageHeader.prepend(mobileToggle);
+      mobileHeader.remove();
+    }
+    setActivePage();
+    applySavedSidebarState();
+    initSidebarLogic();
     const doctorResponse = await fetch("../navigationbar/sidebar.php", {
       method: "GET",
       credentials: "same-origin",
@@ -79,9 +91,6 @@ async function loadSidebar() {
         initialsEl.style.display = "flex";
       }
     }
-    setActivePage();
-    applySavedSidebarState();
-    initSidebarLogic();
   } catch (error) {
     console.error("Failed to load doctor sidebar:", error);
   }

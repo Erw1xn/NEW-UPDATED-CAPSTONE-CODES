@@ -21,9 +21,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inventoryNotificationBtn = document.getElementById(
     "inventoryNotificationBtn",
   );
-  const exportInventoryCsvBtn = document.getElementById(
-    "exportInventoryCsvBtn",
-  );
   const inventoryNotificationCount = document.getElementById(
     "inventoryNotificationCount",
   );
@@ -326,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (headerActions) {
       headerRight.appendChild(headerActions);
     }
-    [exportInventoryCsvBtn, stockMovementBtn, addItemBtn].forEach((button) => {
+    [stockMovementBtn, addItemBtn].forEach((button) => {
       if (!button) {
         return;
       }
@@ -359,6 +356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const itemStock = document.getElementById("itemStock");
   const itemMinimum = document.getElementById("itemMinimum");
   const itemExpiry = document.getElementById("itemExpiry");
+  const itemSku = document.getElementById("itemSku");
   const DENTAL_ITEM_CATEGORIES = {
     "Restorative Materials": [
       "Composite Resin",
@@ -652,6 +650,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const movementType = document.getElementById("movementType");
   const movementQuantity = document.getElementById("movementQuantity");
   const movementReason = document.getElementById("movementReason");
+  const movementBatchNumber = document.getElementById("movementBatchNumber");
+  const movementExpiry = document.getElementById("movementExpiry");
+  const movementBatchGroup = document.getElementById("movementBatchGroup");
+  const movementExpiryGroup = document.getElementById("movementExpiryGroup");
+  const movementStockOutNote = document.getElementById("movementStockOutNote");
   const actionMenu = document.getElementById("actionMenu");
   let selectedActionItemId = null;
   const deleteItemModal = document.getElementById("deleteItemModal");
@@ -674,6 +677,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   let backendInventoryItems = [];
   let backendInventoryMovements = [];
+  let backendInventoryBatches = [];
+  let backendInventoryBatchUsage = [];
   const DEMAND_FORECAST_PAGE_SIZE = 10;
   let demandForecastCurrentPage = 1;
   async function loadInventoryFromBackend() {
@@ -691,6 +696,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         : [];
       backendInventoryMovements = Array.isArray(result?.data?.movements)
         ? result.data.movements
+        : [];
+      backendInventoryBatches = Array.isArray(result?.data?.batches)
+        ? result.data.batches
+        : [];
+      backendInventoryBatchUsage = Array.isArray(result?.data?.batchUsage)
+        ? result.data.batchUsage
         : [];
       window.dentanueva_inventory_items = backendInventoryItems;
       window.dentanueva_inventory_movements = backendInventoryMovements;
@@ -1408,94 +1419,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? backendInventoryMovements
       : [];
   }
-  function getTodayString() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+  function getBatches() {
+    return Array.isArray(backendInventoryBatches)
+      ? backendInventoryBatches
+      : [];
   }
-  function escapeCsvValue(value) {
-    const text = String(value ?? "");
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-  function exportInventoryToCsv() {
-    const movements = getMovements();
-    if (!movements.length) {
-      showInventoryMessage("No inventory movement records available.", "error");
-      return;
-    }
-    const headers = [
-      "Movement ID",
-      "Date",
-      "Patient ID",
-      "Appointment ID",
-      "Item ID",
-      "Item",
-      "Movement Type",
-      "Source",
-      "Quantity",
-      "Unit",
-      "Previous Stock",
-      "New Stock",
-    ];
-    const sortedMovements = [...movements].sort((a, b) => {
-      const aPatient = String(a.patientId || "").trim();
-      const aAppointment = String(a.appointmentId || "").trim();
-      const aItemId = String(a.itemId || "").trim();
-      const aItemName = String(a.itemName || "").trim();
-      const aQuantity =
-        a.quantity !== null && a.quantity !== undefined && a.quantity !== "";
-      const bPatient = String(b.patientId || "").trim();
-      const bAppointment = String(b.appointmentId || "").trim();
-      const bItemId = String(b.itemId || "").trim();
-      const bItemName = String(b.itemName || "").trim();
-      const bQuantity =
-        b.quantity !== null && b.quantity !== undefined && b.quantity !== "";
-      const aComplete =
-        aPatient && aAppointment && aItemId && aItemName && aQuantity;
-      const bComplete =
-        bPatient && bAppointment && bItemId && bItemName && bQuantity;
-      if (aComplete !== bComplete) {
-        return aComplete ? -1 : 1;
-      }
-      const aDate = new Date(a.date || 0).getTime();
-      const bDate = new Date(b.date || 0).getTime();
-      return bDate - aDate;
-    });
-    const rows = sortedMovements.map((movement) => {
-      return [
-        movement.movementId || movement.id || "",
-        movement.date || "",
-        movement.patientId || "Not Applicable",
-        movement.appointmentId || "Not Applicable",
-        movement.itemId || "",
-        movement.itemName || "",
-        movement.type || "",
-        movement.source || movement.reason || "Not Specified",
-        movement.quantity ?? "",
-        movement.unit || "",
-        movement.previousStock ?? "",
-        movement.newStock ?? "",
-      ]
-        .map(escapeCsvValue)
-        .join(",");
-    });
-    const csv = [headers.map(escapeCsvValue).join(","), ...rows].join("\r\n");
-    const blob = new Blob(["\ufeff", csv], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `denta-nueva-inventory-${getTodayString()}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    showInventoryMessage(
-      `${movements.length} inventory movement${movements.length === 1 ? "" : "s"} exported successfully.`,
-    );
+  function getBatchUsage() {
+    return Array.isArray(backendInventoryBatchUsage)
+      ? backendInventoryBatchUsage
+      : [];
   }
   function escapeHTML(value) {
     return String(value ?? "")
@@ -1627,9 +1559,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     let filtered = items.filter((item) => {
       const itemName = String(item.name || "").toLowerCase();
       const itemCategory = String(item.category || "").toLowerCase();
+      const itemSkuValue = String(item.sku || "").toLowerCase();
       const matchesSearch =
         !searchValue ||
         itemName.includes(searchValue) ||
+        itemSkuValue.includes(searchValue) ||
         itemCategory.includes(searchValue);
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory;
@@ -1750,7 +1684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                   ${escapeHTML(item.name)}
                 </span>
                 <span class="item-id" style="color: #4f6258;">
-                  Item ID: ${escapeHTML(item.id)}
+                  SKU: ${escapeHTML(item.sku || "—")} · Item ID: ${escapeHTML(item.id)}
                 </span>
               </div>
             </div>
@@ -1848,6 +1782,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       itemStock.readOnly = true;
       itemMinimum.value = item.minimum;
       itemExpiry.value = item.expiry || "";
+      if (itemSku) {
+        itemSku.value = item.sku || "Auto-generated";
+      }
     } else {
       itemModalTitle.textContent = "Add Inventory Item";
       itemId.value = "";
@@ -1856,6 +1793,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       itemStock.value = "0";
       itemStock.readOnly = true;
       itemMinimum.value = "5";
+      if (itemSku) {
+        itemSku.value = "Auto-generated";
+      }
     }
     updateExpiryFieldState();
     itemModal.classList.add("active");
@@ -1976,6 +1916,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ...savedItem,
         databaseId: savedItem.id,
         id: savedItem.id,
+        sku: savedItem.sku || "",
         name: savedItem.name,
         category: savedItem.category,
         unit: savedItem.unit,
@@ -2005,6 +1946,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     }
   });
+  function updateMovementBatchFields() {
+    const isStockIn = movementType.value === "stock-in";
+    if (movementBatchGroup) {
+      movementBatchGroup.style.display = isStockIn ? "" : "none";
+    }
+    if (movementExpiryGroup) {
+      movementExpiryGroup.style.display = isStockIn ? "" : "none";
+    }
+    if (movementStockOutNote) {
+      movementStockOutNote.style.display = isStockIn ? "none" : "";
+    }
+    if (movementExpiry) {
+      const selectedItem = getItems().find(
+        (item) => String(item.id) === String(movementItem.value),
+      );
+      const hasExpiry =
+        !selectedItem || categoryHasExpiry(selectedItem.category);
+      movementExpiry.disabled = !hasExpiry;
+      if (!hasExpiry) {
+        movementExpiry.value = "";
+      }
+    }
+  }
   function openMovementModal(selectedItemId = "") {
     closeActionMenu();
     movementForm.reset();
@@ -2014,6 +1978,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (selectedItemId) {
       movementItem.value = selectedItemId;
     }
+    updateMovementBatchFields();
     movementModal.classList.add("active");
     movementModal.setAttribute("aria-hidden", "false");
     setTimeout(() => {
@@ -2083,8 +2048,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       newStock = previousStock - quantity;
     }
-    item.stock = newStock;
-    item.updatedAt = new Date().toISOString();
     const movementPayload = {
       action: "record_movement",
       item_id: item.id,
@@ -2100,20 +2063,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       reason:
         reason ||
         (type === "stock-in" ? "Stock replenishment" : "Inventory usage"),
+      batchNumber:
+        type === "stock-in" && movementBatchNumber
+          ? movementBatchNumber.value.trim()
+          : "",
+      expiry:
+        type === "stock-in" && movementExpiry && !movementExpiry.disabled
+          ? movementExpiry.value
+          : "",
     };
-    const movementResponse = await fetch("../../api/inventory.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "same-origin",
-      body: JSON.stringify(movementPayload),
-    });
-    const movementResult = await movementResponse.json();
-    if (!movementResponse.ok || !movementResult?.success) {
-      throw new Error(
-        movementResult?.message || "Unable to record inventory movement.",
+    try {
+      const movementResponse = await fetch("../../api/inventory.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(movementPayload),
+      });
+      const movementResult = await movementResponse.json();
+      if (!movementResponse.ok || !movementResult?.success) {
+        throw new Error(
+          movementResult?.message || "Unable to record inventory movement.",
+        );
+      }
+    } catch (error) {
+      console.error("Unable to record inventory movement:", error);
+      showInventoryMessage(
+        error.message || "Unable to record inventory movement.",
+        "error",
       );
+      return;
     }
     await loadInventoryFromBackend();
     inventoryCurrentPage = 1;
@@ -2180,6 +2160,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   function getMovementTimestamp(movement, item) {
     return movement.createdAt || movement.date || item.updatedAt || "";
   }
+  function getMovementBatchInfo(movement) {
+    if (movement.type === "stock-in") {
+      const batch = getBatches().find(
+        (entry) => String(entry.movementId) === String(movement.id),
+      );
+      return batch ? `Batch: ${batch.batchNumber}` : "";
+    }
+    const usages = getBatchUsage().filter(
+      (entry) => String(entry.movementId) === String(movement.id),
+    );
+    if (!usages.length) {
+      return "";
+    }
+    return `Batches: ${usages
+      .map((entry) => `${entry.batchNumber} (${Number(entry.quantity) || 0})`)
+      .join(", ")}`;
+  }
   function openItemViewModal(item) {
     closeActionMenu();
     if (!viewItemModal || !viewItemDetails) {
@@ -2191,6 +2188,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         const aTime = new Date(getMovementTimestamp(a, item)).getTime();
         const bTime = new Date(getMovementTimestamp(b, item)).getTime();
         return bTime - aTime;
+      });
+    const itemBatches = getBatches()
+      .filter((batch) => String(batch.itemId) === String(item.id))
+      .sort((a, b) => {
+        const aActive = Number(a.remaining) > 0 ? 0 : 1;
+        const bActive = Number(b.remaining) > 0 ? 0 : 1;
+        if (aActive !== bActive) {
+          return aActive - bActive;
+        }
+        return (
+          new Date(a.receivedDate || 0).getTime() -
+          new Date(b.receivedDate || 0).getTime()
+        );
       });
     const status = getStockStatus(item);
     const expiryStatus = getExpiryStatus(item);
@@ -2220,6 +2230,71 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       }
     }
+    const batchesHTML = itemBatches.length
+      ? itemBatches
+          .map((batch) => {
+            const remaining = Number(batch.remaining) || 0;
+            const received = Number(batch.received) || 0;
+            const batchDays = getDaysUntilExpiry(batch.expiry);
+            let batchStatus = "In Stock";
+            if (remaining <= 0) {
+              batchStatus = "Depleted";
+            } else if (batchDays !== null && batchDays <= 0) {
+              batchStatus = "Expired";
+            } else if (batchDays !== null && batchDays <= 7) {
+              batchStatus = "Expiring Soon";
+            }
+            const batchExpiryDate = batch.expiry
+              ? new Date(`${batch.expiry}T00:00:00`)
+              : null;
+            const batchExpiryText =
+              batchExpiryDate && !Number.isNaN(batchExpiryDate.getTime())
+                ? batchExpiryDate.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "No expiry";
+            const markerClass = remaining > 0 ? "stock-in" : "stock-out";
+            return `
+                <div class="item-history-entry">
+                  <div class="item-history-marker ${markerClass}">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                  </div>
+                  <div class="item-history-content">
+                    <div class="item-history-topline">
+                      <strong>
+                        ${escapeHTML(batch.batchNumber)}
+                      </strong>
+                      <span>
+                        ${escapeHTML(batchStatus)}
+                      </span>
+                    </div>
+                    <div class="item-history-quantity ${markerClass}">
+                      ${remaining} / ${received} ${escapeHTML(item.unit)} remaining
+                    </div>
+                    <div class="item-history-reason">
+                      Received: ${escapeHTML(formatItemDateTime(batch.receivedDate))}
+                      · Expiry: ${escapeHTML(batchExpiryText)}
+                    </div>
+                  </div>
+                </div>
+              `;
+          })
+          .join("")
+      : `
+            <div class="item-history-empty">
+              <div class="item-history-empty-icon">
+                <i class="fa-solid fa-boxes-stacked"></i>
+              </div>
+              <strong>
+                No batches recorded
+              </strong>
+              <p>
+                Batches are created every time stock is added to this item.
+              </p>
+            </div>
+          `;
     const historyHTML = movements.length
       ? movements
           .map((movement) => {
@@ -2233,6 +2308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               (movement.type === "stock-in"
                 ? "Stock replenishment"
                 : "Inventory usage");
+            const batchInfo = getMovementBatchInfo(movement);
             return `
                 <div class="item-history-entry">
                   <div class="item-history-marker ${typeClass}">
@@ -2261,6 +2337,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <div class="item-history-reason">
                       ${escapeHTML(reason)}
                     </div>
+                    ${
+                      batchInfo
+                        ? `<div class="item-history-reason">${escapeHTML(batchInfo)}</div>`
+                        : ""
+                    }
                     <div class="item-history-stock">
                       Stock:
                       ${Number(movement.previousStock) || 0}
@@ -2292,7 +2373,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
           <div class="view-item-hero-content">
             <span class="view-item-id">
-              ${escapeHTML(item.id)}
+              SKU: ${escapeHTML(item.sku || "—")} · ID: ${escapeHTML(item.id)}
             </span>
             <h4>
               ${escapeHTML(item.name)}
@@ -2317,6 +2398,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </div>
           <div class="view-item-details-grid">
+            <div class="view-item-detail">
+              <span>
+                SKU
+              </span>
+              <strong>
+                ${escapeHTML(item.sku || "Not assigned")}
+              </strong>
+            </div>
             <div class="view-item-detail">
               <span>
                 Current Stock
@@ -2369,6 +2458,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 )}
               </strong>
             </div>
+          </div>
+        </div>
+        <div class="view-item-section">
+          <div class="view-item-section-heading history-heading">
+            <div>
+              <span class="modal-eyebrow">
+                STOCK BY BATCH
+              </span>
+              <h4>
+                Batches
+              </h4>
+            </div>
+            <span class="view-item-history-count">
+              ${itemBatches.length}
+              ${itemBatches.length === 1 ? "batch" : "batches"}
+            </span>
+          </div>
+          <div class="item-history-list">
+            ${batchesHTML}
           </div>
         </div>
         <div class="view-item-section">
@@ -2537,6 +2645,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderInventoryTable();
   });
   itemCategory.addEventListener("change", updateExpiryFieldState);
+  movementType.addEventListener("change", updateMovementBatchFields);
+  movementItem.addEventListener("change", updateMovementBatchFields);
   inventoryPrevPageBtn?.addEventListener("click", () => {
     if (inventoryCurrentPage > 1) {
       inventoryCurrentPage--;
@@ -2560,7 +2670,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   emptyAddItemBtn.addEventListener("click", () => {
     openItemModal();
   });
-  exportInventoryCsvBtn?.addEventListener("click", exportInventoryToCsv);
   stockMovementBtn.addEventListener("click", () => {
     openMovementModal();
   });

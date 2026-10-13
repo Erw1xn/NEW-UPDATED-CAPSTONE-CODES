@@ -1469,8 +1469,24 @@ function renderTimePicker(slots, currentValue, date, dentist, duration) {
       .join("<br>")}</span>`;
     dropdown.appendChild(note);
   }
+  // Mga available na oras LANG ang ipinapakita. Kapag na-schedule, past na,
+  // o unavailable si doctor, hindi na ito lalabas; kapag nag-open ulit,
+  // lalabas ulit sa susunod na render.
+  const isSlotBookable = (slot) => {
+    if (isToday(date) && timeToMinutes(slot) <= getCurrentTimeMinutes()) {
+      return false;
+    }
+    if (getScheduledTimeConflict(date, slot, dentist, duration)) {
+      return false;
+    }
+    if (findDoctorUnavailabilityConflict(date, slot, duration, dentist)) {
+      return false;
+    }
+    return true;
+  };
   const groups = { Morning: [], Afternoon: [], Evening: [] };
   slots.forEach((slot) => {
+    if (!isSlotBookable(slot)) return;
     groups[classifyTimePeriod(timeToMinutes(slot))].push(slot);
   });
   let availableCount = 0;
@@ -1487,64 +1503,42 @@ function renderTimePicker(slots, currentValue, date, dentist, duration) {
       btn.type = "button";
       btn.className = "time-picker-option";
       btn.dataset.value = slot;
-      const conflict = getScheduledTimeConflict(date, slot, dentist, duration);
-      const isScheduled = !!conflict;
-      const isUnavailable =
-        !isScheduled &&
-        !!findDoctorUnavailabilityConflict(date, slot, duration, dentist);
-      const isPast =
-        isToday(date) && timeToMinutes(slot) <= getCurrentTimeMinutes();
       if (slot === currentValue) {
         btn.classList.add("selected");
       }
-      if (isScheduled) {
-        btn.classList.add("scheduled");
-        btn.disabled = true;
-        btn.title = "This time is already scheduled.";
-        btn.setAttribute(
-          "aria-label",
-          `${formatSlotLabel(slot)}. This time is already scheduled.`,
-        );
-        btn.innerHTML = `<i class="fa-solid fa-ban time-unavailable-icon" aria-hidden="true"></i><span>${formatSlotLabel(slot)}</span>`;
-      } else if (isUnavailable) {
-        btn.classList.add("scheduled", "doctor-unavailable");
-        btn.disabled = true;
-        btn.title = `Not available because ${dentistName} is unavailable at this time.`;
-        btn.setAttribute(
-          "aria-label",
-          `${formatSlotLabel(slot)}. Not available because ${dentistName} is unavailable at this time.`,
-        );
-        btn.innerHTML = `<i class="fa-solid fa-user-slash time-unavailable-icon" aria-hidden="true"></i><span>${formatSlotLabel(slot)}</span>`;
-      } else if (isPast) {
-        btn.classList.add("disabled");
-        btn.disabled = true;
-        btn.title = "This time has already passed.";
-        btn.setAttribute(
-          "aria-label",
-          `${formatSlotLabel(slot)}. This time has already passed.`,
-        );
-        btn.innerHTML = `<i class="fa-solid fa-clock time-past-icon" aria-hidden="true"></i><span>${formatSlotLabel(slot)}</span>`;
-      } else {
-        availableCount += 1;
-        btn.textContent = formatSlotLabel(slot);
-        btn.addEventListener("click", (event) => {
-          event.stopPropagation();
-          selectTimeOption(slot);
-        });
-      }
+      availableCount += 1;
+      btn.textContent = formatSlotLabel(slot);
+      btn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        selectTimeOption(slot);
+      });
       grid.appendChild(btn);
     });
     dropdown.appendChild(grid);
   });
-  if (
-    !availableCount &&
-    !dropdown.querySelector(".time-picker-option.selected")
-  ) {
+  if (!availableCount) {
     const empty = document.createElement("div");
     empty.className = "time-picker-empty";
     empty.textContent = "No available times";
     dropdown.appendChild(empty);
   }
+}
+function refreshTimePickerOptions() {
+  if (!["new", "edit", "reschedule"].includes(modalMode)) return;
+  const date = document.getElementById("f_date")?.value || "";
+  const dentist = document.getElementById("f_dentist")?.value || "";
+  const duration =
+    Number(document.getElementById("f_duration")?.value) || SLOT_MIN;
+  if (!date || !dentist) return;
+  if (isPastDate(date) || isClinicClosedDate(date)) return;
+  if (findAllDayUnavailability(date, dentist)) return;
+  renderTimePicker(
+    getAvailableTimeSlots(date, dentist, duration),
+    getCurrentFormTime(),
+    date,
+    dentist,
+    duration,
+  );
 }
 function forceTimeSelection(time) {
   const timeInput = document.getElementById("f_time");
@@ -1579,6 +1573,7 @@ function openTimePicker() {
   if (!trigger || !dropdown || trigger.disabled) {
     return;
   }
+  refreshTimePickerOptions();
   dropdown.classList.add("open");
   trigger.classList.add("open");
 }
@@ -3555,6 +3550,34 @@ function filteredAppts() {
     })
     .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 }
+function renderScheduleUnavailableNotice(dateKey) {
+  const container = document.getElementById("scheduleUnavailableNotice");
+  if (!container) return;
+  const dentistFilterId = getUnavailabilityFilterDentist();
+  const blocks = doctorUnavailability.filter(
+    (block) =>
+      block.date === dateKey &&
+      (dentistFilterId === ALL_DENTISTS_FILTER ||
+        block.dentist === dentistFilterId),
+  );
+  const html = blocks
+    .map((block) => {
+      const name =
+        getDentistRecord(block.dentist)?.name ||
+        block.doctorName ||
+        block.doctor_name ||
+        block.dentist ||
+        "Dentist";
+      const text = `${name} is unavailable ${formatUnavailabilityRange(block)}${block.reason ? ` · ${block.reason}` : ""}`;
+      return `<span class="schedule-unavailable-pill" title="${escapeHtml(text)}"><i class="fa-solid fa-user-slash"></i><span>${escapeHtml(text)}</span></span>`;
+    })
+    .join("");
+  if (container.dataset.render !== html) {
+    container.innerHTML = html;
+    container.dataset.render = html;
+  }
+  container.hidden = !blocks.length;
+}
 function renderTimeline() {
   const timeline = document.getElementById("timeline");
   const title = document.getElementById("scheduleTitle");
@@ -3588,10 +3611,7 @@ function renderTimeline() {
       requiredHeight > availableHeight,
     );
   }
-  const unavailabilityBanner = createUnavailabilityBanner(selectedKey);
-  if (unavailabilityBanner) {
-    timeline.appendChild(unavailabilityBanner);
-  }
+  renderScheduleUnavailableNotice(selectedKey);
   if (!dayAppointments.length) {
     const dentistFilterId = getUnavailabilityFilterDentist();
     const allDayBlocks = doctorUnavailability.filter(
@@ -3610,26 +3630,10 @@ function renderTimeline() {
             <span>The clinic is closed on Sundays. Open Monday to Saturday, 10:00 AM to 6:00 PM.</span>
           `;
     } else if (allDayBlocks.length && !selectedIsPast) {
-      if (unavailabilityBanner) {
-        unavailabilityBanner.remove();
-      }
-      const names = [
-        ...new Set(
-          allDayBlocks.map(
-            (block) =>
-              getDentistRecord(block.dentist)?.name ||
-              block.doctorName ||
-              block.doctor_name ||
-              "Dentist",
-          ),
-        ),
-      ];
-      const allDayReason =
-        allDayBlocks.find((block) => block.reason)?.reason || "";
       emptyState.innerHTML = `
             <i class="fa-solid fa-user-slash" style="color:#dc3838"></i>
-            <strong style="color:#dc3838">${escapeHtml(names.join(", "))} ${names.length > 1 ? "are" : "is"} unavailable all day</strong>
-            <span>${allDayReason ? `${escapeHtml(allDayReason)} · ` : ""}Appointments cannot be booked on this date.</span>
+            <strong style="color:#dc3838">Appointments unavailable</strong>
+            <span>Appointments cannot be booked on this date.</span>
           `;
     } else {
       emptyState.innerHTML = `
