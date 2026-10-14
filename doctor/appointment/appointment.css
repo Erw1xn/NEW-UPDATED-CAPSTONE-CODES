@@ -2360,79 +2360,80 @@ body {
 
 @media (min-width: 761px) {
   .modal-container {
-    max-width: 500px;
-    border-radius: 19px;
+    max-width: 560px;
+    max-height: calc(100dvh - 48px);
+    border-radius: 20px;
   }
   .modal-header {
-    gap: 14px;
-    padding: 19px 22px;
+    gap: 16px;
+    padding: 22px 26px;
   }
   .modal-header h3 {
-    font-size: 16px;
+    font-size: 18px;
   }
   .modal-subtitle {
-    font-size: 9px;
+    font-size: 10px;
   }
   .primary-btn {
-    height: 36px;
-    padding: 0 12px;
-    font-size: 9px;
+    height: 40px;
+    padding: 0 14px;
+    font-size: 10px;
   }
   .modal-close-icon {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
   }
   .modal-body {
-    padding: 22px 22px 8px;
+    padding: 25px 26px 10px;
   }
   .form-group {
-    margin-bottom: 17px;
+    margin-bottom: 19px;
   }
   .form-row-inline {
-    gap: 14px;
+    gap: 16px;
   }
   .form-row-inline .form-group {
-    margin-bottom: 17px;
+    margin-bottom: 19px;
   }
   .form-group label {
-    min-height: 16px;
-    margin-bottom: 7px;
-    font-size: 9.5px;
+    min-height: 18px;
+    margin-bottom: 8px;
+    font-size: 10.5px;
   }
   .form-control,
   .modal-status {
-    height: 43px;
-    min-height: 43px;
-    font-size: 10.5px;
+    height: 47px;
+    min-height: 47px;
+    font-size: 11.5px;
   }
   .form-control {
-    padding: 0 13px;
+    padding: 0 15px;
   }
   .duration-input-wrapper .form-control {
-    padding-right: 76px;
+    padding-right: 82px;
   }
   .duration-unit {
-    right: 13px;
-    font-size: 8.5px;
+    right: 15px;
+    font-size: 9.5px;
   }
   .view-only-notice {
-    gap: 10px;
-    padding: 12px 13px;
+    gap: 12px;
+    padding: 14px 15px;
   }
   .view-only-notice strong {
-    font-size: 9px;
+    font-size: 10px;
   }
   .view-only-notice span {
-    font-size: 8.3px;
+    font-size: 9.5px;
   }
   .modal-actions {
-    padding: 10px 22px 20px;
+    padding: 12px 26px 23px;
   }
   .btn-cancel,
   .btn-unavailable-save,
   .btn-reopen {
-    min-height: 38px;
-    font-size: 9.5px;
+    min-height: 41px;
+    font-size: 10.5px;
   }
 }
 
@@ -2540,6 +2541,213 @@ body {
   }
   .ptype,
   .appt-time-range {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1051px) {
+  .appointments-shell {
+    padding: 28px 30px 30px;
+  }
+  .appointments-page-heading h1 {
+    font-size: 18px;
+  }
+  .appointments-page-heading p {
+    font-size: 11px;
+  }
+  .appointments-page-actions .patient-search-input {
+    height: 41px;
+    font-size: 10px;
+  }
+  .appointments-page-actions .btn-mark-unavailable {
+    height: 41px;
+    font-size: 10px;
+  }
+  .appointments-layout {
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: 22px;
+    align-items: stretch;
+  }
+  .side-col-stack {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-self: stretch;
+    height: 660px;
+    gap: 18px;
+  }
+  .calendar-panel {
+    padding: 21px;
+  }
+  .calendar-panel h4 {
+    font-size: 15px;
+  }
+  .day {
+    min-height: 37px;
+    font-size: 10.5px;
+  }
+  .side-content-panel {
+    min-height: 0;
+    height: 100%;
+  }
+  .side-section-header {
+    min-height: 76px;
+    padding: 18px 21px 9px;
+  }
+  .side-section-title-line h3 {
+    font-size: 15px;
+  }
+  .side-section-description {
+    max-width: none;
+    font-size: 10px;
+  }
+  .side-content-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 11px 17px 18px;
+  }
+  .waiting-queue-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    gap: 10px;
+  }
+  .queue-item {
+    min-height: 68px;
+    padding: 11px 13px;
+  }
+  .queue-avatar {
+    width: 39px;
+    height: 39px;
+    min-width: 39px;
+    font-size: 10px;
+  }
+  .queue-name {
+    font-size: 10.5px;
+  }
+  .queue-time {
+    font-size: 9px;
+  }
+  .queue-type {
+    font-size: 8px;
+  }
+  .schedule-panel {
+    height: 660px;
+    min-height: 660px;
+  }
+  .schedule-main-header {
+    min-height: 86px;
+    padding: 19px 28px;
+  }
+  .schedule-main-header h3 {
+    font-size: 20px;
+  }
+  .schedule-date-label {
+    font-size: 10.5px;
+  }
+  .time-slots-container {
+    padding: 9px 24px 23px 28px;
+  }
+  .tl-row {
+    grid-template-columns: 86px minmax(0, 1fr);
+    min-height: 82px;
+  }
+  .tl-time {
+    font-size: 10.5px;
+  }
+  .appt-card {
+    min-height: 68px;
+    padding: 12px 16px;
+  }
+  .pname {
+    font-size: 11.5px;
+  }
+  .ptype,
+  .appt-time-range {
+    font-size: 9.5px;
+  }
+}
+
+@media (min-width: 1051px) {
+  .side-col-stack,
+  .schedule-panel {
+    height: 700px;
+  }
+  .schedule-panel {
+    min-height: 700px;
+  }
+  .time-slots-container {
+    gap: 3px;
+    padding: 11px 26px 25px 30px;
+  }
+  .tl-row {
+    grid-template-columns: 90px minmax(0, 1fr);
+    min-height: 88px;
+  }
+  .tl-time {
+    font-size: 11px;
+  }
+  .appt-card {
+    min-height: 76px;
+    gap: 12px;
+    padding: 13px 17px;
+    border-radius: 12px;
+  }
+  .patient-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    font-size: 10px;
+  }
+  .pname {
+    font-size: 12.5px;
+  }
+  .ptype,
+  .appt-time-range {
+    font-size: 10px;
+  }
+  .appt-status-badge {
+    gap: 5px;
+    padding: 6px 10px;
+    font-size: 8.5px;
+  }
+  .appt-status-btn {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1051px) {
+  .waiting-queue-list {
+    gap: 12px;
+    padding: 2px;
+  }
+  .queue-item {
+    min-height: 78px;
+    gap: 12px;
+    padding: 13px 15px;
+    border-radius: 15px;
+  }
+  .queue-main {
+    gap: 11px;
+  }
+  .queue-avatar {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    font-size: 11px;
+  }
+  .queue-name {
+    font-size: 12px;
+  }
+  .queue-time,
+  .queue-dentist {
+    font-size: 10px;
+  }
+  .queue-type {
+    max-width: 115px;
+    padding: 7px 10px;
     font-size: 9px;
   }
 }

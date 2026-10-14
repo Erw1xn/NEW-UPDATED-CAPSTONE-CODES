@@ -290,7 +290,7 @@ body {
   width: 100%;
   max-width: 650px;
   margin: 0 auto;
-  padding: 32px 40px 30px;
+  padding: 26px 38px 24px;
   background: #ffffff;
   border: 1px solid #dfe6e2;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
@@ -301,40 +301,40 @@ body {
 .clinic-name {
   margin: 0;
   color: #17211b;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.2;
 }
 .clinic-address {
   margin: 6px 0 0;
   color: #5f6b64;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .clinic-tin {
   margin: 3px 0 0;
   color: #3f4c45;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.3;
 }
 .clinic-subtitle {
   margin: 8px 0 0;
   color: #78837d;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.3;
 }
 .receipt-title {
-  margin: 13px 0 0;
+  margin: 10px 0 0;
   color: #4c5952;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 1.1px;
   text-transform: uppercase;
 }
 .divider {
-  margin: 17px 0;
+  margin: 12px 0;
   border: 0;
   border-top: 1px solid #dfe5e1;
 }
@@ -343,11 +343,11 @@ body {
   border-collapse: collapse;
 }
 .receipt-info td {
-  padding: 7px 0;
+  padding: 6px 0;
   border-bottom: 1px solid #edf1ee;
   vertical-align: top;
-  font-size: 10px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.25;
 }
 .receipt-info tr:last-child td {
   border-bottom: 0;
@@ -355,7 +355,7 @@ body {
 .receipt-info .label {
   width: 40%;
   color: #7a857f;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.45px;
   text-transform: uppercase;
@@ -374,13 +374,13 @@ body {
   border-radius: 20px;
   background: #f5faf7;
   color: #16803d;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
 .summary {
-  margin-top: 21px;
+  margin-top: 15px;
   padding-top: 2px;
 }
 .summary-row {
@@ -388,9 +388,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 7px 0;
+  padding: 6px 0;
   color: #68746d;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.3;
 }
 .summary-row strong {
@@ -400,37 +400,37 @@ body {
 }
 .summary-row.total {
   margin-top: 2px;
-  padding-top: 9px;
+  padding-top: 7px;
   border-top: 1px solid #dfe5e1;
   color: #303b34;
   font-weight: 700;
 }
 .summary-row.paid {
-  margin-top: 5px;
-  padding-top: 10px;
+  margin-top: 3px;
+  padding-top: 7px;
   border-top: 1px dashed #cfd8d3;
   color: #303b34;
   font-weight: 700;
 }
 .summary-row.paid strong {
   color: #16803d;
-  font-size: 12px;
+  font-size: 14px;
 }
 .summary-row.balance {
-  padding-top: 7px;
+  padding-top: 5px;
   color: #303b34;
   font-weight: 700;
 }
 .summary-row.balance strong {
   color: #c67b00;
-  font-size: 11px;
+  font-size: 13px;
 }
 .receipt-footer {
-  margin-top: 24px;
-  padding-top: 14px;
+  margin-top: 16px;
+  padding-top: 10px;
   border-top: 1px dashed #d4dcd7;
   color: #7b867f;
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.45;
   text-align: center;
 }
@@ -439,17 +439,17 @@ body {
   font-weight: 600;
 }
 .receipt-actions {
-  margin-top: 14px;
+  margin-top: 10px;
   text-align: center;
 }
 .receipt-print-button {
-  min-width: 120px;
+  min-width: 130px;
   padding: 8px 17px;
   border: 0;
   border-radius: 6px;
   background: #16803d;
   color: #ffffff;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -482,15 +482,15 @@ body {
     padding: 6px;
   }
   .receipt-page {
-    padding: 28px 30px 26px;
+    padding: 24px 30px 22px;
   }
 }
 @media (max-width: 500px) {
   .receipt-page {
-    padding: 22px 16px;
+    padding: 20px 16px;
   }
   .clinic-name {
-    font-size: 20px;
+    font-size: 22px;
   }
   .clinic-subtitle {
     font-size: 12px;
@@ -635,7 +635,7 @@ This receipt represents the recorded payment transaction for DentaNueva Dental C
 
     const receiptWindow = isMobile
       ? window.open(url, "_blank")
-      : window.open(url, "_blank", "width=720,height=780");
+      : window.open(url, "_blank", "width=760,height=760");
 
     if (!receiptWindow) {
       URL.revokeObjectURL(url);

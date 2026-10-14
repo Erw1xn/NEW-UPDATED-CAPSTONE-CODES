@@ -3602,15 +3602,13 @@ function renderTimeline() {
   const dayAppointments = filteredAppts();
   function adjustSchedulePanelHeight() {
     const schedulePanel = document.querySelector(".schedule-panel");
-    const timeline = document.getElementById("timeline");
-    if (!schedulePanel || !timeline) return;
-    const availableHeight = 560;
-    const requiredHeight = timeline.scrollHeight;
+    if (!schedulePanel) return;
     schedulePanel.classList.toggle(
       "schedule-panel--expanded",
-      requiredHeight > availableHeight,
+      dayAppointments.length >= 6,
     );
   }
+  adjustSchedulePanelHeight();
   renderScheduleUnavailableNotice(selectedKey);
   if (!dayAppointments.length) {
     const dentistFilterId = getUnavailabilityFilterDentist();
@@ -3658,7 +3656,6 @@ function renderTimeline() {
     row.appendChild(slot);
     timeline.appendChild(row);
   });
-  adjustSchedulePanelHeight();
 }
 function getPendingRescheduleRequestForAppointment(appointmentId) {
   return (

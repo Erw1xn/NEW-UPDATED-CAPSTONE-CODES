@@ -455,6 +455,94 @@ textarea:focus-visible {
   color: #7d8982;
   font-size: 9.5px;
 }
+
+@media (min-width: 1001px) {
+  .patients-main {
+    padding: 28px 32px 40px;
+  }
+  .patient-list-card {
+    border-radius: 18px;
+  }
+  .patient-card-header {
+    min-height: 94px;
+    padding: 20px 24px;
+  }
+  .patient-card-title h1 {
+    font-size: 20px;
+  }
+  .patient-card-title p {
+    font-size: 12px;
+  }
+  .patient-card-header-right {
+    gap: 10px;
+  }
+  .patient-count-label {
+    font-size: 11px;
+  }
+  .patient-search {
+    width: 230px;
+    flex-basis: 230px;
+  }
+  .patient-search input,
+  .patient-select {
+    height: 39px;
+    font-size: 11.5px;
+  }
+  .patient-select {
+    width: 116px;
+  }
+  .patient-table th {
+    height: 48px;
+    padding-right: 20px;
+    padding-left: 20px;
+    font-size: 9.5px;
+  }
+  .patient-table td {
+    height: 84px;
+    padding: 12px 20px;
+    font-size: 12px;
+  }
+  .patient-cell {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    column-gap: 13px;
+  }
+  .patient-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 12px !important;
+  }
+  .patient-name {
+    font-size: 13px;
+  }
+  .patient-id {
+    font-size: 10.5px;
+  }
+  .contact-primary,
+  .age-primary,
+  .appointment-date {
+    font-size: 12.5px;
+  }
+  .contact-secondary,
+  .age-secondary,
+  .appointment-time {
+    font-size: 11px;
+  }
+  .appointment-completed {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+  .medical-form-button {
+    min-width: 118px;
+    height: 38px;
+    font-size: 11px;
+  }
+  .patient-action-trigger {
+    width: 38px;
+    height: 38px;
+  }
+}
 .patient-count-label {
   display: inline-flex;
   align-items: center;
@@ -4562,6 +4650,96 @@ textarea:focus-visible {
     flex: 1 1 auto;
   }
 }
+
+@media (min-width: 701px) {
+  #medicalResultModalBackdrop .medical-result-modal {
+    width: min(940px, calc(100vw - 64px));
+    max-height: min(900px, calc(100dvh - 36px));
+  }
+  #medicalResultModalBackdrop .patient-modal-header {
+    min-height: 118px;
+    padding: 28px 34px 24px;
+  }
+  #medicalResultModalBackdrop .patient-modal-header h2 {
+    font-size: 25px;
+  }
+  #medicalResultModalBackdrop .medical-result-updated {
+    margin-top: 7px;
+    font-size: 11.5px;
+  }
+  #medicalResultModalBackdrop .medical-result-body {
+    padding: 28px 32px 32px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-workspace {
+    gap: 19px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-summary {
+    min-height: 96px;
+    padding: 20px 22px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-summary-icon {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    font-size: 20px;
+  }
+  #medicalResultModalBackdrop
+    #medicalResultBody
+    .medical-record-summary-content
+    h3 {
+    font-size: 18px;
+  }
+  #medicalResultModalBackdrop
+    #medicalResultBody
+    .medical-record-summary-content
+    > span:last-child {
+    font-size: 11.5px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-header {
+    min-height: 72px;
+    padding: 16px 20px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    font-size: 15px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-header h3 {
+    font-size: 15px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-body {
+    padding: 21px;
+    gap: 20px 22px;
+  }
+  #medicalResultModalBackdrop
+    #medicalResultBody
+    .medical-record-summary-eyebrow,
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-header span,
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-field-label {
+    font-size: 9px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-field-value,
+  #medicalResultModalBackdrop #medicalResultBody .medical-result-list,
+  #medicalResultModalBackdrop #medicalResultBody .medical-result-value.empty {
+    min-height: 42px;
+    padding: 10px 13px;
+    font-size: 12px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-result-tag {
+    min-height: 30px;
+    padding: 6px 11px;
+    font-size: 10.5px;
+  }
+  #medicalResultModalBackdrop #medicalResultBody .medical-record-consent {
+    min-height: 72px;
+    padding: 16px 18px;
+  }
+  #medicalResultModalBackdrop .patient-modal-actions {
+    min-height: 82px;
+    padding: 18px 32px;
+  }
+}
 .patient-record-page-header {
   padding: 22px 26px 24px;
   background: #ffffff;
@@ -6032,5 +6210,483 @@ textarea:focus-visible {
   }
   #patientPageAppointments .patient-appointment-meta-item strong {
     font-size: 10px;
+  }
+}
+
+@media (min-width: 1001px) {
+  .patients-main {
+    padding: 30px 34px 42px;
+  }
+  .patient-card-header {
+    min-height: 98px;
+    padding: 21px 25px;
+  }
+  .patient-card-title h1 {
+    font-size: 21px;
+  }
+  .patient-card-title p {
+    font-size: 12.5px;
+  }
+  .patient-card-header-right {
+    gap: 11px;
+  }
+  .patient-count-label {
+    font-size: 11.5px;
+  }
+  .patient-search {
+    width: 242px;
+    flex-basis: 242px;
+  }
+  .patient-search input,
+  .patient-select {
+    height: 40px;
+    font-size: 11.5px;
+  }
+  .patient-select {
+    width: 120px;
+  }
+  .patient-table th {
+    height: 50px;
+    padding-right: 21px;
+    padding-left: 21px;
+    font-size: 9.7px;
+  }
+  .patient-table td {
+    height: 88px;
+    padding: 13px 21px;
+    font-size: 12.5px;
+  }
+  .patient-cell {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    column-gap: 13px;
+  }
+  .patient-avatar {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    font-size: 12.5px !important;
+  }
+  .patient-name {
+    font-size: 13.5px;
+  }
+  .patient-id {
+    font-size: 10.5px;
+  }
+  .contact-primary,
+  .age-primary,
+  .appointment-date {
+    font-size: 13px;
+  }
+  .contact-secondary,
+  .age-secondary,
+  .appointment-time {
+    font-size: 11px;
+  }
+  .appointment-completed {
+    margin-top: 6px;
+    padding: 4px 9px;
+    font-size: 9px;
+  }
+  .medical-form-button {
+    min-width: 122px;
+    height: 40px;
+    font-size: 11.5px;
+  }
+  .patient-action-trigger {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (min-width: 1001px) {
+  #patientPageOverview .patient-overview {
+    gap: 20px;
+    padding: 6px 30px 30px;
+  }
+  #patientPageOverview .patient-overview-heading h3 {
+    font-size: 20px;
+  }
+  #patientPageOverview .patient-overview-heading p {
+    font-size: 11px;
+  }
+  #patientPageOverview .patient-overview-eyebrow {
+    font-size: 9px;
+  }
+  #patientPageOverview .patient-overview-summary-card {
+    gap: 20px;
+    padding: 24px;
+    border-radius: 15px;
+  }
+  #patientPageOverview .patient-overview-summary-avatar {
+    width: 64px;
+    height: 64px;
+    flex-basis: 64px;
+    font-size: 18px;
+  }
+  #patientPageOverview .patient-overview-summary-main h3 {
+    font-size: 18px;
+  }
+  #patientPageOverview .patient-overview-label {
+    font-size: 9px;
+  }
+  #patientPageOverview .patient-overview-summary-meta {
+    gap: 10px 20px;
+    margin-top: 11px;
+  }
+  #patientPageOverview .patient-overview-summary-meta span,
+  #patientPageOverview .patient-overview-summary-meta i {
+    font-size: 10px;
+  }
+  #patientPageOverview .patient-overview-stats {
+    gap: 16px;
+  }
+  #patientPageOverview .patient-overview-stat-card {
+    min-height: 108px;
+    gap: 15px;
+    padding: 20px;
+  }
+  #patientPageOverview .patient-overview-stat-icon {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    font-size: 17px;
+  }
+  #patientPageOverview .patient-overview-stat-card span {
+    font-size: 9px;
+  }
+  #patientPageOverview .patient-overview-stat-card strong {
+    font-size: 24px;
+  }
+  #patientPageOverview .patient-overview-stat-card small {
+    font-size: 9.5px;
+  }
+  #patientPageOverview .patient-overview-card {
+    border-radius: 15px;
+  }
+  #patientPageOverview .patient-overview-card-header {
+    padding: 23px 26px;
+  }
+  #patientPageOverview .patient-overview-card-header h3 {
+    font-size: 17px;
+  }
+  #patientPageOverview .patient-overview-status {
+    padding: 7px 11px;
+    font-size: 9px;
+  }
+  #patientPageOverview .patient-overview-latest-content {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 24px;
+    padding: 25px 26px;
+  }
+  #patientPageOverview .patient-overview-latest-main > strong {
+    font-size: 14px;
+  }
+  #patientPageOverview .patient-overview-latest-meta {
+    gap: 14px;
+    margin-top: 10px;
+  }
+  #patientPageOverview .patient-overview-latest-meta span {
+    font-size: 9.5px;
+  }
+  #patientPageOverview .patient-overview-latest-dentist {
+    padding-left: 22px;
+  }
+  #patientPageOverview .patient-overview-latest-dentist span {
+    font-size: 8.5px;
+  }
+  #patientPageOverview .patient-overview-latest-dentist strong {
+    font-size: 11.5px;
+  }
+  #patientPageOverview .patient-overview-medical-item {
+    padding: 22px 26px;
+  }
+  #patientPageOverview .patient-overview-medical-item span {
+    font-size: 9px;
+  }
+  #patientPageOverview .patient-overview-medical-item strong {
+    font-size: 11px;
+  }
+  #patientPageOverview .patient-overview-record-item {
+    gap: 14px;
+    padding: 21px;
+  }
+  #patientPageOverview .patient-overview-record-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    font-size: 14px;
+  }
+  #patientPageOverview .patient-overview-record-item strong {
+    font-size: 10.5px;
+  }
+  #patientPageOverview .patient-overview-record-item span {
+    font-size: 9px;
+  }
+
+  #patientPageMedical .medical-record-workspace {
+    gap: 17px;
+    padding: 24px 26px 30px;
+  }
+  #patientPageMedical .medical-record-card {
+    border-radius: 14px;
+  }
+  #patientPageMedical .medical-record-card-header {
+    min-height: 68px;
+    padding: 14px 19px;
+    gap: 12px;
+  }
+  #patientPageMedical .medical-record-card-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 14px;
+  }
+  #patientPageMedical .medical-record-card-header-content span,
+  #patientPageMedical
+    .medical-record-card-header
+    > div:not(.medical-record-card-icon):not(.medical-record-complete-badge)
+    span {
+    font-size: 8.5px;
+  }
+  #patientPageMedical .medical-record-card-header-content h3,
+  #patientPageMedical
+    .medical-record-card-header
+    > div:not(.medical-record-card-icon):not(.medical-record-complete-badge)
+    h3 {
+    font-size: 14px;
+  }
+  #patientPageMedical .medical-record-complete-badge {
+    min-height: 29px;
+    padding: 0 11px;
+    font-size: 9px;
+  }
+  #patientPageMedical .medical-record-card-body {
+    padding: 21px;
+    gap: 20px 24px;
+  }
+  #patientPageMedical .medical-record-field-label {
+    margin-bottom: 7px;
+    font-size: 9px;
+  }
+  #patientPageMedical .medical-record-field-value,
+  #patientPageMedical .medical-result-list,
+  #patientPageMedical .medical-result-value.empty {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 11.5px;
+  }
+  #patientPageMedical .medical-record-field-value.large {
+    min-height: 56px;
+  }
+  #patientPageMedical .medical-result-tag {
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+  #patientPageMedical .medical-record-consent {
+    min-height: 70px;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  #patientPageMedical .medical-record-consent-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    font-size: 12px;
+  }
+  #patientPageMedical .medical-record-consent strong {
+    font-size: 10.5px;
+  }
+  #patientPageMedical .medical-record-consent p {
+    font-size: 9.5px;
+  }
+
+  #patientPageTreatments > .patient-record-section {
+    padding: 32px;
+  }
+  #patientPageTreatments > .patient-record-section > .patient-record-section-header {
+    margin-bottom: 24px;
+  }
+  #patientPageTreatments .patient-record-edit-btn {
+    min-height: 38px;
+    padding: 0 13px;
+    font-size: 11px;
+  }
+  #patientPageTreatments .treatment-workspace {
+    margin-bottom: 22px;
+    padding: 28px;
+    border-radius: 16px;
+  }
+  #patientPageTreatments .treatment-workspace .medical-result-grid {
+    gap: 19px 24px;
+  }
+  #patientPageTreatments .treatment-workspace .medical-result-label {
+    margin-bottom: 8px;
+    font-size: 10px;
+  }
+  #patientPageTreatments .treatment-workspace input,
+  #patientPageTreatments .treatment-workspace select,
+  #patientPageTreatments .treatment-workspace textarea {
+    font-size: 12.5px;
+  }
+  #patientPageTreatments .treatment-workspace input,
+  #patientPageTreatments .treatment-workspace select {
+    height: 46px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+  #patientPageTreatments .treatment-workspace textarea {
+    min-height: 106px;
+    padding: 12px 14px;
+  }
+  #patientPageTreatments .treatment-procedure-suggestions button {
+    min-height: 39px;
+    padding: 9px 12px;
+    font-size: 11.5px;
+  }
+  #patientPageTreatments .treatment-form-actions {
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 17px;
+  }
+  #patientPageTreatments .treatment-materials-help {
+    font-size: 10px;
+  }
+  #patientPageTreatments .treatment-materials-list {
+    gap: 9px;
+    margin-top: 5px;
+  }
+  #patientPageTreatments .treatment-material-row {
+    grid-template-columns: minmax(0, 1fr) 100px minmax(145px, auto) 38px;
+    gap: 9px;
+    padding: 9px;
+  }
+  #patientPageTreatments .treatment-material-row input {
+    height: 38px;
+    font-size: 11.5px;
+  }
+  #patientPageTreatments .treatment-history-list {
+    gap: 12px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment {
+    min-height: 86px;
+    gap: 20px;
+    padding: 17px 20px;
+    border-radius: 12px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment-date {
+    width: 132px;
+    min-width: 132px;
+    padding-right: 20px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment-date span {
+    font-size: 10px;
+  }
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-date
+    .treatment-history-time {
+    font-size: 11.5px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment-info {
+    gap: 6px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment-info strong {
+    font-size: 13.5px;
+  }
+  #patientPageTreatments .treatment-history-list .patient-record-appointment-info span,
+  #patientPageTreatments .treatment-consumed-summary {
+    font-size: 10.5px;
+  }
+  #patientPageTreatments .treatment-history-list [data-treatment-edit],
+  #patientPageTreatments .treatment-history-list [data-treatment-delete] {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1001px) {
+  .patient-list-card .patient-card-header {
+    min-height: 90px;
+    padding: 18px 22px;
+  }
+  .patient-list-card .patient-card-title h1 {
+    font-size: 20px;
+  }
+  .patient-list-card .patient-card-title p {
+    font-size: 11.5px;
+  }
+  .patient-list-card .patient-card-header-right {
+    gap: 9px;
+  }
+  .patient-list-card .patient-count-label {
+    font-size: 10.8px;
+  }
+  .patient-list-card .patient-search {
+    width: 228px;
+    flex-basis: 228px;
+  }
+  .patient-list-card .patient-search input,
+  .patient-list-card .patient-select {
+    height: 38px;
+    font-size: 10.8px;
+  }
+  .patient-list-card .patient-select {
+    width: 112px;
+  }
+  .patient-list-card .patient-table th {
+    height: 46px;
+    padding-right: 18px;
+    padding-left: 18px;
+    font-size: 9.2px;
+  }
+  .patient-list-card .patient-table td {
+    height: 82px;
+    padding: 11px 18px;
+    font-size: 12px;
+  }
+  .patient-list-card .patient-cell {
+    grid-template-columns: 43px minmax(0, 1fr) !important;
+    column-gap: 11px;
+  }
+  .patient-list-card .patient-avatar {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    min-height: 43px;
+    font-size: 11.8px !important;
+  }
+  .patient-list-card .patient-name {
+    font-size: 12.8px;
+  }
+  .patient-list-card .patient-id {
+    font-size: 9.8px;
+  }
+  .patient-list-card .contact-primary,
+  .patient-list-card .age-primary,
+  .patient-list-card .appointment-date {
+    font-size: 12.2px;
+  }
+  .patient-list-card .contact-secondary,
+  .patient-list-card .age-secondary,
+  .patient-list-card .appointment-time {
+    font-size: 10.4px;
+  }
+  .patient-list-card .appointment-completed {
+    margin-top: 5px;
+    padding: 3px 8px;
+    font-size: 8.5px;
+  }
+  .patient-list-card .medical-form-button {
+    min-width: 114px;
+    height: 37px;
+    font-size: 10.8px;
+  }
+  .patient-list-card .patient-action-trigger {
+    width: 37px;
+    height: 37px;
   }
 }

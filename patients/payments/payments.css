@@ -1568,6 +1568,36 @@ button {
   margin-top: 1px;
   color: #6786ad;
 }
+#patientPayProcess .patient-payment-process-panel {
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+#patientPayProcess .patient-payment-process-heading {
+  gap: 11px;
+  padding-bottom: 12px;
+}
+#patientPayProcess .patient-payment-process-icon {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  border-radius: 10px;
+}
+#patientPayProcess .patient-payment-process-icon i {
+  font-size: 15px;
+}
+#patientPayProcess .patient-payment-process-heading strong {
+  font-size: 12px;
+}
+#patientPayProcess .patient-payment-process-heading small {
+  margin-top: 4px;
+  font-size: 10px;
+}
+#patientPayProcess .patient-payment-process-message {
+  margin-top: 12px;
+  gap: 9px;
+  font-size: 10px;
+  line-height: 1.5;
+}
 .patient-payment-process-status {
   min-height: 40px;
   padding: 9px 11px;
@@ -1615,6 +1645,16 @@ button {
 .patient-payment-process-status.stacked {
   display: block;
 }
+#patientPayProcess .patient-payment-process-status.stacked {
+  padding: 14px 16px;
+  font-size: 12px;
+}
+#patientPayProcess .patient-payment-process-status.stacked > div {
+  gap: 10px;
+}
+#patientPayProcess .patient-payment-process-status.stacked i {
+  font-size: 15px;
+}
 .xendit-action-value {
   margin-top: 8px;
   padding: 8px 9px;
@@ -1626,6 +1666,13 @@ button {
   line-height: 1.4;
   word-break: break-word;
   white-space: normal;
+}
+#patientPayProcess .xendit-action-value {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .patient-pay-actions {
   margin-top: 20px;

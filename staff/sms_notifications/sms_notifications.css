@@ -1570,3 +1570,115 @@ button {
     padding: 15px 17px;
   }
 }
+
+@media (min-width: 769px) {
+  .sms-main {
+    padding: 26px 32px 42px;
+  }
+  .notification-header-card,
+  .notification-card {
+    border-radius: 18px;
+  }
+  .notification-header-card .card-header {
+    padding: 23px 26px 19px;
+  }
+  .notification-header-card .card-header h3 {
+    font-size: 1.14rem;
+  }
+  .notification-header-card .card-header p {
+    font-size: 0.73rem;
+  }
+  .record-count {
+    min-height: 38px;
+    font-size: 0.7rem;
+  }
+  .stats-row {
+    gap: 12px;
+    padding: 4px 26px 22px;
+  }
+  .stat-chip {
+    min-height: 68px;
+    padding: 14px 16px;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 0.78rem;
+  }
+  .stat-value {
+    font-size: 1.12rem;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+  }
+  .filters {
+    gap: 12px;
+    padding: 17px 22px;
+  }
+  .search-wrapper input,
+  .filter-wrapper select {
+    height: 46px;
+    font-size: 0.74rem;
+  }
+  .notification-table th {
+    height: 50px;
+    font-size: 0.65rem;
+  }
+  .notification-table td {
+    height: 78px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    font-size: 0.73rem;
+  }
+  .patient-cell {
+    gap: 11px;
+  }
+  .patient-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    font-size: 0.7rem;
+  }
+  .patient-name {
+    font-size: 0.77rem;
+  }
+  .patient-id {
+    font-size: 0.62rem;
+  }
+  .contact-line,
+  .message-preview {
+    font-size: 0.72rem;
+  }
+  .type-badge {
+    padding: 7px 10px;
+    font-size: 0.65rem;
+  }
+  .appointment-cell strong {
+    font-size: 0.73rem;
+  }
+  .appointment-cell span {
+    font-size: 0.64rem;
+  }
+  .status-badge {
+    padding: 7px 10px;
+    font-size: 0.64rem;
+  }
+  .action-menu-trigger {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+  .pagination-bar {
+    min-height: 70px;
+    padding: 15px 22px;
+  }
+  .pagination-summary,
+  .pagination-page-info {
+    font-size: 0.7rem;
+  }
+  .pagination-button {
+    min-height: 39px;
+    font-size: 0.68rem;
+  }
+}

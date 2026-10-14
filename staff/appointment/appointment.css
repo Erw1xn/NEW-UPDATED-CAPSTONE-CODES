@@ -6378,3 +6378,219 @@ select.form-control:disabled {
     font-size: 10.5px;
   }
 }
+.appointments-page-actions .dentist-filter-wrapper {
+  flex: 0 0 260px;
+  width: 260px;
+}
+.appointments-page-actions .dentist-filter {
+  padding-right: 32px;
+  font-size: 12px;
+}
+.side-col-stack {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+.todays-appointments-panel {
+  height: auto;
+  min-height: 0;
+}
+.todays-appointments-panel .todays-appointments-body,
+.todays-appointments-panel .waiting-queue-list {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+.todays-appointments-panel .queue-item {
+  height: 86px;
+  min-height: 86px;
+  max-height: 86px;
+  flex: 0 0 86px;
+  padding: 12px 14px;
+}
+.todays-appointments-panel .queue-avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  font-size: 11px;
+}
+.todays-appointments-panel .queue-name {
+  font-size: 12px;
+}
+.todays-appointments-panel .queue-dentist {
+  font-size: 10.5px;
+}
+.appointments-layout {
+  align-items: stretch;
+}
+.tl-row {
+  min-height: 82px;
+}
+.appt-card {
+  min-height: 70px;
+  box-sizing: border-box;
+}
+@media (max-width: 1250px) {
+  .appointments-page-actions .dentist-filter-wrapper {
+    flex: 0 0 260px;
+    width: 260px;
+  }
+  .appointments-page-actions .search-box-wrapper {
+    width: 190px;
+  }
+}
+@media (max-width: 800px) {
+  .appointments-page-actions .dentist-filter-wrapper {
+    flex: 1 1 220px;
+    width: auto;
+    min-width: 220px;
+  }
+  .appointments-page-actions .dentist-filter {
+    font-size: 11px;
+  }
+  .todays-appointments-panel .queue-item {
+    height: auto;
+    min-height: 82px;
+    max-height: none;
+    flex: 0 0 auto;
+  }
+  .tl-row {
+    min-height: 78px;
+  }
+}
+@media (max-width: 640px) {
+  .appointments-page-actions .dentist-filter-wrapper {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .todays-appointments-panel .queue-item {
+    min-height: 78px;
+    padding: 11px 12px;
+  }
+  .todays-appointments-panel .queue-name {
+    font-size: 11px;
+  }
+  .todays-appointments-panel .queue-dentist {
+    font-size: 9.5px;
+  }
+  .tl-row {
+    min-height: 72px;
+  }
+  .appt-card {
+    min-height: 66px;
+  }
+}
+@media (min-width: 1001px) {
+  .appointments-layout {
+    align-items: stretch;
+  }
+  .schedule-panel {
+    height: 560px;
+    min-height: 560px;
+    max-height: 560px;
+    flex: 0 0 auto;
+  }
+  .schedule-panel.schedule-panel--expanded {
+    height: auto;
+    max-height: none;
+    flex: 0 0 auto;
+  }
+  .schedule-panel .time-slots-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .schedule-panel.schedule-panel--expanded .time-slots-container {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+  .side-col-stack {
+    align-self: stretch;
+  }
+  .todays-appointments-panel {
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+    display: flex;
+    flex: 0 0 180px;
+    flex-direction: column;
+  }
+  .todays-appointments-panel .todays-appointments-header {
+    flex: 0 0 auto;
+  }
+  .todays-appointments-panel .todays-appointments-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    padding: 10px 12px;
+  }
+  .todays-appointments-panel .waiting-queue-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: center;
+  }
+  .todays-appointments-panel .empty-queue {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 8px;
+  }
+}
+@media (max-width: 1000px) {
+  .schedule-panel {
+    height: 560px;
+    min-height: 560px;
+    max-height: 560px;
+    display: flex;
+    flex-direction: column;
+  }
+  .schedule-panel.schedule-panel--expanded {
+    height: auto;
+    max-height: none;
+  }
+  .schedule-panel .time-slots-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .schedule-panel.schedule-panel--expanded .time-slots-container {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+  .todays-appointments-panel {
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+    display: flex;
+    flex-direction: column;
+  }
+  .todays-appointments-panel .todays-appointments-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    padding: 10px 12px;
+  }
+  .todays-appointments-panel .waiting-queue-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: center;
+  }
+  .todays-appointments-panel .empty-queue {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 8px;
+  }
+}
+@media (max-width: 640px) {
+  .schedule-panel {
+    height: 500px;
+    min-height: 500px;
+    max-height: 500px;
+  }
+  .schedule-panel.schedule-panel--expanded {
+    height: auto;
+    min-height: 500px;
+    max-height: none;
+  }
+}

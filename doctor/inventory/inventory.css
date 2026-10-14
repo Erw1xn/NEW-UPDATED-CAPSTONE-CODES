@@ -2708,3 +2708,518 @@ button {
     padding: 13px 20px;
   }
 }
+
+@media (min-width: 1201px) {
+  #inventoryPage1 .panel-header {
+    min-height: 84px;
+    margin-bottom: 18px;
+    padding: 18px 26px;
+  }
+  #inventoryPage1 .panel-header-left h2 {
+    font-size: 1.08rem;
+  }
+  #inventoryPage1 .panel-header-left p {
+    font-size: 0.69rem;
+  }
+  #inventoryPage1 .panel-header .inventory-header-actions {
+    gap: 9px;
+  }
+  #inventoryPage1 .panel-header .inventory-header-actions .btn-primary,
+  #inventoryPage1 .panel-header .inventory-header-actions .btn-secondary {
+    min-height: 42px;
+    padding-right: 15px;
+    padding-left: 15px;
+    font-size: 0.71rem;
+  }
+  #inventoryPage1 .item-count {
+    min-height: 33px;
+    padding: 0 11px;
+    font-size: 0.65rem;
+  }
+  #inventoryPage1 .inventory-toolbar {
+    gap: 11px;
+    padding: 17px 24px;
+  }
+  #inventoryPage1 .search-wrapper input,
+  #inventoryPage1 .filter-select {
+    height: 44px;
+    font-size: 0.71rem;
+  }
+  #inventoryPage1 .inventory-table th {
+    height: 48px;
+    padding-right: 14px;
+    padding-left: 14px;
+    font-size: 0.63rem;
+  }
+  #inventoryPage1 .inventory-table td {
+    height: 76px;
+    padding: 10px 14px;
+    font-size: 0.72rem;
+  }
+  #inventoryPage1 .inventory-table th:first-child,
+  #inventoryPage1 .inventory-table td:first-child {
+    padding-left: 22px;
+  }
+  #inventoryPage1 .inventory-table th:last-child,
+  #inventoryPage1 .inventory-table td:last-child {
+    padding-right: 22px;
+  }
+  #inventoryPage1 .item-cell {
+    gap: 12px;
+  }
+  #inventoryPage1 .item-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    font-size: 0.8rem;
+  }
+  #inventoryPage1 .item-name {
+    font-size: 0.76rem;
+  }
+  #inventoryPage1 .item-id {
+    font-size: 0.57rem;
+  }
+  #inventoryPage1 .category-badge {
+    padding: 6px 9px;
+    font-size: 0.63rem;
+  }
+  #inventoryPage1 .minimum-value,
+  #inventoryPage1 .expiry-normal,
+  #inventoryPage1 .expiry-warning,
+  #inventoryPage1 .expiry-danger,
+  #inventoryPage1 .no-expiry,
+  #inventoryPage1 .stock-value {
+    font-size: 0.7rem;
+  }
+  #inventoryPage1 .status-badge {
+    gap: 6px;
+    padding: 5px 9px;
+    font-size: 0.61rem;
+  }
+  #inventoryPage1 .status-badge::before {
+    width: 6px;
+    height: 6px;
+  }
+  #inventoryPage1 .action-button {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+  }
+  #inventoryPage1 .inventory-pagination {
+    min-height: 72px;
+    padding: 15px 24px;
+  }
+  #inventoryPage1 .inventory-pagination-summary,
+  #inventoryPage1 .inventory-pagination-page-info {
+    font-size: 0.68rem;
+  }
+  #inventoryPage1 .inventory-pagination-button {
+    min-height: 39px;
+    padding: 0 13px;
+    font-size: 0.66rem;
+  }
+
+  #inventoryPage2 .forecast-chart-header {
+    gap: 24px;
+    padding: 23px 26px 21px;
+  }
+  #inventoryPage2 .forecast-chart-eyebrow {
+    font-size: 0.59rem;
+  }
+  #inventoryPage2 .forecast-chart-header h3 {
+    font-size: 1rem;
+  }
+  #inventoryPage2 .forecast-chart-header p {
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-chart-select-wrapper {
+    width: 245px;
+    min-width: 220px;
+    gap: 6px;
+  }
+  #inventoryPage2 .forecast-chart-select-wrapper label {
+    font-size: 0.65rem;
+  }
+  #inventoryPage2 .forecast-chart-select-wrapper select {
+    height: 42px;
+    padding: 0 12px;
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-chart-container {
+    height: 355px;
+    padding: 18px 22px 16px;
+  }
+  #inventoryPage2 .prototype-header {
+    min-height: 88px;
+    gap: 24px;
+    padding: 22px 26px;
+  }
+  #inventoryPage2 .prototype-header h3 {
+    font-size: 0.98rem;
+  }
+  #inventoryPage2 .prototype-header p {
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-header-search {
+    width: 270px;
+  }
+  #inventoryPage2 .forecast-header-search input {
+    height: 42px;
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-table th {
+    height: 48px;
+    padding-right: 11px;
+    padding-left: 11px;
+    font-size: 0.57rem;
+  }
+  #inventoryPage2 .forecast-table td {
+    height: 69px;
+    padding: 10px 11px;
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-table th:first-child,
+  #inventoryPage2 .forecast-table td:first-child {
+    padding-left: 19px;
+  }
+  #inventoryPage2 .forecast-table th:last-child,
+  #inventoryPage2 .forecast-table td:last-child {
+    padding-right: 19px;
+  }
+  #inventoryPage2 .forecast-item-cell {
+    gap: 10px;
+  }
+  #inventoryPage2 .forecast-item-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 0.72rem;
+  }
+  #inventoryPage2 .forecast-item-name {
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-number,
+  #inventoryPage2 .forecast-average,
+  #inventoryPage2 .forecast-estimate,
+  #inventoryPage2 .forecast-restock {
+    font-size: 0.65rem;
+  }
+  #inventoryPage2 .forecast-status,
+  #inventoryPage2 .forecast-status-badge {
+    min-height: 29px;
+    padding: 0 10px;
+    font-size: 0.57rem;
+  }
+  #inventoryPage2 .forecast-pagination {
+    min-height: 72px;
+    padding: 15px 24px;
+  }
+  #inventoryPage2 .forecast-pagination-summary,
+  #inventoryPage2 .forecast-pagination-page-info {
+    font-size: 0.68rem;
+  }
+  #inventoryPage2 .forecast-pagination-button {
+    min-height: 39px;
+    padding: 0 13px;
+    font-size: 0.66rem;
+  }
+}
+
+@media (min-width: 1001px) {
+  #itemModal .modal-card,
+  #movementModal .modal-card {
+    width: min(100%, 660px);
+    max-height: calc(100vh - 56px);
+    padding: 28px;
+    border-radius: 18px;
+  }
+  #itemModal .modal-header,
+  #movementModal .modal-header {
+    gap: 18px;
+    margin-bottom: 23px;
+    padding-bottom: 18px;
+  }
+  #itemModal .modal-eyebrow,
+  #movementModal .modal-eyebrow {
+    margin-bottom: 6px;
+    font-size: 0.58rem;
+  }
+  #itemModal .modal-header h3,
+  #movementModal .modal-header h3 {
+    font-size: 1.15rem;
+  }
+  #itemModal .modal-close,
+  #movementModal .modal-close {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    font-size: 0.82rem;
+  }
+  #itemModal .form-grid,
+  #movementModal .form-grid {
+    gap: 18px;
+  }
+  #itemModal .form-group,
+  #movementModal .form-group {
+    gap: 8px;
+  }
+  #itemModal .form-group label,
+  #movementModal .form-group label {
+    font-size: 0.68rem;
+  }
+  #itemModal .form-group input,
+  #itemModal .form-group select,
+  #movementModal .form-group input,
+  #movementModal .form-group select {
+    height: 46px;
+    padding-right: 14px;
+    padding-left: 14px;
+    border-radius: 9px;
+    font-size: 0.72rem;
+  }
+  #movementModal #movementStockOutNote p {
+    font-size: 0.68rem !important;
+  }
+  #itemModal .modal-actions,
+  #movementModal .modal-actions {
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 19px;
+  }
+  #itemModal .modal-actions .btn-modal-cancel,
+  #movementModal .modal-actions .btn-modal-cancel,
+  #itemModal .modal-actions .btn-primary,
+  #movementModal .modal-actions .btn-primary {
+    min-height: 46px;
+    padding-right: 17px;
+    padding-left: 17px;
+    font-size: 0.72rem;
+  }
+
+  #viewItemModal .view-item-modal-card {
+    width: min(100%, 760px);
+    max-height: calc(100vh - 48px);
+    padding: 28px;
+    border-radius: 18px;
+  }
+  #viewItemModal .modal-header {
+    gap: 18px;
+    margin-bottom: 22px;
+    padding-bottom: 17px;
+  }
+  #viewItemModal .modal-eyebrow {
+    font-size: 0.58rem;
+  }
+  #viewItemModal .modal-header h3 {
+    font-size: 1.15rem;
+  }
+  #viewItemModal .modal-close {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+  #viewItemModal .view-item-details {
+    gap: 22px;
+  }
+  #viewItemModal .view-item-hero {
+    gap: 15px;
+    padding: 18px;
+    border-radius: 14px;
+  }
+  #viewItemModal .view-item-avatar {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+  }
+  #viewItemModal .view-item-id {
+    font-size: 0.61rem;
+  }
+  #viewItemModal .view-item-hero-content h4 {
+    font-size: 0.98rem;
+  }
+  #viewItemModal .view-item-category {
+    font-size: 0.66rem;
+  }
+  #viewItemModal .view-item-section-heading {
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  #viewItemModal .view-item-section-heading h4 {
+    font-size: 0.86rem;
+  }
+  #viewItemModal .view-item-details-grid {
+    gap: 10px;
+  }
+  #viewItemModal .view-item-detail {
+    padding: 13px 14px;
+    border-radius: 10px;
+  }
+  #viewItemModal .view-item-detail span {
+    margin-bottom: 5px;
+    font-size: 0.64rem;
+  }
+  #viewItemModal .view-item-detail strong {
+    font-size: 0.73rem;
+  }
+  #viewItemModal .view-item-history-count {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 0.62rem;
+  }
+  #viewItemModal .item-history-list {
+    gap: 10px;
+    max-height: 350px;
+  }
+  #viewItemModal .item-history-entry {
+    gap: 12px;
+    padding: 13px 14px;
+  }
+
+  #inventoryNotificationPopover {
+    top: 88px;
+    right: 36px;
+    width: min(500px, calc(100vw - 48px));
+    max-height: calc(100vh - 120px);
+    border-radius: 16px;
+  }
+  #inventoryNotificationPopover .inventory-notification-header {
+    gap: 15px;
+    padding: 19px 22px 16px;
+  }
+  #inventoryNotificationPopover .modal-eyebrow {
+    font-size: 0.58rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-header h3 {
+    margin-top: 4px;
+    font-size: 1rem;
+  }
+  #inventoryNotificationPopover .modal-close {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+  #inventoryNotificationPopover .inventory-notification-list {
+    max-height: calc(100vh - 180px);
+    padding: 13px;
+  }
+  #inventoryNotificationPopover .inventory-notification-card {
+    gap: 12px;
+    padding: 15px;
+    border-radius: 12px;
+  }
+  #inventoryNotificationPopover .inventory-notification-card + .inventory-notification-card {
+    margin-top: 10px;
+  }
+  #inventoryNotificationPopover .inventory-notification-card-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 9px;
+    font-size: 0.8rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-card-body > strong {
+    font-size: 0.8rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-card-body p {
+    margin-top: 5px;
+    font-size: 0.7rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-items {
+    gap: 5px;
+    margin: 11px 0;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  #inventoryNotificationPopover .inventory-notification-items span {
+    gap: 5px;
+    font-size: 0.69rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-items small {
+    font-size: 0.61rem;
+  }
+  #inventoryNotificationPopover .inventory-notification-confirm {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (min-width: 1001px) {
+  #inventoryPage1 .inventory-table th {
+    height: 52px;
+    font-size: 0.68rem;
+  }
+  #inventoryPage1 .inventory-table td {
+    height: 86px;
+    font-size: 0.78rem;
+  }
+  #inventoryPage1 .item-cell {
+    gap: 14px;
+  }
+  #inventoryPage1 .item-avatar {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    font-size: 0.88rem;
+  }
+  #inventoryPage1 .item-name {
+    font-size: 0.82rem;
+  }
+  #inventoryPage1 .item-id {
+    font-size: 0.62rem;
+  }
+  #inventoryPage1 .category-badge {
+    padding: 7px 10px;
+    font-size: 0.68rem;
+  }
+  #inventoryPage1 .minimum-value,
+  #inventoryPage1 .expiry-normal,
+  #inventoryPage1 .expiry-warning,
+  #inventoryPage1 .expiry-danger,
+  #inventoryPage1 .no-expiry,
+  #inventoryPage1 .stock-value {
+    font-size: 0.76rem;
+  }
+  #inventoryPage1 .status-badge {
+    padding: 6px 10px;
+    font-size: 0.67rem;
+  }
+  #inventoryPage1 .action-button {
+    width: 40px;
+    height: 40px;
+    font-size: 0.82rem;
+  }
+  #inventoryPage2 .forecast-table th {
+    height: 52px;
+    font-size: 0.62rem;
+  }
+  #inventoryPage2 .forecast-table td {
+    height: 75px;
+    font-size: 0.73rem;
+  }
+  #inventoryPage2 .forecast-item-cell {
+    gap: 12px;
+  }
+  #inventoryPage2 .forecast-item-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 0.8rem;
+  }
+  #inventoryPage2 .forecast-item-name {
+    font-size: 0.73rem;
+  }
+  #inventoryPage2 .forecast-number,
+  #inventoryPage2 .forecast-average,
+  #inventoryPage2 .forecast-estimate,
+  #inventoryPage2 .forecast-restock {
+    font-size: 0.7rem;
+  }
+  #inventoryPage2 .forecast-status-badge {
+    min-height: 33px;
+    padding: 0 12px;
+    font-size: 0.63rem;
+  }
+}

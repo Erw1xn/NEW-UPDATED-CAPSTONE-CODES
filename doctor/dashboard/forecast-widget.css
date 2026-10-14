@@ -570,6 +570,75 @@
   color: #aab8af;
   font-size: 8px;
 }
+
+@media (min-width: 1181px) {
+  .forecast-panel .panel-header {
+    padding: 18px 22px 16px;
+  }
+  .forecast-panel .panel-heading h3 {
+    font-size: 16px;
+  }
+  .forecast-panel .panel-heading .panel-subtitle {
+    font-size: 11.5px;
+  }
+  .forecast-panel .fc-body {
+    gap: 10px;
+  }
+  .fc-stats {
+    gap: 10px;
+  }
+  .fc-stat {
+    min-height: 84px;
+    padding: 12px 14px;
+  }
+  .fc-stat-label {
+    font-size: 10.5px;
+  }
+  .fc-stat-value {
+    font-size: 21px;
+  }
+  .fc-stat-model {
+    font-size: 16px;
+  }
+  .fc-stat-sub {
+    font-size: 10px;
+  }
+  .fc-compare-item {
+    min-height: 56px;
+    padding: 9px 12px;
+  }
+  .fc-compare-text small {
+    font-size: 10px;
+  }
+  .fc-compare-text strong {
+    font-size: 14px;
+  }
+  .fc-compare-tag {
+    font-size: 9px;
+  }
+  .fc-insight {
+    min-height: 42px;
+    padding: 9px 13px;
+    font-size: 11px;
+  }
+  .fc-chart-wrap {
+    height: 195px;
+  }
+  .fc-how {
+    padding: 10px 13px;
+  }
+  .fc-how-step strong {
+    font-size: 10px;
+  }
+  .fc-how-step small {
+    font-size: 9px;
+  }
+  .fc-select-button,
+  .fc-view-link {
+    height: 40px;
+    font-size: 11px;
+  }
+}
 @media (max-width: 1180px) {
   .two-col-grid > .stacked-panel-column:first-child > .panel.forecast-panel {
     height: auto;

@@ -3749,3 +3749,196 @@ button {
     font-size: 8px;
   }
 }
+
+@media (min-width: 1201px) {
+  .payment-modal,
+  .details-modal {
+    max-height: calc(100vh - 36px);
+  }
+  .payment-modal {
+    width: min(760px, calc(100vw - 48px));
+  }
+  .details-modal {
+    width: min(760px, calc(100vw - 48px));
+  }
+  .modal-overlay .payment-modal .modal-header,
+  .modal-overlay .details-modal .modal-header {
+    padding: 22px 30px;
+  }
+  .modal-overlay .payment-modal .modal-label,
+  .modal-overlay .details-modal .modal-label {
+    font-size: 10px;
+  }
+  .modal-overlay .payment-modal .modal-header h2,
+  .modal-overlay .details-modal .modal-header h2 {
+    font-size: 22px;
+  }
+  .modal-overlay .payment-modal #paymentForm {
+    padding: 23px 30px 25px;
+  }
+  .modal-overlay .payment-modal .form-grid {
+    gap: 15px 20px;
+  }
+  .modal-overlay .payment-modal .form-group label {
+    margin-bottom: 7px;
+    font-size: 11.5px;
+  }
+  .modal-overlay .payment-modal .form-group input,
+  .modal-overlay .payment-modal .form-group select,
+  .modal-overlay .payment-modal .form-group textarea,
+  .modal-overlay .payment-modal .amount-input {
+    height: 46px;
+    font-size: 12px;
+  }
+  .modal-overlay .payment-modal .field-help {
+    font-size: 9.5px;
+  }
+  .modal-overlay .payment-modal .payment-method-option {
+    min-height: 108px;
+    padding: 15px 16px;
+  }
+  .modal-overlay .payment-modal .payment-method-option-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .modal-overlay .payment-modal .payment-method-option strong {
+    font-size: 12px;
+  }
+  .modal-overlay .payment-modal .payment-method-option small {
+    font-size: 9.5px;
+  }
+  .modal-overlay .details-modal .details-content {
+    padding: 22px 30px;
+  }
+  .modal-overlay .details-modal .transaction-reference {
+    padding: 16px 18px;
+  }
+  .modal-overlay .details-modal .transaction-reference span,
+  .modal-overlay .details-modal .details-grid span {
+    font-size: 10px;
+  }
+  .modal-overlay .details-modal .transaction-reference strong {
+    font-size: 14px;
+  }
+  .modal-overlay .details-modal .details-grid {
+    gap: 15px 22px;
+  }
+  .modal-overlay .details-modal .details-grid > div {
+    min-height: 56px;
+    padding-bottom: 12px;
+  }
+  .modal-overlay .details-modal .details-grid strong {
+    font-size: 12.5px;
+  }
+  .modal-overlay .details-modal .payment-history-item {
+    padding: 14px 16px;
+  }
+  .modal-overlay .details-modal .payment-history-item-info strong,
+  .modal-overlay .details-modal .payment-history-item-right strong {
+    font-size: 11.5px;
+  }
+  .modal-overlay .details-modal .payment-history-item-info span,
+  .modal-overlay .details-modal .payment-history-item-right span {
+    font-size: 9px;
+  }
+  .collection-drawer {
+    width: min(560px, calc(100vw - 48px));
+  }
+  .collection-drawer-header {
+    padding: 25px 30px 21px;
+  }
+  .collection-drawer-label {
+    font-size: 10px;
+  }
+  .collection-drawer-header h2 {
+    font-size: 21px;
+  }
+  .collection-drawer-header p {
+    font-size: 11.5px;
+  }
+  .collection-drawer-content {
+    padding: 22px 24px 28px;
+  }
+  .collection-period-header h3 {
+    font-size: 14px;
+  }
+  .collection-period-header p,
+  .collection-section-heading p {
+    font-size: 10px;
+  }
+  .collection-page-button {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 10px;
+  }
+  .collection-total-card {
+    min-height: 106px;
+    padding: 19px 22px;
+  }
+  .collection-total-card span {
+    font-size: 10px;
+  }
+  .collection-total-card strong {
+    font-size: 25px;
+  }
+  .collection-section-heading h4 {
+    font-size: 12px;
+  }
+  .payment-method-list {
+    gap: 12px;
+  }
+  .payment-method-item {
+    min-height: 88px;
+    padding: 15px;
+  }
+  .method-left strong,
+  .payment-method-item > strong {
+    font-size: 11.5px;
+  }
+  .method-left span {
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1201px) {
+  .transactions-table th {
+    height: 49px;
+    font-size: 10px;
+  }
+  .transactions-table td {
+    height: 84px;
+    padding: 12px 12px;
+    font-size: 12px;
+  }
+  .patient-cell {
+    gap: 12px;
+  }
+  .patient-avatar,
+  .patient-initials {
+    width: 44px;
+    height: 44px;
+  }
+  .patient-info strong,
+  .patient-cell strong {
+    font-size: 12.5px;
+  }
+  .patient-info span,
+  .patient-cell > span:not(.patient-initials) {
+    font-size: 10px;
+  }
+  .date-cell strong {
+    font-size: 11.5px;
+  }
+  .date-cell span {
+    font-size: 10px;
+  }
+  .status-badge {
+    min-height: 32px;
+    padding: 7px 11px;
+    font-size: 10px;
+  }
+  .action-cell .table-action-button {
+    width: 38px;
+    height: 38px;
+  }
+}
