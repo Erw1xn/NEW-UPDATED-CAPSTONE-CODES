@@ -14,8 +14,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="appointment.css?v=7" />
+    <link rel="stylesheet" href="../../navigation_bar/sidebar.css?v=2" />
+    <link rel="stylesheet" href="appointment.css?v=8" />
     <link rel="stylesheet" href="../profile/profile.css?v=20261015" />
   </head>
   <body>
@@ -280,6 +280,16 @@
         </div>
         <div class="modal-actions">
           <div class="modal-left-actions">
+            <button
+              id="deleteAppointmentBtn"
+              class="btn-delete-hidden"
+              type="button"
+              onclick="deleteAppt()"
+              style="display: none"
+              aria-label="Delete appointment"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
             <button
               id="requestRescheduleBtn"
               class="btn-request-reschedule"

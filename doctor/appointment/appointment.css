@@ -2751,3 +2751,35 @@ body {
     font-size: 9px;
   }
 }
+
+.appointments-shell {
+  border-color: #e3ebe6;
+  box-shadow: 0 10px 30px rgba(20, 57, 36, 0.055);
+}
+
+.panel {
+  border-color: #e5ece8;
+  box-shadow: 0 2px 8px rgba(20, 57, 36, 0.025);
+}
+
+.side-content-header {
+  border-bottom: 1px solid #edf2ef;
+}
+
+.queue-item {
+  border-color: #eaf0ec;
+}
+
+.schedule-main-header {
+  background: #fbfdfc;
+  border-bottom-color: #e9efeb;
+}
+
+.tl-row {
+  border-top: 1px solid #edf2ef;
+  border-bottom: 0;
+}
+
+.tl-row:first-child {
+  border-top: 0;
+}

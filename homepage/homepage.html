@@ -318,41 +318,92 @@
             </div>
             <div class="dentists-grid">
               <article class="dentist-card reveal">
-                <div class="dentist-photo-placeholder">
-                  <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
-                </div>
+                <button
+                  class="dentist-photo"
+                  type="button"
+                  data-full="../img/team/nathalia.jpg"
+                  data-name="Dr. Nathalia Villanueva"
+                  data-role="Dentist"
+                  aria-label="View larger photo of Dr. Nathalia Villanueva"
+                >
+                  <img
+                    src="../img/team/nathalia.jpg"
+                    alt="Dr. Nathalia Villanueva"
+                    loading="lazy"
+                  />
+                  <span class="photo-zoom"
+                    ><i
+                      class="fa-solid fa-magnifying-glass-plus"
+                      aria-hidden="true"
+                    ></i
+                  ></span>
+                </button>
                 <div class="dentist-info">
                   <span class="dentist-role">DENTIST</span>
                   <h3>Dr. Nathalia Villanueva</h3>
                   <p>
-                    Provides dental care and supports patients throughout their
-                    treatment journey.
+                    Provides general dental care, from check-ups and cleaning to
+                    fillings, with a gentle and patient-friendly approach.
                   </p>
                 </div>
               </article>
               <article class="dentist-card reveal">
-                <div class="dentist-photo-placeholder">
-                  <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
-                </div>
+                <button
+                  class="dentist-photo"
+                  type="button"
+                  data-full="../img/team/marren.jpg"
+                  data-name="Dr. Marren Geronimo"
+                  data-role="Dentist"
+                  aria-label="View larger photo of Dr. Marren Geronimo"
+                >
+                  <img
+                    src="../img/team/marren.jpg"
+                    alt="Dr. Marren Geronimo"
+                    loading="lazy"
+                  />
+                  <span class="photo-zoom"
+                    ><i
+                      class="fa-solid fa-magnifying-glass-plus"
+                      aria-hidden="true"
+                    ></i
+                  ></span>
+                </button>
                 <div class="dentist-info">
                   <span class="dentist-role">DENTIST</span>
                   <h3>Dr. Marren Geronimo</h3>
                   <p>
-                    Provides dental care and supports patients throughout their
-                    treatment journey.
+                    Provides dental care and treatment for common oral health
+                    concerns, focused on your comfort and long-term smile.
                   </p>
                 </div>
               </article>
               <article class="dentist-card reveal">
-                <div class="dentist-photo-placeholder">
-                  <i class="fa-solid fa-user-nurse" aria-hidden="true"></i>
-                </div>
+                <button
+                  class="dentist-photo"
+                  type="button"
+                  data-full="../img/team/nancy.jpg"
+                  data-name="Nancy Fe"
+                  data-role="Staff"
+                  aria-label="View larger photo of Nancy Fe"
+                >
+                  <img
+                    src="../img/team/nancy.jpg"
+                    alt="Nancy Fe"
+                    loading="lazy"
+                  />
+                  <span class="photo-zoom"
+                    ><i
+                      class="fa-solid fa-magnifying-glass-plus"
+                      aria-hidden="true"
+                    ></i
+                  ></span>
+                </button>
                 <div class="dentist-info">
                   <span class="dentist-role">STAFF</span>
                   <h3>Nancy Fe</h3>
                   <p>
-                    Supports clinic operations and assists with the patient
-                    experience and appointment process.
+                    Your first point of contact. Helps with clinic operations,
+                    appointments, and answering your questions.
                   </p>
                 </div>
               </article>
@@ -601,6 +652,30 @@
     >
       <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
     </button>
+    <div
+      class="photo-lightbox"
+      id="photoLightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Team member photo"
+      aria-hidden="true"
+    >
+      <button
+        class="lightbox-close"
+        id="lightboxClose"
+        type="button"
+        aria-label="Close photo"
+      >
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+      <figure class="lightbox-figure">
+        <img id="lightboxImg" src="" alt="" />
+        <figcaption>
+          <strong id="lightboxName"></strong>
+          <span id="lightboxRole"></span>
+        </figcaption>
+      </figure>
+    </div>
     <div
       class="login-modal-overlay"
       id="loginModalOverlay"

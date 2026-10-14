@@ -106,7 +106,7 @@ img {
   right: 0;
   z-index: 3000;
   width: 100%;
-  height: 68px;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -382,7 +382,6 @@ img {
   );
   pointer-events: none;
 }
-
 .info-bar {
   position: relative;
   z-index: 5;
@@ -712,20 +711,55 @@ img {
   border-color: #bbf7d0;
   box-shadow: var(--sh-md);
 }
-.dentist-photo-placeholder {
-  width: 112px;
-  height: 112px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.dentist-photo {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: block;
+  flex-shrink: 0;
   margin-bottom: 26px;
+  padding: 0;
+  overflow: hidden;
+  border: none;
   border-radius: 50%;
   background: var(--mint);
-  color: var(--g-d);
-  font-size: 2.6rem;
+  cursor: zoom-in;
   box-shadow:
     0 0 0 8px #fff,
     0 0 0 10px #bbf7d0;
+  transition: box-shadow 0.3s ease;
+}
+.dentist-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center 18%;
+  transition: transform 0.4s ease;
+}
+.dentist-photo:hover {
+  box-shadow:
+    0 0 0 8px #fff,
+    0 0 0 10px var(--g);
+}
+.dentist-photo:hover img {
+  transform: scale(1.06);
+}
+.photo-zoom {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 59, 44, 0.45);
+  color: #fff;
+  font-size: 1.3rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.dentist-photo:hover .photo-zoom,
+.dentist-photo:focus-visible .photo-zoom {
+  opacity: 1;
 }
 .dentist-role {
   display: inline-block;
@@ -748,6 +782,84 @@ img {
   color: var(--mut);
   font-size: 0.82rem;
   line-height: 1.7;
+}
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 59, 44, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.3s ease;
+}
+.photo-lightbox.active {
+  opacity: 1;
+  visibility: visible;
+}
+.lightbox-figure {
+  max-width: min(92vw, 520px);
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+.photo-lightbox.active .lightbox-figure {
+  transform: scale(1);
+}
+.lightbox-figure img {
+  width: auto;
+  max-width: 100%;
+  max-height: 78vh;
+  display: block;
+  margin: 0 auto;
+  border: 6px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+.lightbox-figure figcaption {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lightbox-figure figcaption strong {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.lightbox-figure figcaption span {
+  color: var(--lime);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--dark);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.lightbox-close:hover {
+  background: #fff;
+  transform: scale(1.06);
 }
 .about-section {
   background:
@@ -1612,6 +1724,10 @@ a:focus-visible {
   .login-modal-container {
     width: min(520px, 96%);
     height: 82vh;
+  }
+  .lightbox-close {
+    top: 14px;
+    right: 14px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

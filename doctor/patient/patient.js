@@ -6,6 +6,9 @@ const APPOINTMENTS_STORAGE_KEY = "appointments";
 const LEGACY_APPOINTMENTS_STORAGE_KEY = "dentanueva_appointments";
 let patients = [];
 let doctorAppointments = [];
+const PATIENTS_PER_PAGE = 10;
+let currentPatientPage = 1;
+let patientPaginationContainer = null;
 let currentDoctorDentistId = null;
 let currentUserFromDatabase = null;
 let currentPatientId = null;
@@ -642,8 +645,15 @@ function bindPatientEvents() {
     }
     openEditPatientModal(patientId);
   });
-  patientSearch?.addEventListener("input", renderPatients);
-  sortPatients?.addEventListener("change", renderPatients);
+  patientSearch?.addEventListener("input", () => {
+    currentPatientPage = 1;
+    renderPatients();
+  });
+
+  sortPatients?.addEventListener("change", () => {
+    currentPatientPage = 1;
+    renderPatients();
+  });
 }
 function openAddPatientModal() {
   currentPatientId = null;
@@ -786,12 +796,17 @@ function closePatientModal() {
   $("patientModalBackdrop")?.setAttribute("aria-hidden", "true");
   currentPatientId = null;
 }
+
 function renderPatients() {
   if (!patientTableBody) {
     return;
   }
+
+  ensurePatientPagination();
+
   let filteredPatients = [...getDoctorPatients()];
   const search = patientSearch?.value?.trim().toLowerCase() || "";
+
   if (search) {
     filteredPatients = filteredPatients.filter((patient) => {
       const searchable = [
@@ -804,52 +819,189 @@ function renderPatients() {
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
+
       return searchable.includes(search);
     });
   }
+
   const sort = sortPatients?.value || "newest";
+
   filteredPatients.sort((a, b) => {
     if (sort === "nameAsc" || sort === "nameDesc") {
       const nameA = getFullName(a).toLowerCase();
       const nameB = getFullName(b).toLowerCase();
+
       return sort === "nameAsc"
         ? nameA.localeCompare(nameB)
         : nameB.localeCompare(nameA);
     }
+
     const dateA = new Date(a.createdAt || a.updatedAt || 0).getTime();
     const dateB = new Date(b.createdAt || b.updatedAt || 0).getTime();
+
     return sort === "oldest" ? dateA - dateB : dateB - dateA;
   });
+
   patientTableBody.innerHTML = "";
-  const displayedPatientCount = filteredPatients.length;
+
+  const totalPatients = filteredPatients.length;
+  const totalPages = Math.ceil(totalPatients / PATIENTS_PER_PAGE);
+
+  if (currentPatientPage > totalPages) {
+    currentPatientPage = Math.max(totalPages, 1);
+  }
+
   if (patientCountLabel) {
-    patientCountLabel.textContent = `${displayedPatientCount} ${
-      displayedPatientCount === 1 ? "patient" : "patients"
+    patientCountLabel.textContent = `${totalPatients} ${
+      totalPatients === 1 ? "patient" : "patients"
     }`;
   }
-  if (!displayedPatientCount) {
+
+  if (totalPatients === 0) {
     if (patientEmptyState) {
       patientEmptyState.hidden = false;
     }
+
+    patientPaginationContainer.hidden = true;
+    patientPaginationContainer.innerHTML = "";
     updateTotalPatientCount();
     return;
   }
+
   if (patientEmptyState) {
     patientEmptyState.hidden = true;
   }
-  filteredPatients.forEach((patient) => {
+
+  const startIndex = (currentPatientPage - 1) * PATIENTS_PER_PAGE;
+  const endIndex = Math.min(startIndex + PATIENTS_PER_PAGE, totalPatients);
+
+  filteredPatients.slice(startIndex, endIndex).forEach((patient) => {
     const row = document.createElement("tr");
     row.innerHTML = createPatientRow(patient);
     row.dataset.patientOpen = patient.id || patient.patientId || "";
     patientTableBody.appendChild(row);
   });
+
+  renderPatientPagination(totalPatients, startIndex, endIndex);
   updateTotalPatientCount();
-  if (patientCountLabel) {
-    patientCountLabel.textContent = `${displayedPatientCount} ${
-      displayedPatientCount === 1 ? "patient" : "patients"
-    }`;
-  }
 }
+
+function ensurePatientPagination() {
+  if (patientPaginationContainer) {
+    return;
+  }
+
+  const tableWrapper = patientTableBody?.closest(".patient-table-wrapper");
+
+  if (!tableWrapper) {
+    return;
+  }
+
+  patientPaginationContainer = document.createElement("div");
+  patientPaginationContainer.className = "patient-pagination";
+  patientPaginationContainer.id = "patientPagination";
+  patientPaginationContainer.hidden = true;
+  tableWrapper.insertAdjacentElement("afterend", patientPaginationContainer);
+
+  patientPaginationContainer.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-page]");
+
+    if (!button || button.disabled) {
+      return;
+    }
+
+    const requestedPage = Number(button.dataset.page);
+
+    if (!Number.isInteger(requestedPage) || requestedPage < 1) {
+      return;
+    }
+
+    currentPatientPage = requestedPage;
+    renderPatients();
+  });
+}
+
+function renderPatientPagination(totalPatients, startIndex, endIndex) {
+  const totalPages = Math.ceil(totalPatients / PATIENTS_PER_PAGE);
+
+  patientPaginationContainer.hidden = totalPages <= 1;
+
+  if (totalPages <= 1) {
+    patientPaginationContainer.innerHTML = "";
+    return;
+  }
+
+  const pageButton = (page, label = page, active = false) => `
+    <button
+      type="button"
+      class="patient-page-button${active ? " active" : ""}"
+      data-page="${page}"
+      ${active ? 'aria-current="page"' : ""}
+      aria-label="Page ${page}"
+      ${page === currentPatientPage ? "disabled" : ""}
+    >${label}</button>
+  `;
+
+  let pageButtons = "";
+
+  pageButtons += `
+    <button
+      type="button"
+      class="patient-page-button patient-page-arrow"
+      data-page="${currentPatientPage - 1}"
+      aria-label="Previous page"
+      ${currentPatientPage === 1 ? "disabled" : ""}
+    >
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+  `;
+
+  const pagesToShow = new Set([1, totalPages]);
+
+  for (
+    let page = Math.max(1, currentPatientPage - 2);
+    page <= Math.min(totalPages, currentPatientPage + 2);
+    page++
+  ) {
+    pagesToShow.add(page);
+  }
+
+  const visiblePages = [...pagesToShow].sort((a, b) => a - b);
+  let previousPage = 0;
+
+  visiblePages.forEach((page) => {
+    if (previousPage && page - previousPage > 1) {
+      pageButtons += '<span class="patient-page-ellipsis">…</span>';
+    }
+
+    pageButtons += pageButton(page, page, page === currentPatientPage);
+
+    previousPage = page;
+  });
+
+  pageButtons += `
+    <button
+      type="button"
+      class="patient-page-button patient-page-arrow"
+      data-page="${currentPatientPage + 1}"
+      aria-label="Next page"
+      ${currentPatientPage === totalPages ? "disabled" : ""}
+    >
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  `;
+
+  patientPaginationContainer.innerHTML = `
+    <div class="patient-pagination-info">
+      Showing <strong>${startIndex + 1}–${endIndex}</strong>
+      of <strong>${totalPatients}</strong> patients
+    </div>
+    <nav class="patient-pagination-controls" aria-label="Patient list pages">
+      ${pageButtons}
+    </nav>
+  `;
+}
+
 function createPatientRow(patient) {
   const name = getFullName(patient) || "Unnamed Patient";
   const patientId = patient.patientId || patient.id || "N/A";

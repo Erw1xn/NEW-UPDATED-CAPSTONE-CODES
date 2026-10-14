@@ -4705,7 +4705,10 @@ textarea:focus-visible {
     flex-basis: 40px;
     font-size: 15px;
   }
-  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-header h3 {
+  #medicalResultModalBackdrop
+    #medicalResultBody
+    .medical-record-card-header
+    h3 {
     font-size: 15px;
   }
   #medicalResultModalBackdrop #medicalResultBody .medical-record-card-body {
@@ -4715,7 +4718,10 @@ textarea:focus-visible {
   #medicalResultModalBackdrop
     #medicalResultBody
     .medical-record-summary-eyebrow,
-  #medicalResultModalBackdrop #medicalResultBody .medical-record-card-header span,
+  #medicalResultModalBackdrop
+    #medicalResultBody
+    .medical-record-card-header
+    span,
   #medicalResultModalBackdrop #medicalResultBody .medical-record-field-label {
     font-size: 9px;
   }
@@ -6505,7 +6511,9 @@ textarea:focus-visible {
   #patientPageTreatments > .patient-record-section {
     padding: 32px;
   }
-  #patientPageTreatments > .patient-record-section > .patient-record-section-header {
+  #patientPageTreatments
+    > .patient-record-section
+    > .patient-record-section-header {
     margin-bottom: 24px;
   }
   #patientPageTreatments .patient-record-edit-btn {
@@ -6575,12 +6583,17 @@ textarea:focus-visible {
     padding: 17px 20px;
     border-radius: 12px;
   }
-  #patientPageTreatments .treatment-history-list .patient-record-appointment-date {
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-date {
     width: 132px;
     min-width: 132px;
     padding-right: 20px;
   }
-  #patientPageTreatments .treatment-history-list .patient-record-appointment-date span {
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-date
+    span {
     font-size: 10px;
   }
   #patientPageTreatments
@@ -6589,13 +6602,21 @@ textarea:focus-visible {
     .treatment-history-time {
     font-size: 11.5px;
   }
-  #patientPageTreatments .treatment-history-list .patient-record-appointment-info {
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-info {
     gap: 6px;
   }
-  #patientPageTreatments .treatment-history-list .patient-record-appointment-info strong {
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-info
+    strong {
     font-size: 13.5px;
   }
-  #patientPageTreatments .treatment-history-list .patient-record-appointment-info span,
+  #patientPageTreatments
+    .treatment-history-list
+    .patient-record-appointment-info
+    span,
   #patientPageTreatments .treatment-consumed-summary {
     font-size: 10.5px;
   }
@@ -6688,5 +6709,145 @@ textarea:focus-visible {
   .patient-list-card .patient-action-trigger {
     width: 37px;
     height: 37px;
+  }
+}
+
+.patient-list-card {
+  border-color: #e1e9e4;
+  box-shadow:
+    0 10px 28px rgba(20, 57, 36, 0.045),
+    0 2px 6px rgba(20, 57, 36, 0.025);
+}
+
+.patient-list-card .patient-card-header {
+  background: #fcfdfc;
+  border-bottom-color: #e9efeb;
+}
+
+.patient-list-card .patient-table th {
+  background: #f7faf8;
+  color: #68766e;
+  border-bottom-color: #e5ece8;
+}
+
+.patient-list-card .patient-table td {
+  border-bottom-color: #edf2ef;
+}
+
+.patient-list-card .patient-table tbody tr:hover {
+  background: #f7fbf8;
+}
+
+.patient-list-card .patient-avatar {
+  background: #e8f5ec;
+  color: #176b38;
+}
+
+.patient-list-card .appointment-completed {
+  border-radius: 999px;
+}
+
+.patient-list-card .patient-action-trigger {
+  border-color: #e2e9e4;
+  border-radius: 10px;
+}
+
+.patient-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  background: #fff;
+  border-radius: 0 0 16px 16px;
+}
+
+.patient-pagination[hidden] {
+  display: none !important;
+}
+
+.patient-pagination-info {
+  color: var(--text-soft);
+  font-size: 11px;
+}
+
+.patient-pagination-info strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.patient-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.patient-page-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 500;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.patient-page-button:hover:not(:disabled) {
+  border-color: #b8d9c3;
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.patient-page-button.active {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
+.patient-page-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.patient-page-ellipsis {
+  padding: 0 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .patient-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .patient-pagination-info {
+    font-size: 10px;
+  }
+
+  .patient-pagination-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .patient-page-button {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
   }
 }

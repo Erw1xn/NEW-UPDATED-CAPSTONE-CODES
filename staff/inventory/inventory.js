@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const CONFIRMED_NOTIFICATIONS_KEY =
     "dentanueva_inventory_confirmed_notifications";
   const RESET_VERSION = "inventory-reset-2026-08-16-v1";
-  const INVENTORY_PAGE_SIZE = 15;
+  const INVENTORY_PAGE_SIZE = 10;
   void loadInventoryNotificationsFromDatabase();
   const INVENTORY_CATEGORIES = [
     "Restorative Materials",

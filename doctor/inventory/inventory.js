@@ -265,6 +265,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         button.removeAttribute("aria-current");
       }
     });
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      window.scrollTo(0, 0);
+    }
     if (
       requestedPage === 2 &&
       typeof window.refreshInventoryForecast === "function"

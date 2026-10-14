@@ -3151,3 +3151,459 @@ textarea:focus-visible {
     font-size: 15px;
   }
 }
+
+.medical-records-main {
+  padding: 26px clamp(20px, 2.5vw, 36px) 36px;
+}
+.medical-records-content {
+  max-width: 1480px;
+}
+.medical-records-header {
+  min-height: 84px;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+  border-radius: 16px;
+}
+.medical-records-heading h1 {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.medical-records-heading p {
+  font-size: 12.5px;
+}
+.start-record-btn {
+  min-height: 42px;
+  height: auto;
+  padding: 0 18px;
+}
+.record-profile-card,
+.record-progress-card,
+.patient-record-navigation {
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.record-profile-card {
+  margin-bottom: 18px;
+  padding: 22px 24px;
+}
+.record-profile-top {
+  align-items: center;
+  padding-bottom: 16px;
+}
+.record-profile-avatar {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+}
+.record-profile-details {
+  padding-top: 15px;
+}
+.profile-detail {
+  padding: 0 18px;
+}
+.detail-label {
+  margin-bottom: 6px;
+}
+.record-progress-card {
+  margin-bottom: 18px;
+  padding: 20px 24px;
+}
+.progress-card-heading h2 {
+  font-size: 15px;
+}
+.progress-card-heading h2::before {
+  content: none;
+}
+.progress-card-heading p {
+  font-size: 11.5px;
+}
+.overall-progress {
+  margin-top: 14px;
+}
+.overall-progress-track {
+  height: 7px;
+}
+.record-checklist {
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.record-check-item,
+.record-check-item:first-child {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #f7faf8;
+}
+.record-check-item:first-child {
+  padding-left: 10px;
+}
+.record-check-item:hover,
+.record-check-item.complete {
+  border: 0;
+  background: #f2f8f4;
+}
+.record-check-item strong {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  color: #405047;
+  font-size: 10.5px;
+  white-space: normal;
+}
+.check-complete {
+  position: static;
+  flex: 0 0 auto;
+  margin: 0;
+}
+.patient-record-navigation {
+  padding: 20px 22px 14px;
+  gap: 12px;
+}
+.patient-record-label {
+  min-height: 0;
+  padding-bottom: 12px;
+}
+.patient-record-tabs {
+  gap: 8px;
+}
+.patient-record-tab {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 11px;
+}
+.patient-record-panel.active {
+  gap: 16px;
+}
+.patient-record-panel > .patient-record-section,
+.patient-record-panel > .patient-overview-card,
+.patient-record-panel > .patient-record-table-card,
+.patient-record-panel > .patient-record-empty {
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 1100px) {
+  .medical-records-main {
+    padding: 22px 24px 32px;
+  }
+  .record-checklist {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .record-check-item,
+  .record-check-item:first-child {
+    padding: 8px 10px;
+  }
+  .record-check-item:nth-child(odd) {
+    padding-left: 10px;
+    border-left: 0;
+  }
+  .record-check-item:nth-child(n + 3) {
+    margin-top: 0;
+    padding-top: 8px;
+    border-top: 0;
+  }
+}
+@media (max-width: 800px) {
+  .medical-records-main {
+    padding: 18px 20px 28px;
+  }
+  .medical-records-header {
+    padding: 16px 18px;
+  }
+  .record-profile-card,
+  .record-progress-card {
+    padding: 18px;
+  }
+  .patient-record-navigation {
+    padding: 16px 16px 12px;
+  }
+  .patient-record-tabs {
+    padding-bottom: 3px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd8cf transparent;
+  }
+  .patient-record-tab {
+    flex: 0 0 auto;
+  }
+  .record-checklist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .record-check-item:nth-child(odd) {
+    padding-left: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .medical-records-main {
+    padding: 14px 14px 24px;
+  }
+  .medical-records-header {
+    margin-bottom: 14px;
+    padding: 14px;
+  }
+  .medical-records-heading {
+    min-height: 0;
+    padding-left: 0;
+  }
+  .medical-records-heading h1 {
+    font-size: 19px;
+  }
+  .medical-records-heading p {
+    font-size: 11.5px;
+  }
+  .record-profile-card,
+  .record-progress-card {
+    margin-bottom: 14px;
+    padding: 16px;
+  }
+  .record-profile-top {
+    gap: 12px;
+  }
+  .record-profile-avatar {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+  .record-profile-identity h2 {
+    font-size: 16px;
+  }
+  .record-profile-details {
+    gap: 14px 0;
+  }
+  .profile-detail:nth-child(odd) {
+    padding-right: 12px;
+  }
+  .profile-detail:nth-child(even) {
+    padding-left: 12px;
+  }
+  .progress-card-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .progress-card-heading h2 {
+    font-size: 14px;
+  }
+  .progress-card-heading p {
+    font-size: 11px;
+  }
+  .progress-percentage {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+  .record-checklist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .record-check-item,
+  .record-check-item:first-child,
+  .record-check-item:nth-child(odd) {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+    padding: 8px 9px;
+  }
+  .record-check-item strong {
+    font-size: 9.5px;
+  }
+  .patient-record-navigation {
+    padding: 15px 14px 12px;
+  }
+  .patient-record-tab {
+    min-height: 38px;
+    padding: 0 11px;
+    font-size: 10.5px;
+  }
+  .patient-record-panel.active {
+    gap: 12px;
+  }
+}
+@media (max-width: 420px) {
+  .record-checklist {
+    grid-template-columns: 1fr;
+  }
+  .record-check-item,
+  .record-check-item:first-child,
+  .record-check-item:nth-child(odd) {
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 600px) {
+  .medical-records-layout {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  #sidebar-container {
+    position: static;
+    width: 100%;
+    height: 0;
+    min-height: 0;
+    flex-shrink: 0;
+  }
+
+  .medical-records-main {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 14px 28px;
+  }
+
+  .medical-records-header {
+    min-width: 0;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .mobile-header {
+    top: 24px;
+    left: 20px;
+    z-index: 1000;
+  }
+
+  .medical-records-heading {
+    min-width: 0;
+    min-height: 44px;
+    padding-left: 52px;
+    pointer-events: none;
+  }
+
+  .medical-records-heading h1,
+  .medical-records-heading p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .medical-records-header-actions,
+  .medical-records-header-actions .start-record-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .start-record-btn {
+    min-height: 44px;
+    white-space: normal;
+  }
+
+  .record-profile-card,
+  .record-progress-card,
+  .patient-record-navigation {
+    min-width: 0;
+  }
+
+  .record-profile-top {
+    gap: 11px;
+  }
+
+  .record-profile-identity {
+    min-width: 0;
+  }
+
+  .record-profile-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 0;
+  }
+
+  .profile-detail,
+  .profile-detail:nth-child(odd),
+  .profile-detail:nth-child(even) {
+    min-width: 0;
+    padding: 0 10px;
+    border-left: 1px solid #edf1ee;
+  }
+
+  .profile-detail:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .profile-detail strong {
+    overflow-wrap: anywhere;
+  }
+
+  .progress-card-heading {
+    min-width: 0;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .progress-card-heading > div:first-child {
+    min-width: 0;
+  }
+
+  .progress-percentage {
+    flex: 0 0 auto;
+    min-height: 32px;
+  }
+
+  .record-check-item,
+  .record-check-item:first-child,
+  .record-check-item:nth-child(odd) {
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: #f7faf8;
+  }
+
+  .record-check-item strong {
+    font-size: 10px;
+    line-height: 1.4;
+    white-space: normal;
+  }
+
+  .patient-record-navigation {
+    overflow: hidden;
+  }
+
+  .patient-record-tabs {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 360px) {
+  .medical-records-main {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .mobile-header {
+    left: 16px;
+  }
+
+  .medical-records-heading {
+    padding-left: 50px;
+  }
+
+  .record-profile-details {
+    gap: 13px 0;
+  }
+
+  .profile-detail,
+  .profile-detail:nth-child(odd),
+  .profile-detail:nth-child(even) {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .profile-detail:nth-child(odd) {
+    padding-left: 0;
+  }
+}

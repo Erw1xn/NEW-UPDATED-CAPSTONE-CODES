@@ -8,7 +8,7 @@
   --btn-size: 32px;
   position: sticky;
   top: 0;
-  width: 248px;
+  width: 256px;
   height: 100vh;
   background:
     radial-gradient(
@@ -25,13 +25,13 @@
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 20px 0 18px 0;
+  padding: 18px 0 16px;
   flex-shrink: 0;
   transition:
     width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1050;
-  box-shadow: 4px 0 24px rgba(7, 59, 44, 0.18);
+  box-shadow: 4px 0 22px rgba(7, 59, 44, 0.16);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -63,13 +63,13 @@
 .sidebar-patient-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
   width: calc(100% - 28px);
-  min-height: 62px;
-  margin: 0 14px 18px 14px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  min-height: 66px;
+  margin: 0 14px 20px;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.06);
   transition:
@@ -81,9 +81,9 @@
   border-color: rgba(217, 249, 157, 0.3);
 }
 .sidebar-patient-avatar {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,7 +115,7 @@
 .sidebar-patient-name {
   display: block;
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -126,9 +126,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 5px;
+  margin-top: 6px;
   color: #bbf7d0;
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
@@ -144,7 +144,7 @@
 .sidebar-menu {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   padding: 0 12px;
   flex-grow: 1;
   overflow: hidden;
@@ -153,13 +153,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 13px;
+  min-height: 46px;
+  padding: 11px 14px;
   color: #c2e7d3;
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 500;
-  border-radius: 14px;
+  border-radius: 12px;
   background: transparent;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -169,7 +170,7 @@
   color: #ffffff;
 }
 .menu-item.active {
-  background-color: rgba(217, 249, 157, 0.14);
+  background-color: rgba(217, 249, 157, 0.17);
   color: #ffffff;
   font-weight: 600;
 }
@@ -179,13 +180,13 @@
   top: 50%;
   left: -12px;
   width: 4px;
-  height: 24px;
+  height: 26px;
   border-radius: 0 4px 4px 0;
   background-color: #d9f99d;
   transform: translateY(-50%);
 }
 .menu-item i {
-  width: 20px;
+  width: 21px;
   font-size: 1.05rem;
   text-align: center;
   transition:
@@ -208,21 +209,22 @@
 }
 .sidebar-footer {
   flex-shrink: 0;
-  padding: 0 12px;
+  padding: 0 12px 2px;
   margin-top: auto;
   overflow: hidden;
 }
 .sidebar-footer .btn-logout {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 13px;
   width: 100%;
-  padding: 12px 14px;
+  min-height: 46px;
+  padding: 11px 14px;
   background-color: transparent;
   color: #fecaca;
-  border-radius: 14px;
+  border-radius: 12px;
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 500;
   white-space: nowrap;
   border: none;
@@ -241,7 +243,7 @@
 .sidebar-footer-divider {
   width: 100%;
   height: 1px;
-  margin: 8px 0 0 0;
+  margin: 10px 0 0;
   background-color: rgba(255, 255, 255, 0.12);
 }
 .toggle-btn {
@@ -580,9 +582,9 @@ body.logout-modal-open {
     display: none;
   }
   .sidebar.collapsed .sidebar-patient-avatar {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
   }
   .sidebar.collapsed .sidebar-menu {
     padding-left: 10px;

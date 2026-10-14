@@ -2842,9 +2842,317 @@ textarea:focus-visible {
 .detail-actions #deleteAppointmentBtn:focus-visible {
   background: transparent;
   border-color: transparent;
-  color: rgba(23, 34, 27, 0.4);
+  color: rgba(23, 34, 27, 0.16);
   transform: none;
 }
 .detail-actions #deleteAppointmentBtn:disabled {
   cursor: progress;
+}
+
+.page-shell {
+  max-width: 1480px;
+  padding: 26px clamp(20px, 2.5vw, 36px) 36px;
+}
+.page-header {
+  min-height: 84px;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+  border-radius: 16px;
+}
+.page-header h1 {
+  font-size: 22px;
+}
+.page-header p {
+  font-size: 12.5px;
+}
+.header-book-btn {
+  min-height: 42px;
+}
+.top-layout {
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.55fr);
+  gap: 18px;
+  align-items: stretch;
+}
+.panel,
+.calendar-panel {
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+.panel {
+  min-width: 0;
+}
+.calendar-panel {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 22px;
+}
+.upcoming-panel {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 380px;
+}
+.upcoming-panel-header {
+  min-height: 78px;
+  padding: 17px 22px;
+}
+.upcoming-content {
+  min-height: 0;
+  padding: 20px 22px;
+}
+.upcoming-card-content {
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 13px;
+}
+.upcoming-card-content > div:first-child {
+  padding-right: 145px;
+}
+.upcoming-schedule {
+  gap: 9px;
+  padding-top: 14px;
+  padding-right: 126px;
+}
+.upcoming-date,
+.upcoming-time-range {
+  min-height: 36px;
+  padding: 0 12px;
+}
+.calendar-panel .calendar-header {
+  margin-bottom: 16px;
+}
+.calendar-nav-btns button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.calendar-grid-days {
+  gap: 4px;
+}
+.day {
+  min-height: 40px;
+  border-radius: 10px;
+}
+.calendar-legend {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #edf1ee;
+}
+
+@media (max-width: 1100px) and (min-width: 851px) {
+  .top-layout {
+    grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.3fr);
+    gap: 16px;
+  }
+  .calendar-panel {
+    padding: 18px;
+  }
+  .upcoming-panel-header {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+  .upcoming-content {
+    padding: 16px;
+  }
+  .upcoming-card-content {
+    padding: 18px;
+  }
+}
+@media (max-width: 850px) {
+  .top-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .upcoming-panel,
+  .calendar-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .upcoming-panel {
+    min-height: 280px;
+  }
+  .calendar-panel {
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .page-shell {
+    padding: 18px 18px 28px;
+  }
+  .page-header {
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .page-header h1 {
+    font-size: 20px;
+  }
+  .upcoming-panel-header {
+    padding: 16px 18px;
+  }
+  .upcoming-content {
+    padding: 16px 18px;
+  }
+  .upcoming-card-content > div:first-child {
+    padding-right: 125px;
+  }
+  .upcoming-schedule {
+    padding-right: 110px;
+  }
+}
+@media (max-width: 600px) {
+  .page-shell {
+    padding: 14px 14px 24px;
+  }
+  .page-header {
+    padding: 14px;
+  }
+  .page-header-actions {
+    gap: 10px;
+  }
+  .header-book-btn {
+    min-height: 40px;
+    min-width: 0;
+    padding: 0 14px;
+  }
+  .upcoming-panel {
+    min-height: 0;
+  }
+  .upcoming-card-content > div:first-child {
+    padding-right: 0;
+  }
+  .upcoming-schedule {
+    padding-right: 0;
+  }
+  .calendar-panel {
+    padding: 16px;
+  }
+  .day {
+    min-height: 38px;
+  }
+}
+@media (max-width: 480px) {
+  .page-header h1 {
+    font-size: 18px;
+  }
+  .page-header p {
+    font-size: 11.5px;
+  }
+  .upcoming-panel-header {
+    padding: 14px 16px;
+  }
+  .upcoming-content {
+    padding: 14px;
+  }
+  .upcoming-card-content {
+    gap: 14px;
+    padding: 14px;
+  }
+  .calendar-panel {
+    padding: 14px;
+  }
+  .calendar-panel h4 {
+    font-size: 15px;
+  }
+  .calendar-nav-btns button {
+    width: 34px;
+    height: 34px;
+  }
+  .calendar-grid-days {
+    gap: 2px;
+  }
+  .day {
+    min-height: 36px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-header,
+  .page-heading,
+  .page-header-actions,
+  .reschedule-alert,
+  .booking-restriction-alert,
+  .booking-warning-alert {
+    min-width: 0;
+  }
+
+  .page-header h1,
+  .page-header p,
+  .reschedule-alert p,
+  .booking-restriction-alert p,
+  .booking-warning-alert p {
+    overflow-wrap: anywhere;
+  }
+
+  .reschedule-alert-content,
+  .booking-restriction-alert > div:last-child,
+  .booking-warning-alert > div:last-child {
+    min-width: 0;
+  }
+
+  .calendar-panel {
+    width: 100%;
+  }
+
+  .calendar-grid-days {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .day {
+    min-height: 40px;
+  }
+
+  .modal-container {
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .modal-body {
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  .modal-actions .btn-primary,
+  .modal-actions .btn-secondary,
+  .modal-actions .btn-request {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .page-shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .page-header {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .page-header-actions {
+    gap: 8px;
+  }
+
+  .header-book-btn {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
+  .appointment-info summary {
+    width: 40px;
+    height: 40px;
+  }
+
+  .calendar-panel {
+    padding: 12px;
+  }
+
+  .calendar-grid-days {
+    gap: 1px;
+  }
+
+  .day {
+    min-height: 38px;
+    font-size: 11px;
+  }
 }

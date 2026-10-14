@@ -2054,3 +2054,241 @@ button {
     max-height: calc(100vh - 20px);
   }
 }
+
+.payments-main {
+  padding: 26px clamp(20px, 2.5vw, 36px) 36px;
+}
+.payments-content {
+  max-width: 1480px;
+}
+.payments-page-header {
+  min-height: 84px;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+  border-radius: 16px;
+}
+.payments-heading h1 {
+  margin-bottom: 5px;
+  font-size: 22px;
+}
+.payments-heading p {
+  font-size: 12.5px;
+}
+.payment-summary-grid {
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.payment-summary-card {
+  min-height: 116px;
+  padding: 18px 22px;
+  border-radius: 16px;
+}
+.payment-summary-card strong {
+  font-size: 23px;
+}
+.payment-history-card {
+  border-radius: 16px;
+}
+.payment-history-header {
+  min-height: 76px;
+  padding: 16px 22px;
+}
+.payment-history-header h2 {
+  font-size: 16px;
+}
+.payment-history-header p {
+  font-size: 11.5px;
+}
+.transaction-count,
+.export-pdf-btn {
+  min-height: 34px;
+}
+.payment-filters {
+  min-height: 48px;
+  padding: 8px 22px;
+  background: #fbfcfb;
+}
+.payment-table-wrapper {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd8cf transparent;
+}
+.payment-table {
+  min-width: 1060px;
+}
+.payment-table th:first-child,
+.payment-table td:first-child {
+  padding-left: 22px;
+}
+.payment-table th:last-child,
+.payment-table td:last-child {
+  padding-right: 22px;
+}
+
+@media (max-width: 800px) {
+  .payments-main {
+    padding: 16px 18px 28px;
+  }
+  .payments-page-header {
+    min-height: 0;
+    padding: 16px 18px;
+  }
+  .payments-heading {
+    min-height: 0;
+    padding-left: 0;
+  }
+  .payment-summary-grid {
+    gap: 12px;
+  }
+  .payment-history-header {
+    padding: 14px 16px;
+  }
+  .payment-filters {
+    padding: 8px 16px;
+  }
+  .payment-table-wrapper {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .payments-main {
+    padding: 14px 14px 24px;
+  }
+  .payments-page-header {
+    margin-bottom: 14px;
+    padding: 14px;
+  }
+  .page-title-row,
+  .payments-heading {
+    width: 100%;
+    min-width: 0;
+  }
+  .payments-heading {
+    min-height: 44px;
+    padding-left: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .payments-heading h1 {
+    font-size: 19px;
+  }
+  .payments-heading p {
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+  }
+  .payment-summary-card {
+    min-height: 96px;
+    padding: 14px 16px;
+  }
+  .payment-summary-card p {
+    overflow-wrap: anywhere;
+  }
+  .payment-history-card {
+    border-radius: 14px;
+  }
+  .payment-history-header {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+  .payment-history-header > div:first-child {
+    min-width: 0;
+  }
+  .payment-history-header p {
+    overflow-wrap: anywhere;
+  }
+  .payment-history-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .export-pdf-btn {
+    min-height: 40px;
+  }
+  .transaction-count {
+    min-height: 36px;
+  }
+  .payment-filters {
+    padding: 8px 14px;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .payment-filter {
+    min-width: 56px;
+    min-height: 40px;
+    flex: 0 0 auto;
+  }
+  .mobile-payment-item {
+    padding: 14px;
+  }
+  .mobile-payment-top > div {
+    min-width: 0;
+  }
+  .mobile-payment-id,
+  .mobile-payment-service {
+    overflow-wrap: anywhere;
+  }
+  .mobile-payment-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mobile-payment-detail {
+    min-width: 0;
+  }
+  .mobile-payment-detail strong {
+    overflow-wrap: anywhere;
+  }
+  .mobile-payment-actions .view-payment-btn,
+  .mobile-payment-actions .pay-payment-btn {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+  .payment-empty-state {
+    min-height: 190px;
+    padding: 28px 16px;
+  }
+  .payment-empty-state p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .payments-main {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  .payments-page-header {
+    padding: 12px;
+  }
+  .payments-heading {
+    padding-left: 50px;
+  }
+  .payment-history-header {
+    padding: 12px;
+  }
+  .payment-history-actions {
+    gap: 6px;
+  }
+  .export-pdf-btn {
+    padding: 0 10px;
+  }
+  .transaction-count {
+    padding: 0 8px;
+    font-size: 10px;
+  }
+  .payment-filters {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .payments-heading {
+    min-height: 44px;
+    padding-left: 52px;
+  }
+}

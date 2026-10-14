@@ -1061,7 +1061,595 @@ a:focus-visible {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  .two-col-grid > .stacked-panel-column:last-child .panel-body::-webkit-scrollbar {
+  .two-col-grid
+    > .stacked-panel-column:last-child
+    .panel-body::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.main-content {
+  padding: 22px 28px 24px;
+}
+.dash-header {
+  min-height: 82px;
+  margin-bottom: 16px;
+  padding: 16px 22px;
+  border-radius: 16px;
+}
+.dashboard-title {
+  letter-spacing: -0.02em;
+}
+.dashboard-subtitle {
+  font-size: 0.72rem;
+}
+.header-action-row {
+  gap: 10px;
+}
+.datetime-pill-widget {
+  box-shadow: none;
+}
+.qa-btn-pill {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+}
+.stats-grid {
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  min-height: 120px;
+  padding: 18px 20px;
+  border-radius: 16px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+}
+.stat-label {
+  font-size: 11px;
+}
+.stat-value {
+  font-size: 24px;
+}
+.two-col-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+  gap: 18px;
+}
+.stacked-panel-column {
+  gap: 16px;
+}
+.panel {
+  border-radius: 16px;
+}
+.panel:hover {
+  transform: none;
+  box-shadow: var(--shadow-card);
+}
+.panel-header {
+  min-height: 72px;
+  padding: 16px 20px;
+}
+.panel-header h3 {
+  font-size: 15px;
+}
+.panel-subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+}
+.panel-body {
+  padding: 14px 18px 16px;
+}
+.btn-link {
+  font-size: 11px;
+}
+.inv-item,
+.dentist-item {
+  min-height: 58px;
+  padding: 10px 12px;
+}
+.inv-name,
+.dentist-name {
+  font-size: 12px;
+}
+.inv-sub,
+.dentist-spec {
+  font-size: 10px;
+}
+.badge {
+  min-height: 24px;
+  padding: 4px 9px;
+  font-size: 9px;
+}
+.dentist-avatar {
+  width: 38px;
+  height: 38px;
+}
+.dentist-status {
+  font-size: 9.5px;
+}
+
+@media (min-width: 1181px) {
+  .main-content {
+    padding: 20px 28px 22px;
+  }
+  .dash-header {
+    min-height: 82px;
+    margin-bottom: 16px;
+  }
+  .stats-grid {
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    min-height: 120px;
+  }
+  .two-col-grid {
+    gap: 18px;
+  }
+  .stacked-panel-column {
+    gap: 16px;
+  }
+  .panel-header {
+    min-height: 72px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .main-content {
+    padding: 20px 24px 28px;
+  }
+  .two-col-grid {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    padding: 18px 20px 26px;
+  }
+  .dash-header {
+    padding: 16px 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: 14px 14px 24px;
+  }
+  .dash-header {
+    padding: 14px;
+  }
+  .stats-grid {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    min-height: 100px;
+    padding: 14px;
+  }
+  .panel {
+    border-radius: 14px;
+  }
+  .panel-header {
+    gap: 10px;
+    padding: 14px;
+  }
+  .btn-link {
+    font-size: 10px;
+  }
+  .inv-item,
+  .dentist-item {
+    padding: 9px 8px;
+  }
+}
+
+/* Keep dashboard navigation and content aligned across viewport sizes. */
+body {
+  overflow-x: hidden;
+}
+
+.dashboard-layout {
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+}
+
+.main-content {
+  min-width: 0;
+  min-height: 100vh;
+  height: auto;
+  padding: 20px clamp(16px, 2.2vw, 30px) 28px;
+}
+
+.dash-header {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.dash-header-left,
+.page-heading,
+.dash-header-right,
+.header-action-row {
+  min-width: 0;
+}
+
+.dashboard-title,
+.dashboard-subtitle {
+  overflow-wrap: anywhere;
+}
+
+.two-col-grid {
+  min-width: 0;
+}
+
+.stacked-panel-column,
+.panel,
+.panel-body {
+  min-width: 0;
+}
+
+@media (min-width: 1181px) {
+  .main-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .two-col-grid {
+    flex: initial;
+    min-height: initial;
+    grid-template-rows: auto;
+  }
+
+  .stacked-panel-column {
+    grid-template-rows: auto;
+    min-height: initial;
+  }
+
+  .two-col-grid > .stacked-panel-column:first-child > .panel:first-child {
+    height: 390px;
+    min-height: 340px;
+  }
+
+  .two-col-grid > .stacked-panel-column:last-child > .panel {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .main-content {
+    min-height: 0;
+  }
+
+  .two-col-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .stacked-panel-column {
+    grid-template-rows: auto;
+  }
+
+  .two-col-grid > .stacked-panel-column:first-child > .panel:first-child {
+    height: auto;
+    min-height: 300px;
+  }
+
+  .two-col-grid
+    > .stacked-panel-column:first-child
+    > .panel:first-child
+    .ta-list {
+    height: auto;
+    min-height: 220px;
+    max-height: 420px;
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-header {
+    position: relative;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .dash-header-left {
+    position: static;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  .dashboard-title,
+  .dashboard-subtitle {
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .dash-header-right,
+  .header-action-row {
+    width: 100%;
+  }
+
+  .header-action-row {
+    justify-content: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .datetime-pill-widget {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  #sidebar-container {
+    position: static;
+    width: 100%;
+    height: 0;
+    min-height: 0;
+    flex-shrink: 0;
+  }
+
+  .mobile-header {
+    position: absolute;
+    top: 28px;
+    left: 28px;
+    z-index: 1000;
+    width: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .mobile-menu-toggle {
+    width: 44px;
+    height: 44px;
+    border: 1px solid #dcebe2;
+    border-radius: 13px;
+  }
+
+  .main-content {
+    width: 100%;
+    max-width: 900px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 14px 16px 28px;
+  }
+
+  .dash-header {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid var(--ink-100);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dash-header-left {
+    min-height: 44px;
+    padding-left: 58px;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .page-heading {
+    justify-content: center;
+  }
+
+  .dashboard-title {
+    font-size: 1.22rem;
+    line-height: 1.25;
+  }
+
+  .dashboard-subtitle {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .dash-header-right {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .header-action-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .datetime-pill-widget {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  .datetime-text-group {
+    font-size: 0.68rem;
+  }
+
+  .header-quick-actions {
+    display: contents;
+  }
+
+  .qa-btn-pill {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 10px;
+    font-size: 0.68rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    min-height: 104px;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .two-col-grid {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .main-content {
+    padding: 12px 14px 24px;
+  }
+
+  .mobile-header {
+    top: 24px;
+    left: 24px;
+  }
+
+  .dash-header {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 12px;
+  }
+
+  .dash-header-left {
+    padding-left: 58px;
+  }
+
+  .dashboard-title {
+    font-size: 1.12rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .dash-header-right {
+    padding: 0;
+  }
+
+  .header-action-row {
+    gap: 8px;
+  }
+
+  .qa-btn-pill {
+    min-height: 44px;
+    gap: 5px;
+    padding: 0 7px;
+    font-size: 0.62rem;
+  }
+
+  .datetime-text-group {
+    font-size: 0.62rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 96px;
+    padding: 14px 16px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+  }
+
+  .stat-value {
+    font-size: 1.55rem;
+  }
+
+  .stat-trend,
+  .stat-trend.up,
+  .stat-trend.neutral,
+  .stat-trend.down,
+  #statPatientsTrend,
+  #statAppointmentsTrend,
+  #statTodayRevenueTrend,
+  #statMonthlyRevenueTrend {
+    font-size: 0.68rem;
+  }
+
+  .two-col-grid > .stacked-panel-column:first-child > .panel:first-child {
+    min-height: 270px;
+  }
+
+  .two-col-grid
+    > .stacked-panel-column:first-child
+    > .panel:first-child
+    .ta-list {
+    min-height: 190px;
+  }
+
+  .panel-header {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .panel-header h3 {
+    font-size: 0.9rem;
+  }
+
+  .panel-subtitle {
+    font-size: 0.68rem;
+  }
+
+  .btn-link {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .dash-header-left {
+    padding-left: 54px;
+  }
+
+  .mobile-header {
+    left: 20px;
+  }
+
+  .datetime-text-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .datetime-dot {
     display: none;
   }
 }

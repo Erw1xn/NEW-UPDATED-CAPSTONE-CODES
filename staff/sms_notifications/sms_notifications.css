@@ -1682,3 +1682,207 @@ button {
     font-size: 0.68rem;
   }
 }
+
+.sms-main {
+  padding: 25px 30px 40px;
+}
+.sms-page {
+  max-width: 1480px;
+}
+.notification-header-card,
+.notification-card {
+  border-color: #e3ebe6;
+  border-radius: 18px;
+  box-shadow: 0 5px 20px rgba(20, 32, 26, 0.04);
+}
+.notification-header-card {
+  margin-bottom: 17px;
+}
+.notification-header-card .card-header {
+  align-items: center;
+  padding: 22px 24px 16px;
+}
+.notification-header-card .card-header h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.notification-header-card .card-header p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.record-count {
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-size: 0.68rem;
+}
+.stats-row {
+  gap: 11px;
+  padding: 4px 24px 20px;
+}
+.stat-chip {
+  min-height: 64px;
+  gap: 12px;
+  padding: 12px 14px;
+  border-color: #e7eeea;
+  border-radius: 11px;
+}
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+}
+.stat-value {
+  font-size: 1.08rem;
+}
+.stat-label {
+  font-size: 0.65rem;
+}
+.filters {
+  grid-template-columns: minmax(260px, 1fr) 180px minmax(200px, 220px);
+  gap: 10px;
+  padding: 15px 20px;
+  border-radius: 18px 18px 0 0;
+  background: #fafcfb;
+}
+.search-wrapper input,
+.filter-wrapper select {
+  height: 43px;
+  border-color: #e3ebe6;
+  border-radius: 9px;
+  font-size: 0.69rem;
+}
+.notification-table th {
+  height: 46px;
+  color: #69776f;
+  font-size: 0.62rem;
+  letter-spacing: 0.045em;
+}
+.notification-table td {
+  height: 74px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+.patient-cell {
+  gap: 10px;
+}
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+}
+.patient-name {
+  font-size: 0.74rem;
+}
+.patient-id {
+  font-size: 0.58rem;
+}
+.contact-line,
+.message-preview {
+  font-size: 0.67rem;
+}
+.type-badge {
+  padding: 6px 9px;
+  border-radius: 7px;
+  font-size: 0.6rem;
+}
+.appointment-cell strong {
+  font-size: 0.68rem;
+}
+.appointment-cell span {
+  font-size: 0.59rem;
+}
+.status-badge {
+  padding: 6px 9px;
+  font-size: 0.6rem;
+}
+.action-menu-trigger {
+  width: 36px;
+  height: 36px;
+}
+.pagination-bar {
+  min-height: 66px;
+  padding: 13px 20px;
+}
+.pagination-summary,
+.pagination-page-info {
+  font-size: 0.66rem;
+}
+.pagination-button {
+  min-height: 37px;
+  font-size: 0.64rem;
+}
+
+@media (max-width: 900px) {
+  .sms-main {
+    padding: 20px 20px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sms-main {
+    padding: 18px 14px 30px;
+  }
+  .notification-header-card .card-header {
+    padding: 18px 16px 14px;
+  }
+  .stats-row {
+    gap: 9px;
+    padding: 4px 16px 17px;
+  }
+  .stat-chip {
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+  .filters {
+    gap: 9px;
+    padding: 13px 16px;
+  }
+  .notification-table {
+    min-width: 940px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sms-main {
+    padding: 14px 10px 26px;
+  }
+  .notification-header-card .card-header {
+    padding: 16px 14px 12px;
+  }
+  .notification-header-card .card-header h3 {
+    font-size: 1.02rem;
+  }
+  .notification-header-card .card-header p {
+    font-size: 0.67rem;
+  }
+  .stats-row {
+    gap: 8px;
+    padding: 4px 12px 15px;
+  }
+  .stat-chip {
+    gap: 9px;
+    min-height: 56px;
+    padding: 9px 10px;
+  }
+  .stat-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+  .stat-value {
+    font-size: 1rem;
+  }
+  .filters {
+    padding: 12px;
+  }
+}

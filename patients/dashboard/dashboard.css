@@ -70,17 +70,17 @@ a:focus-visible {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 22px 32px 30px;
+  padding: 24px clamp(20px, 2.5vw, 36px) 32px;
 }
 .dash-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
   width: 100%;
   min-height: 82px;
-  margin-bottom: 16px;
-  padding: 18px 22px;
+  margin-bottom: 20px;
+  padding: 20px 24px;
   background: var(--white);
   border: 1px solid var(--ink-100);
   border-radius: 14px;
@@ -94,7 +94,7 @@ a:focus-visible {
 }
 .dashboard-title {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   line-height: 1.25;
   font-weight: 700;
   color: var(--ink-900);
@@ -102,7 +102,7 @@ a:focus-visible {
 .dashboard-subtitle {
   margin-top: 4px;
   color: var(--ink-500);
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   line-height: 1.5;
   font-weight: 500;
 }
@@ -198,16 +198,16 @@ a:focus-visible {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 18px;
+  margin-bottom: 20px;
 }
 .stat-card {
   display: flex;
   align-items: center;
   gap: 14px;
   min-width: 0;
-  min-height: 116px;
-  padding: 19px 21px;
+  min-height: 120px;
+  padding: 20px 22px;
   background: var(--white);
   border: 1px solid var(--ink-100);
   border-radius: var(--radius-lg);
@@ -252,7 +252,7 @@ a:focus-visible {
 }
 .stat-label {
   color: var(--ink-500);
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.4;
   font-weight: 600;
 }
@@ -260,7 +260,7 @@ a:focus-visible {
   margin-top: 2px;
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 23px;
   line-height: 1.3;
   font-weight: 600;
   color: var(--ink-900);
@@ -272,7 +272,7 @@ a:focus-visible {
   overflow: hidden;
   margin-top: 2px;
   color: var(--green-700);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.45;
   font-weight: 500;
   text-overflow: ellipsis;
@@ -281,12 +281,12 @@ a:focus-visible {
 .two-col-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
-  gap: 18px;
+  gap: 20px;
   align-items: stretch;
 }
 .panel {
   min-width: 0;
-  min-height: 270px;
+  min-height: 300px;
   overflow: hidden;
   background: var(--white);
   border: 1px solid var(--ink-100);
@@ -305,8 +305,8 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  min-height: 74px;
-  padding: 18px 22px;
+  min-height: 76px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--ink-100);
 }
 .appointment-summary-panel {
@@ -392,20 +392,20 @@ a:focus-visible {
 }
 .panel-header h3 {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--ink-900);
   line-height: 1.4;
 }
 .panel-subtitle {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 11.5px;
   line-height: 1.5;
   color: var(--ink-500);
   font-weight: 500;
 }
 .panel-body {
-  padding: 15px 21px 18px;
+  padding: 16px 22px 20px;
 }
 .appointments-panel-body {
   min-height: 184px;
@@ -538,22 +538,22 @@ a:focus-visible {
   min-width: 0;
 }
 .appointment-summary-body {
-  padding: 15px 21px 18px;
+  padding: 16px 20px 20px;
 }
 .appointment-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 11px;
 }
 .appointment-summary-stat {
   width: 100%;
   min-width: 0;
-  min-height: 74px;
+  min-height: 76px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 5px;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 10px 13px;
   background: var(--white);
   border: 1px solid var(--ink-100);
   border-radius: var(--radius-md);
@@ -587,7 +587,7 @@ a:focus-visible {
 .summary-stat-label {
   overflow: hidden;
   color: var(--ink-500);
-  font-size: 9.5px;
+  font-size: 10.5px;
   line-height: 1.35;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -597,7 +597,7 @@ a:focus-visible {
   display: block;
   color: var(--ink-900);
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 23px;
   line-height: 1.1;
   font-weight: 600;
 }
@@ -633,9 +633,9 @@ a:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
-  padding: 11px 12px;
+  gap: 14px;
+  margin-top: 13px;
+  padding: 12px 14px;
   background: var(--green-50);
   border: 1px solid #dceee2;
   border-radius: var(--radius-md);
@@ -672,14 +672,14 @@ a:focus-visible {
 .appointment-behavior-heading strong {
   display: block;
   color: var(--ink-900);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.4;
 }
 .appointment-behavior-heading p,
 .appointment-restriction-details {
   margin-top: 3px;
   color: var(--ink-500);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.5;
 }
 .appointment-restriction-details {
@@ -691,21 +691,18 @@ a:focus-visible {
 }
 @media (max-width: 1180px) {
   .main-content {
-    padding: 20px 28px 28px;
+    padding: 22px 26px 30px;
   }
   .two-col-grid {
     grid-template-columns: 1fr;
   }
   .panel {
-    min-height: 240px;
-  }
-  .appointments-panel-body {
-    max-height: 240px;
+    min-height: 280px;
   }
 }
 @media (max-width: 900px) {
   .main-content {
-    padding: 18px 20px 28px;
+    padding: 20px 22px 28px;
   }
   .appointment-behavior-status {
     align-items: flex-start;
@@ -732,13 +729,13 @@ a:focus-visible {
 }
 @media (max-width: 768px) {
   .main-content {
-    padding: 14px 14px 24px;
+    padding: 16px 18px 26px;
   }
   .dash-header {
     min-height: 0;
-    margin-bottom: 12px;
-    padding: 12px;
-    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    gap: 14px;
   }
   .page-heading {
     min-height: 40px;
@@ -765,10 +762,10 @@ a:focus-visible {
     margin: 0 auto;
   }
   .dashboard-title {
-    font-size: 1.02rem;
+    font-size: 1.08rem;
   }
   .dashboard-subtitle {
-    font-size: 0.59rem;
+    font-size: 0.68rem;
   }
   .dash-header-right {
     width: 100%;
@@ -789,9 +786,9 @@ a:focus-visible {
   }
   .qa-btn-pill {
     width: 100%;
-    min-height: 35px;
+    min-height: 40px;
     padding: 0 8px;
-    font-size: 0.58rem;
+    font-size: 0.68rem;
   }
   .panel {
     min-height: 0;
@@ -805,8 +802,8 @@ a:focus-visible {
     padding: 12px 14px 14px;
   }
   .appointments-panel-body {
-    min-height: 170px;
-    max-height: 230px;
+    min-height: 180px;
+    max-height: 300px;
   }
   .appointment-summary-body {
     padding: 11px 14px 14px;
@@ -816,30 +813,30 @@ a:focus-visible {
     gap: 8px;
   }
   .appointment-summary-stat {
-    min-height: 64px;
-    padding: 8px 10px;
+    min-height: 68px;
+    padding: 9px 10px;
   }
   .summary-stat-icon {
     width: 24px;
     height: 24px;
   }
   .appointment-summary-stat strong {
-    font-size: 19px;
+    font-size: 20px;
   }
 }
 @media (max-width: 480px) {
   .dashboard-title {
-    font-size: 0.96rem;
+    font-size: 1rem;
   }
   .dashboard-subtitle {
-    font-size: 0.56rem;
+    font-size: 0.64rem;
   }
   .datetime-text-group {
-    font-size: 0.54rem;
+    font-size: 0.6rem;
   }
   .qa-btn-pill {
-    min-height: 33px;
-    font-size: 0.54rem;
+    min-height: 38px;
+    font-size: 0.64rem;
   }
   .stat-card {
     min-height: 94px;
@@ -850,13 +847,13 @@ a:focus-visible {
     height: 35px;
   }
   .stat-label {
-    font-size: 10px;
+    font-size: 10.5px;
   }
   .stat-value {
     font-size: 19px;
   }
   .stat-trend {
-    font-size: 9px;
+    font-size: 9.5px;
   }
   .panel-header {
     padding: 13px 14px;
@@ -865,10 +862,10 @@ a:focus-visible {
     padding: 10px 12px 13px;
   }
   .panel-header h3 {
-    font-size: 13.5px;
+    font-size: 14px;
   }
   .panel-subtitle {
-    font-size: 10px;
+    font-size: 10.5px;
   }
   .appointment-info-popover {
     width: min(340px, calc(100vw - 48px));
@@ -915,10 +912,10 @@ a:focus-visible {
     font-size: 8px;
   }
   .summary-stat-label {
-    font-size: 8px;
+    font-size: 8.5px;
   }
   .appointment-summary-stat strong {
-    font-size: 18px;
+    font-size: 19px;
   }
 }
 .appointments-panel {
@@ -929,9 +926,11 @@ a:focus-visible {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 184px;
+  justify-content: center;
+  gap: 10px;
+  min-height: 200px;
   max-height: 340px;
-  padding: 16px 18px;
+  padding: 18px 20px;
   overflow-y: auto;
 }
 .appointments-panel-body .empty-state {
@@ -939,16 +938,10 @@ a:focus-visible {
   justify-content: center;
   align-items: center;
 }
-.appointments-panel-body > .appt-item:first-child {
-  margin-top: 50px;
-}
-.appointments-panel-body > .appt-item:last-child {
-  margin-bottom: auto;
-}
 .appointments-panel-body .appt-item {
   flex-shrink: 0;
-  gap: 16px;
-  padding: 18px 22px;
+  gap: 18px;
+  padding: 22px 26px;
   background: var(--green-50);
   border: 1px solid #dceee2;
   border-radius: var(--radius-lg);
@@ -964,9 +957,9 @@ a:focus-visible {
   box-shadow: var(--shadow-card);
 }
 .appointments-panel-body .appt-avatar {
-  width: 56px;
-  height: 56px;
-  font-size: 16px;
+  width: 68px;
+  height: 68px;
+  font-size: 18px;
   background: var(--white);
   border: 2px solid #cfe6d6;
 }
@@ -976,49 +969,51 @@ a:focus-visible {
   justify-content: center;
 }
 .appointments-panel-body .appt-name {
-  font-size: 15px;
+  font-size: 17px;
 }
 .appointments-panel-body .appt-meta {
-  margin-top: 5px;
-  font-size: 12px;
+  margin-top: 6px;
+  font-size: 14px;
 }
 .appointments-panel-body .appt-service {
   margin-top: 3px;
-  font-size: 11.5px;
+  font-size: 13px;
   color: #26332d;
 }
 .appointments-panel-body .badge {
   align-self: center;
-  min-height: 28px;
-  padding: 6px 14px;
-  font-size: 10.5px;
+  min-height: 34px;
+  padding: 7px 16px;
+  font-size: 12px;
 }
 @media (max-width: 640px) {
   .appointments-panel-body {
-    min-height: 140px;
+    min-height: 180px;
     max-height: 320px;
-    padding: 12px 14px;
-  }
-  .appointments-panel-body > .appt-item:first-child {
-    margin-top: 0;
+    padding: 14px;
   }
   .appointments-panel-body .appt-item {
-    padding: 14px 15px;
+    padding: 15px 16px;
     gap: 12px;
   }
   .appointments-panel-body .appt-avatar {
-    width: 46px;
-    height: 46px;
-    font-size: 13px;
+    width: 48px;
+    height: 48px;
+    font-size: 14px;
   }
   .appointments-panel-body .appt-name {
-    font-size: 13.5px;
+    font-size: 14px;
   }
   .appointments-panel-body .appt-meta {
-    font-size: 11px;
+    font-size: 11.5px;
   }
   .appointments-panel-body .appt-service {
-    font-size: 10.5px;
+    font-size: 11px;
+  }
+  .appointments-panel-body .badge {
+    min-height: 27px;
+    padding: 5px 10px;
+    font-size: 9.5px;
   }
 }
 @media (max-width: 480px) {
@@ -1031,18 +1026,217 @@ a:focus-visible {
   }
   .appointments-panel-body .badge {
     min-height: 24px;
-    padding: 4px 9px;
-    font-size: 9px;
+    padding: 4px 8px;
+    font-size: 8.5px;
   }
 }
 @media (max-width: 640px) {
   .appointments-panel-body {
     justify-content: center;
   }
-  .appointments-panel-body > .appt-item:first-child {
-    margin-top: 0;
+}
+.appointments-panel-body {
+  justify-content: flex-start;
+  padding-top: 8px;
+}
+
+.appointments-panel-body .appt-item {
+  margin-top: 50px;
+}
+
+@media (max-width: 640px) {
+  body {
+    width: 100%;
+    overflow-x: hidden;
   }
-  .appointments-panel-body > .appt-item:last-child {
-    margin-bottom: 0;
+
+  .dashboard-layout {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  #sidebar-container {
+    position: static;
+    width: 100%;
+    height: 0;
+    min-height: 0;
+    flex-shrink: 0;
+  }
+
+  .mobile-header {
+    top: 24px;
+    left: 20px;
+  }
+
+  .main-content {
+    width: 100%;
+    max-width: 700px;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 14px 14px 28px;
+  }
+
+  .dash-header {
+    align-items: stretch;
+    gap: 12px;
+    min-height: 0;
+    margin-bottom: 14px;
+    padding: 14px;
+  }
+
+  .page-heading {
+    min-height: 44px;
+    padding-left: 52px;
+    justify-content: center;
+  }
+
+  .dashboard-title,
+  .dashboard-subtitle {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-title {
+    font-size: 1.08rem;
+    line-height: 1.3;
+  }
+
+  .dashboard-subtitle {
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .dash-header-right,
+  .header-action-row,
+  .header-quick-actions {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .header-action-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .datetime-pill-widget {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .datetime-text-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+    font-size: 0.66rem;
+  }
+
+  .qa-btn-pill {
+    width: 100%;
+    min-height: 44px;
+    white-space: normal;
+  }
+
+  .stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card {
+    min-height: 92px;
+    padding: 14px 16px;
+  }
+
+  .stat-value,
+  .stat-trend {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .two-col-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .panel {
+    width: 100%;
+    min-height: 0;
+  }
+
+  .appointments-panel-body {
+    min-height: 130px;
+    max-height: 320px;
+    padding: 12px;
+  }
+
+  .appointments-panel-body .empty-state {
+    min-height: 105px;
+    padding: 12px;
+  }
+
+  .appointments-panel-body .appt-item {
+    margin-top: 0;
+    padding: 12px;
+  }
+
+  .appointment-summary-body {
+    padding: 12px;
+  }
+
+  .appointment-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .appointment-summary-stat {
+    min-height: 66px;
+    padding: 9px;
+  }
+
+  .appointment-behavior-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .appointment-restriction-details {
+    text-align: left;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .mobile-header {
+    left: 16px;
+  }
+
+  .page-heading {
+    padding-left: 50px;
+  }
+
+  .appointment-summary-grid {
+    gap: 6px;
+  }
+
+  .appointment-summary-stat {
+    padding: 8px;
+  }
+
+  .summary-stat-label {
+    font-size: 8px;
   }
 }

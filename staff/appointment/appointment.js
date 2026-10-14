@@ -1784,6 +1784,7 @@ function openViewModal(id) {
   const modalSubtitle = document.getElementById("modalSubtitle");
   const saveBtn = document.getElementById("saveBtn");
   const requestRescheduleBtn = document.getElementById("requestRescheduleBtn");
+  const deleteBtn = document.getElementById("deleteAppointmentBtn");
   const viewRescheduleRequestBtn = document.getElementById(
     "viewRescheduleRequestBtn",
   );
@@ -1830,6 +1831,10 @@ function openViewModal(id) {
   setFormReadOnly(true);
   updateDateUnavailableState();
   saveBtn.style.display = "none";
+  if (deleteBtn) {
+    deleteBtn.style.display = "inline-flex";
+    deleteBtn.disabled = false;
+  }
   const hasPatientAccount = patientHasAccount(linkedPatient);
   requestRescheduleBtn.style.display =
     hasPatientAccount &&
@@ -1972,6 +1977,10 @@ function closeModal() {
   const saveBtn = document.getElementById("saveBtn");
   if (saveBtn) {
     saveBtn.textContent = "Save Appointment";
+  }
+  const deleteBtn = document.getElementById("deleteAppointmentBtn");
+  if (deleteBtn) {
+    deleteBtn.style.display = "none";
   }
   closeServiceDropdown();
   closePatientDropdown();
@@ -2913,20 +2922,20 @@ function rejectRescheduleRequest(requestId) {
   renderAll();
   showToast("Reschedule request was rejected.");
 }
-function deleteAppt() {
+async function deleteAppt() {
   if (!editingId) return;
+
   const appt = appointments.find((item) => item.id === editingId);
   if (!appt) return;
+
   deleteTargetId = appt.id;
-  document.getElementById("deleteConfirmMessage").textContent =
-    `Are you sure you want to delete ${appt.patient}'s appointment on ${formatDateLong(appt.date)} at ${fmtTime(appt.start)}? This action cannot be undone.`;
-  document.getElementById("deleteConfirmOverlay").classList.add("show");
+  await confirmDeleteAppt();
 }
 function closeDeleteConfirmation() {
   deleteTargetId = null;
   document.getElementById("deleteConfirmOverlay").classList.remove("show");
 }
-function confirmDeleteAppt() {
+async function confirmDeleteAppt() {
   if (!deleteTargetId) {
     return;
   }
@@ -2935,24 +2944,33 @@ function confirmDeleteAppt() {
     closeDeleteConfirmation();
     return;
   }
+  const confirmButton = document.querySelector(".delete-confirm-btn");
+  if (confirmButton) confirmButton.disabled = true;
+  try {
+    if (!window.DentaNuevaAppointmentDatabase) {
+      throw new Error("Appointment database API is unavailable.");
+    }
+    await window.DentaNuevaAppointmentDatabase.remove(
+      target.databaseAppointmentId || target.id,
+    );
+  } catch (error) {
+    console.error("Unable to delete appointment from database:", error);
+    if (confirmButton) confirmButton.disabled = false;
+    showToast(error?.message || "Appointment could not be deleted.");
+    return;
+  }
+  if (confirmButton) confirmButton.disabled = false;
   removeAppointmentFromPatient(target);
   const requests = loadRescheduleRequests().filter(
     (request) =>
       String(getRescheduleAppointmentId(request)) !== String(deleteTargetId),
   );
-  saveRescheduleRequests(requests);
+  rescheduleRequests = requests;
   appointments = appointments.filter((item) => item.id !== deleteTargetId);
-  saveAppointmentsToDatabase();
-  void window.DentaNuevaAppointmentDatabase?.remove(deleteTargetId).catch(
-    (error) => {
-      console.error("Unable to delete appointment from database:", error);
-    },
-  );
   synchronizeAllPatientAppointments();
   closeDeleteConfirmation();
   closeModal();
   renderAll();
-  showToast(`${target.patient}'s appointment was deleted.`);
 }
 function checkInAppointment(id) {
   const appt = appointments.find((item) => item.id === id);

@@ -2137,6 +2137,11 @@ button {
     display: block;
     width: 100%;
   }
+  #sidebar-container {
+    position: static;
+    height: auto;
+    min-height: 0;
+  }
   .mobile-header {
     position: absolute;
     top: 34px;
@@ -2290,6 +2295,38 @@ button {
     left: 15px;
     min-width: 0;
     max-width: none;
+  }
+  #inventoryPage2 .forecast-chart-header > div:first-child h3 {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    padding-left: 52px;
+  }
+  #inventoryPage2
+    .forecast-chart-container:has(+ .forecast-chart-empty:not([hidden])) {
+    display: none;
+  }
+  #inventoryPage2 .prototype-header {
+    margin-top: 14px;
+    border: 1px solid #e3ebe6;
+    border-bottom: 1px solid #edf1ee;
+    border-radius: 12px 12px 0 0;
+  }
+  #inventoryPage2 .forecast-table-wrapper {
+    border-right: 1px solid #e3ebe6;
+    border-bottom: 1px solid #e3ebe6;
+    border-left: 1px solid #e3ebe6;
+  }
+  #inventoryPage2
+    .forecast-table-wrapper:has(
+      + .forecast-pagination[style*="display: none"]
+    ) {
+    border-radius: 0 0 12px 12px;
+  }
+  #inventoryPage2 .forecast-pagination {
+    border: 1px solid #e3ebe6;
+    border-top: 1px solid #edf1ee;
+    border-radius: 0 0 12px 12px;
   }
 }
 @media (max-width: 600px) {
@@ -2594,7 +2631,6 @@ button {
 .currency-input input {
   padding-left: 28px;
 }
-
 @media (min-width: 1201px) {
   .panel-header {
     min-height: 76px;
@@ -2708,7 +2744,6 @@ button {
     padding: 13px 20px;
   }
 }
-
 @media (min-width: 1201px) {
   #inventoryPage1 .panel-header {
     min-height: 84px;
@@ -2818,7 +2853,6 @@ button {
     padding: 0 13px;
     font-size: 0.66rem;
   }
-
   #inventoryPage2 .forecast-chart-header {
     gap: 24px;
     padding: 23px 26px 21px;
@@ -2924,7 +2958,6 @@ button {
     font-size: 0.66rem;
   }
 }
-
 @media (min-width: 1001px) {
   #itemModal .modal-card,
   #movementModal .modal-card {
@@ -2995,7 +3028,6 @@ button {
     padding-left: 17px;
     font-size: 0.72rem;
   }
-
   #viewItemModal .view-item-modal-card {
     width: min(100%, 760px);
     max-height: calc(100vh - 48px);
@@ -3076,7 +3108,6 @@ button {
     gap: 12px;
     padding: 13px 14px;
   }
-
   #inventoryNotificationPopover {
     top: 88px;
     right: 36px;
@@ -3109,7 +3140,9 @@ button {
     padding: 15px;
     border-radius: 12px;
   }
-  #inventoryNotificationPopover .inventory-notification-card + .inventory-notification-card {
+  #inventoryNotificationPopover
+    .inventory-notification-card
+    + .inventory-notification-card {
     margin-top: 10px;
   }
   #inventoryNotificationPopover .inventory-notification-card-icon {
@@ -3145,7 +3178,6 @@ button {
     font-size: 0.68rem;
   }
 }
-
 @media (min-width: 1001px) {
   #inventoryPage1 .inventory-table th {
     height: 52px;

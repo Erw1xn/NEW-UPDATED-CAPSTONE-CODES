@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   );
-
   function toggleMobileMenu(forceState) {
     if (!navMenuWrapper) return;
     const currentState = navMenuWrapper.classList.contains("mobile-open");
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleMobileMenu(false);
     });
   });
-
   const NAV_HIDE_AFTER = 80;
   function updateScrollState() {
     const y = window.scrollY;
@@ -47,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
   backToTop?.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
-
   const loginModalOverlay = document.getElementById("loginModalOverlay");
   const modalCloseBtn = document.getElementById("modalCloseBtn");
   const loginIframe = document.getElementById("loginIframe");
@@ -73,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.pathname + window.location.hash,
     );
   }
-
   function openLoginModal(event) {
     event.preventDefault();
     if (!loginModalOverlay) return;
@@ -120,8 +116,46 @@ document.addEventListener("DOMContentLoaded", () => {
   loginModalOverlay?.addEventListener("click", (event) => {
     if (event.target === loginModalOverlay) closeLoginModal();
   });
+  const photoLightbox = document.getElementById("photoLightbox");
+  const lightboxClose = document.getElementById("lightboxClose");
+  const lightboxImg = document.getElementById("lightboxImg");
+  const lightboxName = document.getElementById("lightboxName");
+  const lightboxRole = document.getElementById("lightboxRole");
+  let lightboxTrigger = null;
+  function openLightbox(button) {
+    if (!photoLightbox || !lightboxImg) return;
+    lightboxTrigger = button;
+    lightboxImg.src = button.dataset.full;
+    lightboxImg.alt = button.dataset.name || "";
+    if (lightboxName) lightboxName.textContent = button.dataset.name || "";
+    if (lightboxRole) lightboxRole.textContent = button.dataset.role || "";
+    photoLightbox.classList.add("active");
+    photoLightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    lightboxClose?.focus();
+  }
+  function closeLightbox() {
+    if (!photoLightbox) return;
+    photoLightbox.classList.remove("active");
+    photoLightbox.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    if (lightboxTrigger && typeof lightboxTrigger.focus === "function") {
+      lightboxTrigger.focus();
+    }
+  }
+  document.querySelectorAll(".dentist-photo").forEach((button) => {
+    button.addEventListener("click", () => openLightbox(button));
+  });
+  lightboxClose?.addEventListener("click", closeLightbox);
+  photoLightbox?.addEventListener("click", (event) => {
+    if (event.target === photoLightbox) closeLightbox();
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    if (photoLightbox?.classList.contains("active")) {
+      closeLightbox();
+      return;
+    }
     if (loginModalOverlay?.classList.contains("active")) closeLoginModal();
     if (navMenuWrapper?.classList.contains("mobile-open"))
       toggleMobileMenu(false);
@@ -147,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     frameDocument.addEventListener("click", handleAuthFrameNavigation);
   });
-
   const navLinks = document.querySelectorAll(".nav-link");
   const sectionToNav = {
     home: "#home",
@@ -161,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const observedSections = Object.keys(sectionToNav)
     .map((id) => document.getElementById(id))
     .filter(Boolean);
-
   function setActiveNav(targetHref) {
     navLinks.forEach((link) => {
       const isActive = link.getAttribute("href") === targetHref;
@@ -181,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     observedSections.forEach((section) => sectionObserver.observe(section));
   }
-
   const revealItems = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window && !prefersReducedMotion.matches) {
     const revealObserver = new IntersectionObserver(
@@ -206,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     revealItems.forEach((item) => item.classList.add("in"));
   }
-
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
     link.addEventListener("click", () => {
       const targetId = link.getAttribute("href");

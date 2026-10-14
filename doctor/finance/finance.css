@@ -4225,3 +4225,24 @@ select {
     font-size: 12px;
   }
 }
+
+@media (max-width: 1000px) {
+  .finance-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .finance-header-main {
+    width: 100%;
+  }
+
+  .finance-header-info p {
+    max-width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
