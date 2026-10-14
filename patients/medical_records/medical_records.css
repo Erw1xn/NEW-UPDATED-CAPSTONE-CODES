@@ -2573,6 +2573,9 @@ textarea:focus-visible {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(20, 57, 36, 0.03);
 }
+.patient-dental-tooth i {
+  font-size: 30px;
+}
 .patient-dental-tooth.recorded {
   border-color: #8fc8a0;
   background: #e8f7ed;

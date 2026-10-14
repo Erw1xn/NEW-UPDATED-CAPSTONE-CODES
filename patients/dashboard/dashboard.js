@@ -668,15 +668,45 @@ function updateBookingAccess() {
     ? "Appointment booking is temporarily restricted"
     : "Book a new appointment";
 }
+
 function isAppointmentRescheduled(appointment) {
   if (!appointment || typeof appointment !== "object") {
     return false;
   }
+
   const details =
     appointment.appointmentDetails ||
     appointment.details ||
     appointment.appointment_details ||
+    appointment.metadata ||
     {};
+
+  const explicitCount = Number(
+    appointment.approvedRescheduleCount ??
+      appointment.approved_reschedule_count ??
+      appointment.rescheduleCount ??
+      appointment.reschedule_count ??
+      details.approvedRescheduleCount ??
+      details.approved_reschedule_count ??
+      details.rescheduleCount ??
+      details.reschedule_count ??
+      0,
+  );
+
+  if (Number.isFinite(explicitCount) && explicitCount > 0) {
+    return true;
+  }
+
+  const history =
+    appointment.rescheduleHistory ??
+    appointment.reschedule_history ??
+    details.rescheduleHistory ??
+    details.reschedule_history;
+
+  if (Array.isArray(history) && history.length > 0) {
+    return true;
+  }
+
   const values = [
     appointment.rescheduled,
     appointment.isRescheduled,
@@ -691,20 +721,25 @@ function isAppointmentRescheduled(appointment) {
     details.rescheduleStatus,
     details.reschedule_status,
   ];
+
   return values.some((value) => {
-    if (value === true) {
+    if (value === true || value === 1) {
       return true;
     }
+
     const normalized = String(value ?? "")
       .trim()
       .toLowerCase();
+
     return (
       normalized === "true" ||
+      normalized === "1" ||
       normalized === "yes" ||
       normalized === "rescheduled"
     );
   });
 }
+
 function renderTodayAppointments() {
   const container = document.getElementById("appointmentsList");
   if (!container) {

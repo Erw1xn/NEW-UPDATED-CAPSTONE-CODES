@@ -612,6 +612,9 @@ button {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+.payment-modal-dialog {
+  width: min(680px, 100%);
+}
 .payment-modal-dialog::-webkit-scrollbar,
 .receipt-modal-dialog::-webkit-scrollbar,
 .patient-pay-dialog::-webkit-scrollbar {
@@ -619,7 +622,7 @@ button {
   width: 0;
 }
 .patient-pay-dialog {
-  width: min(620px, 100%);
+  width: min(720px, 100%);
   border-radius: 22px;
 }
 .receipt-modal-dialog {
@@ -917,6 +920,75 @@ button {
   margin-top: 2px;
   color: #8d9791;
   font-size: 7.5px;
+}
+.payment-modal-header {
+  min-height: 86px;
+  padding: 20px 24px;
+}
+.payment-modal-header .section-eyebrow {
+  font-size: 9px;
+}
+.payment-modal-header h2 {
+  font-size: 18px;
+}
+.payment-modal-body {
+  padding: 24px;
+}
+.payment-modal-body .modal-payment-id {
+  padding: 16px;
+}
+.payment-modal-body .modal-payment-id span {
+  font-size: 9px;
+}
+.payment-modal-body .modal-payment-id strong {
+  font-size: 14px;
+}
+.payment-modal-body .modal-section-label {
+  font-size: 9px;
+}
+.payment-modal-body .modal-detail-item {
+  min-height: 76px;
+  padding: 14px 16px;
+}
+.payment-modal-body .modal-detail-item span {
+  font-size: 9px;
+}
+.payment-modal-body .modal-detail-item strong {
+  font-size: 12px;
+}
+.payment-modal-body .payment-history-header > div:first-child > span {
+  font-size: 9px;
+}
+.payment-modal-body .payment-history-header h3 {
+  font-size: 16px;
+}
+.payment-modal-body .payment-history-header p {
+  font-size: 10px;
+}
+.payment-modal-body .payment-history-count {
+  font-size: 9px;
+}
+.payment-modal-body .payment-history-item {
+  padding: 12px 14px;
+}
+.payment-modal-body .payment-history-method-icon {
+  width: 36px;
+  height: 36px;
+}
+.payment-modal-body .payment-history-method-icon i {
+  font-size: 15px;
+}
+.payment-modal-body .payment-history-item-info strong,
+.payment-modal-body .payment-history-item-right strong {
+  font-size: 12px;
+}
+.payment-modal-body .payment-history-item-info span,
+.payment-modal-body .payment-history-item-right span {
+  font-size: 10px;
+}
+.payment-modal-body .modal-receipt-button {
+  min-height: 46px;
+  font-size: 12px;
 }
 .modal-receipt-action,
 .modal-receipt-button {
@@ -1358,6 +1430,66 @@ button {
 .patient-payment-method-option.is-selected .patient-payment-method-check {
   opacity: 1;
   transform: scale(1);
+}
+.patient-pay-header {
+  min-height: 86px;
+  padding: 20px 24px;
+}
+.patient-pay-header > div > span {
+  font-size: 9px;
+}
+.patient-pay-header h2 {
+  font-size: 18px;
+}
+.patient-pay-body {
+  padding: 26px;
+}
+.patient-pay-summary > div {
+  min-height: 92px;
+  padding: 16px 18px;
+}
+.patient-pay-summary span {
+  font-size: 9px;
+}
+.patient-pay-summary strong {
+  font-size: 14px;
+}
+.patient-pay-summary > div:last-child strong {
+  font-size: 15px;
+}
+.patient-pay-field label {
+  font-size: 11px;
+}
+.patient-pay-field small {
+  font-size: 9px;
+}
+.patient-pay-amount-input {
+  min-height: 56px;
+}
+.patient-pay-amount-input input {
+  min-height: 54px;
+}
+.patient-payment-method-option {
+  min-height: 100px;
+  padding: 14px 16px;
+}
+.patient-payment-method-icon {
+  width: 38px;
+  height: 38px;
+}
+.patient-payment-method-icon i {
+  font-size: 16px;
+}
+.patient-payment-method-option strong {
+  font-size: 12px;
+}
+.patient-payment-method-option small {
+  font-size: 9px;
+}
+.patient-pay-actions .secondary-button,
+.patient-pay-actions .primary-button {
+  min-height: 46px;
+  font-size: 11px;
 }
 .patient-payment-method-check i {
   font-size: 8px;

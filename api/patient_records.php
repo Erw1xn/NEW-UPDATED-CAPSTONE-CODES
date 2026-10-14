@@ -489,7 +489,25 @@ function patientPayload(mysqli $conn, string $patientId): ?array
     $stmt->execute();
     $appointments = $stmt->get_result();
     while ($row = $appointments->fetch_assoc()) {
-        $patient['appointments'][] = [
+    $metadata = decodeJsonValue((string) ($row['metadata'] ?? ''));
+
+    $rescheduleCount = max(0, (int) (
+        $metadata['approvedRescheduleCount']
+        ?? $metadata['approved_reschedule_count']
+        ?? $metadata['rescheduleCount']
+        ?? $metadata['reschedule_count']
+        ?? 0
+    ));
+
+    $rescheduleHistory = $metadata['rescheduleHistory']
+        ?? $metadata['reschedule_history']
+        ?? [];
+
+    if (!is_array($rescheduleHistory)) {
+        $rescheduleHistory = [];
+    }
+
+    $patient['appointments'][] = [
             'id' => $row['appointment_uid'] ?: $row['appointment_id'],
             'appointmentId' => $row['appointment_id'],
             'appointment_uid' => $row['appointment_uid'],
@@ -512,6 +530,13 @@ function patientPayload(mysqli $conn, string $patientId): ?array
             'doctorName' => $row['doctor_name'],
             'doctor_name' => $row['doctor_name'],
             'status' => $row['status'],
+            'rescheduleCount' => $rescheduleCount,
+            'reschedule_count' => $rescheduleCount,
+            'approvedRescheduleCount' => $rescheduleCount,
+            'approved_reschedule_count' => $rescheduleCount,
+            'rescheduleHistory' => $rescheduleHistory,
+            'reschedule_history' => $rescheduleHistory,
+            'rescheduled' => $rescheduleCount > 0 || count($rescheduleHistory) > 0,
             'checkedIn' => (bool) $row['checked_in'],
             'checkedInAt' => $row['checked_in_at'],
             'reason' => $row['reason'],
