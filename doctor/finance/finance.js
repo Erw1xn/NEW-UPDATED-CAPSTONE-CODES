@@ -33,9 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 function setupEvents() {
   setupPatientSelector();
   document
-    .getElementById("procedureChartFilter")
-    ?.addEventListener("change", renderProcedureChart);
-  document
     .getElementById("transactionSearch")
     ?.addEventListener("input", () => {
       transactionCurrentPage = 1;
@@ -629,7 +626,6 @@ function renderTransactionPagination(totalTransactions, totalPages) {
 }
 function renderProcedureChart() {
   const container = document.getElementById("procedureChart");
-  const filter = document.getElementById("procedureChartFilter");
   if (!container) {
     return;
   }
@@ -643,7 +639,7 @@ function renderProcedureChart() {
       (revenueByProcedure.get(service) || 0) + revenue,
     );
   });
-  let data = Array.from(revenueByProcedure.entries())
+  const data = Array.from(revenueByProcedure.entries())
     .map(([name, amount]) => ({ name, amount }))
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
@@ -653,20 +649,14 @@ function renderProcedureChart() {
     return;
   }
   const totalRevenue = data.reduce((sum, item) => sum + item.amount, 0);
-  const selectedLimit = filter?.value || "10";
-  if (selectedLimit !== "all") {
-    data = data.slice(0, Number(selectedLimit));
-  }
-  const max = Math.max(...data.map((item) => item.amount), 1);
   data.forEach((item) => {
     const row = document.createElement("div");
     row.className = "procedure-row";
-    const percentage = (item.amount / max) * 100;
     const share = totalRevenue > 0 ? (item.amount / totalRevenue) * 100 : 0;
     row.innerHTML = `
       <span class="procedure-name" title="${escapeHtml(item.name)}">${escapeHtml(shortenService(item.name))}</span>
       <div class="procedure-bar-bg">
-        <div class="procedure-bar" style="width:${Math.max(percentage, 1.5)}%"></div>
+        <div class="procedure-bar" style="width:100%"></div>
       </div>
       <span class="procedure-value">${formatMoney(item.amount)}</span>
       <div class="procedure-tooltip">

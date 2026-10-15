@@ -527,9 +527,29 @@ if (isset($input['reschedule_requests'])) {
         if (!in_array($requestedBy, ['patient', 'staff', 'doctor'], true)) {
             $requestedBy = 'patient';
         }
-        if ($role === 'user') {
-            $requestedBy = 'patient';
-            $status = 'pending';
+                if ($role === 'user') {
+            $ownStmt = $conn->prepare('SELECT status, requested_by FROM tbl_reschedule_requests WHERE request_id = ? AND patient_id = ? AND appointment_id = ? LIMIT 1');
+            if (!$ownStmt) {
+                appointmentResponse(false, 'Reschedule request could not be verified.', null, 500);
+            }
+            $ownStmt->bind_param('ssi', $requestId, $patientId, $appointmentId);
+            $ownStmt->execute();
+            $ownRow = $ownStmt->get_result()->fetch_assoc();
+            $ownStmt->close();
+            if ($ownRow) {
+                $existingStatus = strtolower((string) $ownRow['status']);
+                $existingBy = strtolower((string) $ownRow['requested_by']);
+                $requestedBy = $existingBy;
+                $clinicInitiated = in_array($existingBy, ['staff', 'doctor'], true);
+                if ($status === 'approved' && (($clinicInitiated && $existingStatus === 'pending') || $existingStatus === 'approved')) {
+                    $status = 'approved';
+                } else {
+                    $status = $existingStatus;
+                }
+            } else {
+                $requestedBy = 'patient';
+                $status = 'pending';
+            }
         }
         $reason = (string) ($request['reason'] ?? '');
         $reasonLabel = (string) ($request['reason_label'] ?? $request['reasonLabel'] ?? '');

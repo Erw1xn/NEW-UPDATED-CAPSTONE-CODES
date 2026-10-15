@@ -3550,7 +3550,11 @@ async function confirmStaffRescheduleResponse() {
     status: "Approved",
     approved_reschedule_count: nextApprovedCount,
   };
-  await saveRescheduleRequests(requests);
+  const requestSaved = await saveRescheduleRequests(requests);
+  if (!requestSaved) {
+    showToast("Unable to save your new schedule. Please try again.");
+    return;
+  }
   let savedAppointments;
   try {
     savedAppointments =
