@@ -2126,12 +2126,17 @@ select:focus-visible {
   position: fixed;
   bottom: 22px;
   left: 50%;
-  padding: 10px 17px;
+  min-width: min(280px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  min-height: 54px;
+  padding: 14px 22px;
   background: #1d2a22;
   color: #fff;
-  border-radius: 9px;
-  font-size: 9.5px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
   opacity: 0;
   pointer-events: none;
   transform: translateX(-50%) translateY(18px);
@@ -6028,9 +6033,9 @@ select.form-control:disabled {
   border-radius: 10px;
 }
 .toast {
-  font-size: 13px;
-  padding: 13px 22px;
-  border-radius: 11px;
+  font-size: 15px;
+  padding: 16px 24px;
+  border-radius: 12px;
 }
 @media (max-width: 1250px) {
   .appointments-shell {

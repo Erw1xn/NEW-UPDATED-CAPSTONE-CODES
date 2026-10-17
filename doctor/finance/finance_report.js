@@ -231,7 +231,17 @@
     appointments.forEach(function (a) {
       if (!doctorName && a.doctorName) doctorName = a.doctorName;
     });
-    var transactions = (data.transactions || [])
+    var period = data.period || null;
+    var hasPeriod = !!(period && (period.start || period.end));
+    var periodStartMs =
+      hasPeriod && period.start ? period.start.getTime() : -Infinity;
+    var periodEndMs = hasPeriod && period.end ? period.end.getTime() : Infinity;
+    function inPeriod(value) {
+      if (!hasPeriod) return true;
+      var t = timeValue(value);
+      return t > 0 && t >= periodStartMs && t < periodEndMs;
+    }
+    var allTransactions = (data.transactions || [])
       .filter(function (raw) {
         return doctorPatientIds[String(raw.patient_id || "").trim()] === true;
       })
@@ -239,9 +249,17 @@
       .sort(function (a, b) {
         return timeValue(b.date) - timeValue(a.date);
       });
+    // Transactions created in the period; payments received in the period.
+    var transactions = allTransactions.filter(function (t) {
+      return inPeriod(t.date);
+    });
+    auditEvents = auditEvents.filter(function (e) {
+      return inPeriod(e.timestamp);
+    });
     var allPayments = [];
-    transactions.forEach(function (t) {
+    allTransactions.forEach(function (t) {
       t.confirmed.forEach(function (p) {
+        if (!inPeriod(p.date)) return;
         allPayments.push({ payment: p, transaction: t });
       });
     });
@@ -250,8 +268,10 @@
     });
     var now = new Date();
     var todayKey = dateKey(now);
-    var currentMonthKey = todayKey.slice(0, 7);
-    var currentYear = now.getFullYear();
+    var currentMonthKey =
+      period && period.monthKey ? period.monthKey : todayKey.slice(0, 7);
+    var currentYear = Number(currentMonthKey.slice(0, 4));
+    var currentMonthIndex = Number(currentMonthKey.slice(5, 7)) - 1;
     function collect(filterFn) {
       var result = { total: 0, count: 0 };
       METHODS.forEach(function (m) {
@@ -315,7 +335,7 @@
     for (var mi = 0; mi < 12; mi++) {
       monthlyRevenue.push(0);
     }
-    transactions.forEach(function (t) {
+    allTransactions.forEach(function (t) {
       var d = parseDateTime(t.date);
       if (d && d.getFullYear() === currentYear) {
         monthlyRevenue[d.getMonth()] += t.paid;
@@ -333,7 +353,9 @@
     doc.setFontSize(10);
     doc.text(
       "Doctor Finance & Collections Report" +
-        (doctorName ? "  |  " + doctorLabel(doctorName) : ""),
+        (doctorName ? "  |  " + doctorLabel(doctorName) : "") +
+        "  |  Period: " +
+        (hasPeriod && period.label ? period.label : "All time"),
       M,
       49,
     );
@@ -360,12 +382,17 @@
     var y = 70 + 22;
     var cards = [
       {
-        label: "TODAY'S REVENUE",
-        value: money(todayRevenue),
+        label: hasPeriod ? "COLLECTED IN PERIOD" : "TODAY'S REVENUE",
+        value: money(hasPeriod ? allTotals.total : todayRevenue),
         color: GREEN,
       },
       {
-        label: "NET INCOME (THIS MONTH)",
+        label:
+          period && period.monthKey
+            ? "NET INCOME (" +
+              MONTH_NAMES[currentMonthIndex].toUpperCase() +
+              ")"
+            : "NET INCOME (THIS MONTH)",
         value: money(netIncome),
         color: netIncome < 0 ? RED : GREEN,
       },
@@ -829,7 +856,7 @@
     y += 22;
     var expenseSubtitle =
       "Expense categories for " +
-      MONTH_NAMES[now.getMonth()] +
+      MONTH_NAMES[currentMonthIndex] +
       " " +
       currentYear;
     if (previousExpenses > 0) {
@@ -1001,7 +1028,7 @@
       toast.id = "financeToast";
       toast.className = "finance-toast";
       toast.style.cssText =
-        "position:fixed;right:24px;bottom:24px;z-index:99999;padding:12px 18px;border-radius:10px;background:#16803d;color:#fff;font-size:12px;font-weight:600;box-shadow:0 8px 22px rgba(0,0,0,0.18);transition:opacity 0.2s ease;opacity:0;pointer-events:none;";
+        "position:fixed;right:24px;bottom:24px;z-index:99999;min-width:300px;max-width:calc(100vw - 48px);padding:18px 26px;border-radius:14px;background:#16803d;color:#fff;font-size:15px;font-weight:600;box-shadow:0 8px 22px rgba(0,0,0,0.18);transition:opacity 0.2s ease;opacity:0;pointer-events:none;";
       document.body.appendChild(toast);
     }
     toast.textContent = message;
@@ -1019,7 +1046,149 @@
     var label = button.querySelector("span");
     if (label) label.textContent = busy ? "Generating..." : "Export PDF";
   }
-  async function exportFinanceReportPdf() {
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+  function monthPeriod(year, monthIndex) {
+    return {
+      start: new Date(year, monthIndex, 1),
+      end: new Date(year, monthIndex + 1, 1),
+      label: MONTH_NAMES[monthIndex] + " " + year,
+      fileTag: year + "-" + pad2(monthIndex + 1),
+      monthKey: year + "-" + pad2(monthIndex + 1),
+    };
+  }
+  function injectPeriodModalStyles() {
+    if (document.getElementById("finReportPeriodStyles")) return;
+    var style = document.createElement("style");
+    style.id = "finReportPeriodStyles";
+    style.textContent =
+      ".fin-period-backdrop{position:fixed;inset:0;background:rgba(15,30,22,.45);display:flex;align-items:center;justify-content:center;z-index:99998;padding:16px}" +
+      ".fin-period-modal{background:#fff;border-radius:16px;width:100%;max-width:420px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25);font-family:inherit;color:#17221b}" +
+      ".fin-period-modal h3{margin:0 0 4px;font-size:18px}" +
+      ".fin-period-modal p{margin:0 0 16px;font-size:12.5px;color:#68756d;line-height:1.5}" +
+      ".fin-period-modal label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:#68756d;margin:12px 0 6px}" +
+      ".fin-period-modal select,.fin-period-modal input{width:100%;box-sizing:border-box;height:42px;border:1px solid #e2e9e4;border-radius:10px;padding:0 12px;font:inherit;font-size:14px;background:#fff;color:#17221b}" +
+      ".fin-period-row{display:flex;gap:10px}.fin-period-row>div{flex:1}" +
+      ".fin-period-error{color:#b04747;font-size:12px;margin-top:10px;min-height:16px}" +
+      ".fin-period-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}" +
+      ".fin-period-actions button{height:40px;padding:0 18px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1px solid #e2e9e4;background:#fff;color:#17221b}" +
+      ".fin-period-actions button.primary{background:#16803d;border-color:#16803d;color:#fff}";
+    document.head.appendChild(style);
+  }
+  function openPeriodModal(onConfirm) {
+    if (document.getElementById("finReportPeriodBackdrop")) return;
+    injectPeriodModalStyles();
+    var now = new Date();
+    var currentMonth = now.getFullYear() + "-" + pad2(now.getMonth() + 1);
+    var today = currentMonth + "-" + pad2(now.getDate());
+    var backdrop = document.createElement("div");
+    backdrop.className = "fin-period-backdrop";
+    backdrop.id = "finReportPeriodBackdrop";
+    backdrop.innerHTML =
+      '<div class="fin-period-modal" role="dialog" aria-modal="true" aria-labelledby="finPeriodTitle">' +
+      '<h3 id="finPeriodTitle">Export Finance Report</h3>' +
+      "<p>Choose which period to include. Transactions are filtered by their date and payments by the date they were received.</p>" +
+      '<label for="finPeriodType">PERIOD</label>' +
+      '<select id="finPeriodType">' +
+      '<option value="all">All time</option>' +
+      '<option value="this">This month</option>' +
+      '<option value="last">Last month</option>' +
+      '<option value="month">Specific month</option>' +
+      '<option value="range">Custom date range</option>' +
+      "</select>" +
+      '<div id="finPeriodMonthWrap" hidden><label for="finPeriodMonth">MONTH</label>' +
+      '<input type="month" id="finPeriodMonth" value="' +
+      currentMonth +
+      '" /></div>' +
+      '<div id="finPeriodRangeWrap" class="fin-period-row" hidden>' +
+      '<div><label for="finPeriodFrom">FROM</label><input type="date" id="finPeriodFrom" value="' +
+      currentMonth +
+      '-01" max="' +
+      today +
+      '" /></div>' +
+      '<div><label for="finPeriodTo">TO</label><input type="date" id="finPeriodTo" value="' +
+      today +
+      '" /></div></div>' +
+      '<div class="fin-period-error" id="finPeriodError"></div>' +
+      '<div class="fin-period-actions">' +
+      '<button type="button" id="finPeriodCancel">Cancel</button>' +
+      '<button type="button" class="primary" id="finPeriodConfirm">Download PDF</button>' +
+      "</div></div>";
+    document.body.appendChild(backdrop);
+    var typeSel = backdrop.querySelector("#finPeriodType");
+    var monthWrap = backdrop.querySelector("#finPeriodMonthWrap");
+    var rangeWrap = backdrop.querySelector("#finPeriodRangeWrap");
+    var errorBox = backdrop.querySelector("#finPeriodError");
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      backdrop.remove();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("keydown", onKey);
+    backdrop.addEventListener("click", function (e) {
+      if (e.target === backdrop) close();
+    });
+    backdrop.querySelector("#finPeriodCancel").onclick = close;
+    typeSel.onchange = function () {
+      monthWrap.hidden = typeSel.value !== "month";
+      rangeWrap.hidden = typeSel.value !== "range";
+      errorBox.textContent = "";
+    };
+    backdrop.querySelector("#finPeriodConfirm").onclick = function () {
+      var type = typeSel.value;
+      var period = null;
+      if (type === "this") {
+        period = monthPeriod(now.getFullYear(), now.getMonth());
+      } else if (type === "last") {
+        var last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        period = monthPeriod(last.getFullYear(), last.getMonth());
+      } else if (type === "month") {
+        var mv = backdrop.querySelector("#finPeriodMonth").value;
+        if (!/^\d{4}-\d{2}$/.test(mv)) {
+          errorBox.textContent = "Please select a month.";
+          return;
+        }
+        period = monthPeriod(
+          Number(mv.slice(0, 4)),
+          Number(mv.slice(5, 7)) - 1,
+        );
+      } else if (type === "range") {
+        var from = backdrop.querySelector("#finPeriodFrom").value;
+        var to = backdrop.querySelector("#finPeriodTo").value;
+        if (!from || !to) {
+          errorBox.textContent = "Please select both dates.";
+          return;
+        }
+        if (from > to) {
+          errorBox.textContent = "The start date must be before the end date.";
+          return;
+        }
+        var f = from.split("-").map(Number);
+        var t = to.split("-").map(Number);
+        var nice = function (d) {
+          return d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        };
+        var startDate = new Date(f[0], f[1] - 1, f[2]);
+        var endDate = new Date(t[0], t[1] - 1, t[2]);
+        period = {
+          start: startDate,
+          end: new Date(t[0], t[1] - 1, t[2] + 1),
+          label: nice(startDate) + " - " + nice(endDate),
+          fileTag: from + "_to_" + to,
+        };
+      }
+      close();
+      onConfirm(period);
+    };
+  }
+  async function exportFinanceReportPdf(period) {
     var button = document.getElementById("exportPdfBtn");
     if (button && button.disabled) return;
     if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -1035,7 +1204,13 @@
         loadJson(APPOINTMENTS_API),
         loadJson(PATIENT_API),
         loadJson(
-          EXPENSES_API + "?month=" + encodeURIComponent(monthKey(new Date())),
+          EXPENSES_API +
+            "?month=" +
+            encodeURIComponent(
+              period && period.monthKey
+                ? period.monthKey
+                : monthKey(new Date()),
+            ),
         ),
         loadJson(EXPENSES_API + "?action=audit&limit=100"),
       ]);
@@ -1076,9 +1251,14 @@
         patientIds: patientIds,
         expenses: expensesData,
         audit: auditData,
+        period: period || null,
       });
       doc.save(
-        "DentaNueva_Doctor_Finance_Report_" + dateKey(new Date()) + ".pdf",
+        "DentaNueva_Doctor_Finance_Report" +
+          (period && period.fileTag ? "_" + period.fileTag : "") +
+          "_" +
+          dateKey(new Date()) +
+          ".pdf",
       );
       showReportMessage("Finance PDF report downloaded.");
     } catch (error) {
@@ -1091,7 +1271,10 @@
   if (typeof document !== "undefined") {
     document.addEventListener("DOMContentLoaded", function () {
       var button = document.getElementById("exportPdfBtn");
-      if (button) button.addEventListener("click", exportFinanceReportPdf);
+      if (button)
+        button.addEventListener("click", function () {
+          openPeriodModal(exportFinanceReportPdf);
+        });
     });
   }
   if (typeof module !== "undefined" && module.exports) {

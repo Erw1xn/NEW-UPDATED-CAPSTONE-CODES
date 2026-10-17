@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="../navigationbar/sidebar.css?v=2" />
     <link rel="stylesheet" href="../profile/profile.css?v=20261015" />
     <link rel="stylesheet" href="patient.css?v=10" />
+    <link rel="stylesheet" href="../../shared/notify/notify.css?v=1" />
   </head>
   <body>
     <div class="patients-layout">
@@ -55,8 +56,8 @@
                   class="patient-select sort-select"
                 >
                   <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="nameAsc" selected>Name A-Z</option>
+                  <option value="oldest" selected>Oldest</option>
+                  <option value="nameAsc">Name A-Z</option>
                   <option value="nameDesc">Name Z-A</option>
                 </select>
               </div>
@@ -879,15 +880,12 @@
         <i class="fa-regular fa-file-lines"></i>
         <span>Medical Form</span>
       </button>
-      <button type="button" data-action="delete" class="danger-action">
-        <i class="fa-regular fa-trash-can"></i>
-        <span>Delete Patient</span>
-      </button>
     </div>
     <script src="../navigationbar/sidebar.js"></script>
     <script src="../profile/profile.js"></script>
     <script src="../../shared/inventory/treatment_materials.js"></script>
     <script src="../../shared/inventory/inventory_service.js"></script>
     <script src="patient.js"></script>
+    <script src="../../shared/notify/notify.js"></script>
   </body>
 </html>

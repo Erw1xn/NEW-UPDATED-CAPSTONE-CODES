@@ -126,6 +126,15 @@
     var CW = W - M * 2;
     var items = data.items || [];
     var movements = data.movements || [];
+    var period = data.period || null;
+    if (period && (period.start || period.end)) {
+      var startMs = period.start ? period.start.getTime() : -Infinity;
+      var endMs = period.end ? period.end.getTime() : Infinity;
+      movements = movements.filter(function (m) {
+        var t = timeValue(m.date || m.createdAt);
+        return t > 0 && t >= startMs && t < endMs;
+      });
+    }
     var batches = data.batches || [];
     var batchUsage = data.batchUsage || [];
     var appointments = data.appointments || [];
@@ -207,7 +216,12 @@
     doc.text(CLINIC_NAME, M, 31);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text("Inventory Usage & Stock Report", M, 49);
+    doc.text(
+      "Inventory Usage & Stock Report  |  Period: " +
+        (period && period.label ? period.label : "All time"),
+      M,
+      49,
+    );
     doc.setFontSize(8.5);
     doc.text(
       "Generated: " +
@@ -651,7 +665,162 @@
         ? "fa-solid fa-spinner fa-spin"
         : "fa-solid fa-file-pdf";
   }
-  async function exportInventoryReportPdf() {
+  var MONTH_NAMES = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  function pad2(n) {
+    return String(n).padStart(2, "0");
+  }
+  function monthPeriod(year, monthIndex) {
+    return {
+      start: new Date(year, monthIndex, 1),
+      end: new Date(year, monthIndex + 1, 1),
+      label: MONTH_NAMES[monthIndex] + " " + year,
+      fileTag: year + "-" + pad2(monthIndex + 1),
+    };
+  }
+  function injectPeriodModalStyles() {
+    if (document.getElementById("invReportPeriodStyles")) return;
+    var style = document.createElement("style");
+    style.id = "invReportPeriodStyles";
+    style.textContent =
+      ".inv-period-backdrop{position:fixed;inset:0;background:rgba(15,30,22,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}" +
+      ".inv-period-modal{background:#fff;border-radius:16px;width:100%;max-width:420px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25);font-family:inherit;color:#17221b}" +
+      ".inv-period-modal h3{margin:0 0 4px;font-size:18px}" +
+      ".inv-period-modal p{margin:0 0 16px;font-size:12.5px;color:#68756d}" +
+      ".inv-period-modal label{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:#68756d;margin:12px 0 6px}" +
+      ".inv-period-modal select,.inv-period-modal input{width:100%;box-sizing:border-box;height:42px;border:1px solid #e2e9e4;border-radius:10px;padding:0 12px;font:inherit;font-size:14px;background:#fff;color:#17221b}" +
+      ".inv-period-row{display:flex;gap:10px}.inv-period-row>div{flex:1}" +
+      ".inv-period-error{color:#b04747;font-size:12px;margin-top:10px;min-height:16px}" +
+      ".inv-period-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}" +
+      ".inv-period-actions button{height:40px;padding:0 18px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1px solid #e2e9e4;background:#fff;color:#17221b}" +
+      ".inv-period-actions button.primary{background:#16803d;border-color:#16803d;color:#fff}";
+    document.head.appendChild(style);
+  }
+  function openPeriodModal(onConfirm) {
+    if (document.getElementById("invReportPeriodBackdrop")) return;
+    injectPeriodModalStyles();
+    var now = new Date();
+    var currentMonth = now.getFullYear() + "-" + pad2(now.getMonth() + 1);
+    var today = currentMonth + "-" + pad2(now.getDate());
+    var backdrop = document.createElement("div");
+    backdrop.className = "inv-period-backdrop";
+    backdrop.id = "invReportPeriodBackdrop";
+    backdrop.innerHTML =
+      '<div class="inv-period-modal" role="dialog" aria-modal="true" aria-labelledby="invPeriodTitle">' +
+      '<h3 id="invPeriodTitle">Export Inventory Report</h3>' +
+      "<p>Choose which period of stock movements to include. Item stock levels shown are always the current ones.</p>" +
+      '<label for="invPeriodType">PERIOD</label>' +
+      '<select id="invPeriodType">' +
+      '<option value="all">All time</option>' +
+      '<option value="this">This month</option>' +
+      '<option value="last">Last month</option>' +
+      '<option value="month">Specific month</option>' +
+      '<option value="range">Custom date range</option>' +
+      "</select>" +
+      '<div id="invPeriodMonthWrap" hidden><label for="invPeriodMonth">MONTH</label>' +
+      '<input type="month" id="invPeriodMonth" value="' +
+      currentMonth +
+      '" /></div>' +
+      '<div id="invPeriodRangeWrap" class="inv-period-row" hidden>' +
+      '<div><label for="invPeriodFrom">FROM</label><input type="date" id="invPeriodFrom" value="' +
+      currentMonth +
+      '-01" max="' +
+      today +
+      '" /></div>' +
+      '<div><label for="invPeriodTo">TO</label><input type="date" id="invPeriodTo" value="' +
+      today +
+      '" /></div></div>' +
+      '<div class="inv-period-error" id="invPeriodError"></div>' +
+      '<div class="inv-period-actions">' +
+      '<button type="button" id="invPeriodCancel">Cancel</button>' +
+      '<button type="button" class="primary" id="invPeriodConfirm">Download PDF</button>' +
+      "</div></div>";
+    document.body.appendChild(backdrop);
+    var typeSel = backdrop.querySelector("#invPeriodType");
+    var monthWrap = backdrop.querySelector("#invPeriodMonthWrap");
+    var rangeWrap = backdrop.querySelector("#invPeriodRangeWrap");
+    var errorBox = backdrop.querySelector("#invPeriodError");
+    function close() {
+      document.removeEventListener("keydown", onKey);
+      backdrop.remove();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") close();
+    }
+    document.addEventListener("keydown", onKey);
+    backdrop.addEventListener("click", function (e) {
+      if (e.target === backdrop) close();
+    });
+    backdrop.querySelector("#invPeriodCancel").onclick = close;
+    typeSel.onchange = function () {
+      monthWrap.hidden = typeSel.value !== "month";
+      rangeWrap.hidden = typeSel.value !== "range";
+      errorBox.textContent = "";
+    };
+    backdrop.querySelector("#invPeriodConfirm").onclick = function () {
+      var type = typeSel.value;
+      var period = null;
+      if (type === "this") {
+        period = monthPeriod(now.getFullYear(), now.getMonth());
+      } else if (type === "last") {
+        var last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        period = monthPeriod(last.getFullYear(), last.getMonth());
+      } else if (type === "month") {
+        var mv = backdrop.querySelector("#invPeriodMonth").value;
+        if (!/^\d{4}-\d{2}$/.test(mv)) {
+          errorBox.textContent = "Please select a month.";
+          return;
+        }
+        period = monthPeriod(
+          Number(mv.slice(0, 4)),
+          Number(mv.slice(5, 7)) - 1,
+        );
+      } else if (type === "range") {
+        var from = backdrop.querySelector("#invPeriodFrom").value;
+        var to = backdrop.querySelector("#invPeriodTo").value;
+        if (!from || !to) {
+          errorBox.textContent = "Please select both dates.";
+          return;
+        }
+        if (from > to) {
+          errorBox.textContent = "The start date must be before the end date.";
+          return;
+        }
+        var f = from.split("-").map(Number);
+        var t = to.split("-").map(Number);
+        function nice(d) {
+          return d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        }
+        var startDate = new Date(f[0], f[1] - 1, f[2]);
+        var endDate = new Date(t[0], t[1] - 1, t[2]);
+        period = {
+          start: startDate,
+          end: new Date(t[0], t[1] - 1, t[2] + 1),
+          label: nice(startDate) + " - " + nice(endDate),
+          fileTag: from + "_to_" + to,
+        };
+      }
+      close();
+      onConfirm(period);
+    };
+  }
+  async function exportInventoryReportPdf(period) {
     var button = document.getElementById("exportInventoryPdfButton");
     if (button && button.disabled) return;
     if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -693,6 +862,7 @@
           : [],
         appointments: Array.isArray(results[1]) ? results[1] : [],
         patients: Array.isArray(results[2]) ? results[2] : [],
+        period: period || null,
       });
       var now = new Date();
       var today =
@@ -701,7 +871,10 @@
         String(now.getMonth() + 1).padStart(2, "0") +
         "-" +
         String(now.getDate()).padStart(2, "0");
-      doc.save("DentaNueva_Inventory_Report_" + today + ".pdf");
+      var periodTag = period && period.fileTag ? "_" + period.fileTag : "";
+      doc.save(
+        "DentaNueva_Inventory_Report" + periodTag + "_" + today + ".pdf",
+      );
       showReportMessage("Inventory PDF report downloaded.");
     } catch (error) {
       console.error("Unable to generate inventory PDF report:", error);
@@ -713,7 +886,10 @@
   if (typeof document !== "undefined") {
     document.addEventListener("DOMContentLoaded", function () {
       var button = document.getElementById("exportInventoryPdfButton");
-      if (button) button.addEventListener("click", exportInventoryReportPdf);
+      if (button)
+        button.addEventListener("click", function () {
+          openPeriodModal(exportInventoryReportPdf);
+        });
     });
   }
   if (typeof module !== "undefined" && module.exports) {

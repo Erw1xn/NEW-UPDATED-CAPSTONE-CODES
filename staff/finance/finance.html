@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="../profile/profile.css?v=20261015" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css?v=2" />
     <link rel="stylesheet" href="finance.css?v=5" />
+    <link rel="stylesheet" href="../../shared/notify/notify.css?v=1" />
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       .payment-method-form-group {
@@ -902,14 +903,6 @@
                   >0 transactions</span
                 >
                 <button
-                  class="secondary-button"
-                  id="exportPdfBtn"
-                  type="button"
-                  title="Download a full PDF report of finance and collections"
-                >
-                  <i data-lucide="file-text"></i><span>Export PDF</span>
-                </button>
-                <button
                   class="collection-header-button"
                   id="openCollectionDrawerBtn"
                   type="button"
@@ -956,19 +949,6 @@
                   </div>
                   <div class="finance-overview-card-icon">
                     <i data-lucide="receipt-text"></i>
-                  </div>
-                </div>
-                <div class="finance-overview-card">
-                  <div class="finance-overview-card-content">
-                    <span class="finance-overview-card-label">This Month</span
-                    ><strong
-                      class="finance-overview-card-value"
-                      id="overviewMonthlyCollection"
-                      >₱0.00</strong
-                    >
-                  </div>
-                  <div class="finance-overview-card-icon">
-                    <i data-lucide="calendar-range"></i>
                   </div>
                 </div>
                 <div class="finance-overview-card">
@@ -1760,11 +1740,9 @@
     </div>
     <script src="../../navigation_bar/sidebar.js"></script>
     <script src="../../shared/receipt/receipt.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="finance.js?v=20261007"></script>
-    <script src="finance_report.js"></script>
     <script src="../profile/profile.js"></script>
+    <script src="../../shared/notify/notify.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const paymentMethodInput = document.getElementById("paymentMethod");

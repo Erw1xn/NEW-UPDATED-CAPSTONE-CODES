@@ -9,16 +9,9 @@ let patients = [];
 let revenueMode = "today";
 let expenseReport = null;
 let auditEvents = [];
-let expensesModalReport = null;
 let currentDetailsTransaction = null;
 const TRANSACTION_PAGE_SIZE = 10;
 let transactionCurrentPage = 1;
-const EXPENSE_COLORS = {
-  utilities: "#2F80ED",
-  maintenance: "#A855F7",
-  rent_facilities: "#F59E0B",
-  other: "#8A9690",
-};
 document.addEventListener("DOMContentLoaded", async () => {
   await loadPatients();
   setupEvents();
@@ -75,22 +68,6 @@ function setupEvents() {
     .getElementById("revenueSwitch")
     ?.addEventListener("click", toggleRevenueMode);
   document
-    .getElementById("monthlyExpensesButton")
-    ?.addEventListener("click", openExpensesModal);
-  document
-    .getElementById("closeExpensesBtn")
-    ?.addEventListener("click", closeExpensesModal);
-  document
-    .getElementById("expensesCloseButton")
-    ?.addEventListener("click", closeExpensesModal);
-  document
-    .getElementById("expensesModal")
-    ?.addEventListener("click", (event) => {
-      if (event.target === document.getElementById("expensesModal")) {
-        closeExpensesModal();
-      }
-    });
-  document
     .getElementById("viewAllAuditButton")
     ?.addEventListener("click", openAuditModal);
   document
@@ -104,14 +81,6 @@ function setupEvents() {
       closeAuditModal();
     }
   });
-  document
-    .getElementById("expensesMonthSelect")
-    ?.addEventListener("change", (event) => {
-      loadExpensesModal(event.target.value);
-    });
-  document
-    .getElementById("addExpenseButton")
-    ?.addEventListener("click", addManualExpense);
   document
     .getElementById("recordPaymentButton")
     ?.addEventListener("click", openPaymentModal);
@@ -147,7 +116,6 @@ function setupEvents() {
         closeDetailsModal();
       }
     });
-  window.addEventListener("resize", renderRevenueExpenseChart);
 }
 async function loadTransactions() {
   try {
@@ -436,8 +404,6 @@ function renderFinance() {
   renderSummaryCards();
   renderTransactions();
   renderProcedureChart();
-  renderRevenueExpenseChart();
-  renderExpenseChart();
   renderAuditTrail();
 }
 function toggleRevenueMode() {
@@ -490,12 +456,6 @@ function renderSummaryCards() {
   if (subtitle) {
     subtitle.textContent = `${count} active balance${count === 1 ? "" : "s"}`;
   }
-  const expenses = getMonthlyExpenses();
-  const expensesElement = document.getElementById("monthlyExpenses");
-  if (expensesElement) {
-    expensesElement.textContent = formatMoney(expenses);
-  }
-  renderExpenseChange();
 }
 function getFilteredTransactions() {
   const search = (document.getElementById("transactionSearch")?.value || "")
@@ -668,198 +628,6 @@ function renderProcedureChart() {
     container.appendChild(row);
   });
 }
-function renderRevenueExpenseChart() {
-  const svg = document.getElementById("revenueExpenseChart");
-  const wrapper = svg?.closest(".line-chart-wrapper");
-  if (!svg || !wrapper) {
-    return;
-  }
-  svg.innerHTML = "";
-  wrapper.querySelector(".revenue-expense-tooltip")?.remove();
-  const months = Array.from({ length: 12 }, (_, index) =>
-    new Date(new Date().getFullYear(), index, 1).toLocaleDateString("en-US", {
-      month: "short",
-    }),
-  );
-  const revenue = months.map((_, index) => getRevenueForMonth(index));
-  const expenses = months.map((_, index) =>
-    Number(expenseReport?.yearly?.[index] || 0),
-  );
-  const allValues = [...revenue, ...expenses];
-  const maxValue = Math.max(...allValues, 1000);
-  const width = Math.max(svg.clientWidth || 640, 320);
-  const height = Math.max(svg.clientHeight || 230, 180);
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  const left = 56;
-  const right = 24;
-  const top = 16;
-  const bottom = 34;
-  const chartWidth = width - left - right;
-  const chartHeight = height - top - bottom;
-  const xStep = chartWidth / (months.length - 1);
-  const svgNamespace = "http://www.w3.org/2000/svg";
-  function yPosition(value) {
-    return top + chartHeight - (value / maxValue) * chartHeight;
-  }
-  for (let i = 0; i <= 5; i++) {
-    const y = top + (chartHeight / 5) * i;
-    const line = document.createElementNS(svgNamespace, "line");
-    line.setAttribute("x1", left);
-    line.setAttribute("x2", width - right);
-    line.setAttribute("y1", y);
-    line.setAttribute("y2", y);
-    line.setAttribute("class", "chart-grid-line");
-    svg.appendChild(line);
-    const label = document.createElementNS(svgNamespace, "text");
-    label.setAttribute("x", left - 10);
-    label.setAttribute("y", y + 3);
-    label.setAttribute("text-anchor", "end");
-    label.setAttribute("class", "chart-axis-label");
-    label.textContent = formatCompactMoney(maxValue - (maxValue / 5) * i);
-    svg.appendChild(label);
-  }
-  months.forEach((month, index) => {
-    const x = left + xStep * index;
-    const label = document.createElementNS(svgNamespace, "text");
-    label.setAttribute("x", x);
-    label.setAttribute("y", height - 10);
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "chart-axis-label");
-    label.textContent = month;
-    svg.appendChild(label);
-  });
-  function makePoints(data) {
-    return data.map((value, index) => ({
-      x: left + xStep * index,
-      y: yPosition(value),
-    }));
-  }
-  function makePath(points) {
-    return points
-      .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
-      .join(" ");
-  }
-  function makeAreaPath(points) {
-    const baseline = top + chartHeight;
-    return `${makePath(points)} L ${points[points.length - 1].x} ${baseline} L ${points[0].x} ${baseline} Z`;
-  }
-  const revenuePoints = makePoints(revenue);
-  const expensePoints = makePoints(expenses);
-  const expenseArea = document.createElementNS(svgNamespace, "path");
-  expenseArea.setAttribute("d", makeAreaPath(expensePoints));
-  expenseArea.setAttribute("class", "expense-area");
-  svg.appendChild(expenseArea);
-  const revenueArea = document.createElementNS(svgNamespace, "path");
-  revenueArea.setAttribute("d", makeAreaPath(revenuePoints));
-  revenueArea.setAttribute("class", "revenue-area");
-  svg.appendChild(revenueArea);
-  const revenuePath = document.createElementNS(svgNamespace, "path");
-  revenuePath.setAttribute("d", makePath(revenuePoints));
-  revenuePath.setAttribute("class", "revenue-line");
-  svg.appendChild(revenuePath);
-  const expensePath = document.createElementNS(svgNamespace, "path");
-  expensePath.setAttribute("d", makePath(expensePoints));
-  expensePath.setAttribute("class", "expense-line");
-  svg.appendChild(expensePath);
-  const tooltip = document.createElement("div");
-  tooltip.className = "revenue-expense-tooltip";
-  wrapper.appendChild(tooltip);
-  function showTooltip(point, month, type, value, seriesClass) {
-    const pointRect = point.getBoundingClientRect();
-    const wrapperRect = wrapper.getBoundingClientRect();
-    tooltip.innerHTML = `<span class="revenue-expense-tooltip-month">${escapeHtml(month)}</span><span class="revenue-expense-tooltip-type"><span class="revenue-expense-tooltip-dot ${seriesClass}"></span>${escapeHtml(type)}</span><span class="revenue-expense-tooltip-value">${escapeHtml(formatMoney(value))}</span>`;
-    tooltip.classList.add("show");
-    const tooltipWidth = tooltip.offsetWidth;
-    const tooltipHeight = tooltip.offsetHeight;
-    let left =
-      pointRect.left -
-      wrapperRect.left +
-      pointRect.width / 2 -
-      tooltipWidth / 2;
-    let top = pointRect.top - wrapperRect.top - tooltipHeight - 9;
-    const minLeft = 4;
-    const maxLeft = wrapperRect.width - tooltipWidth - 4;
-    left = Math.max(minLeft, Math.min(left, maxLeft));
-    if (top < 4) {
-      top = pointRect.bottom - wrapperRect.top + 9;
-    }
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-  }
-  function hideTooltip() {
-    tooltip.classList.remove("show");
-  }
-  revenuePoints.forEach((point, index) => {
-    const circle = document.createElementNS(svgNamespace, "circle");
-    circle.setAttribute("cx", point.x);
-    circle.setAttribute("cy", point.y);
-    circle.setAttribute("r", 4);
-    circle.setAttribute("class", "revenue-point");
-    circle.addEventListener("mouseenter", () => {
-      showTooltip(circle, months[index], "Revenue", revenue[index], "revenue");
-    });
-    circle.addEventListener("mouseleave", hideTooltip);
-    svg.appendChild(circle);
-  });
-  expensePoints.forEach((point, index) => {
-    const circle = document.createElementNS(svgNamespace, "circle");
-    circle.setAttribute("cx", point.x);
-    circle.setAttribute("cy", point.y);
-    circle.setAttribute("r", 4);
-    circle.setAttribute("class", "expense-point");
-    circle.addEventListener("mouseenter", () => {
-      showTooltip(
-        circle,
-        months[index],
-        "Expenses",
-        expenses[index],
-        "expense",
-      );
-    });
-    circle.addEventListener("mouseleave", hideTooltip);
-    svg.appendChild(circle);
-  });
-}
-function renderExpenseChart() {
-  const list = document.getElementById("expenseCategoryList");
-  const pie = document.getElementById("expensePieChart");
-  if (!list || !pie) {
-    return;
-  }
-  list.innerHTML = "";
-  pie.innerHTML = "";
-  const categories = Array.isArray(expenseReport?.categories)
-    ? expenseReport.categories
-    : [];
-  const total = categories.reduce(
-    (sum, item) => sum + Number(item.amount || 0),
-    0,
-  );
-  let currentPercent = 0;
-  const gradients = [];
-  categories.forEach((item) => {
-    const amount = Number(item.amount || 0);
-    const percentage = total > 0 ? (amount / total) * 100 : 0;
-    const color = EXPENSE_COLORS[item.key] || EXPENSE_COLORS.other;
-    if (amount > 0) {
-      const end = currentPercent + percentage;
-      gradients.push(`${color} ${currentPercent}% ${end}%`);
-      currentPercent = end;
-    }
-    const itemElement = document.createElement("div");
-    itemElement.className = "expense-category";
-    itemElement.innerHTML = `<span class="expense-color" style="background:${color}"></span><span class="expense-category-label">${escapeHtml(item.label)}</span><span class="expense-category-amount">${formatMoney(amount)}</span><span class="expense-category-percent">${percentage.toFixed(1)}%</span>`;
-    list.appendChild(itemElement);
-  });
-  if (!categories.length || total <= 0) {
-    pie.style.background = "#edf1ef";
-    pie.innerHTML =
-      '<div class="expense-pie-empty">No expenses<br />this month</div>';
-    return;
-  }
-  pie.style.background = `conic-gradient(${gradients.join(",")})`;
-  pie.innerHTML = `<div class="expense-pie-center"><span>Total</span><strong>${formatMoney(total)}</strong></div>`;
-}
 function getAuditItemHtml(event) {
   const icons = {
     payment: "fa-peso-sign",
@@ -950,201 +718,12 @@ async function loadExpenseReport() {
     expenseReport = null;
   }
 }
-function renderExpenseChange() {
-  const element = document.getElementById("expenseChange");
-  if (!element) {
-    return;
-  }
-  const wrapper = element.closest(".expense-change");
-  const icon = wrapper?.querySelector("i");
-  const current = Number(expenseReport?.total || 0);
-  const previous = Number(expenseReport?.previous_total || 0);
-  let text = "0% vs last month";
-  let direction = "up";
-  if (previous > 0) {
-    const change = ((current - previous) / previous) * 100;
-    direction = change > 0 ? "up" : "down";
-    text = `${Math.abs(change).toFixed(1)}% vs last month`;
-  } else if (current > 0) {
-    text = "New vs last month";
-  }
-  element.textContent = text;
-  wrapper?.classList.toggle("down", direction === "down" && previous > 0);
-  if (icon) {
-    icon.className = `fa-solid fa-arrow-${direction}`;
-  }
-}
 function getMonthLabel(monthKey) {
   const [year, month] = String(monthKey).split("-").map(Number);
   return new Date(year, (month || 1) - 1, 1).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
-}
-function openExpensesModal() {
-  const select = document.getElementById("expensesMonthSelect");
-  if (select) {
-    select.innerHTML = "";
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    for (let monthIndex = currentMonth; monthIndex >= 0; monthIndex--) {
-      const date = new Date(currentYear, monthIndex, 1);
-      const option = document.createElement("option");
-      option.value = getMonthKey(date);
-      option.textContent = getMonthLabel(option.value);
-      select.appendChild(option);
-    }
-  }
-  const dateInput = document.getElementById("expenseDate");
-  if (dateInput) {
-    dateInput.value = getTodayKey();
-  }
-  document.getElementById("expensesModal")?.classList.add("show");
-  loadExpensesModal(select?.value || getMonthKey());
-}
-function closeExpensesModal() {
-  document.getElementById("expensesModal")?.classList.remove("show");
-}
-async function loadExpensesModal(month) {
-  try {
-    expensesModalReport = await fetchExpenseReport(month);
-  } catch (error) {
-    console.error("Unable to load monthly expenses:", error);
-    expensesModalReport = null;
-  }
-  renderExpensesModal(month);
-}
-function renderExpensesModal(month) {
-  const report = expensesModalReport;
-  const total = Number(report?.total || 0);
-  const previous = Number(report?.previous_total || 0);
-  document.getElementById("expensesModalTotal").textContent =
-    formatMoney(total);
-  document.getElementById("expensesModalCompare").textContent = report
-    ? previous > 0
-      ? `${getMonthLabel(month)} · ${(((total - previous) / previous) * 100).toFixed(1)}% vs previous month`
-      : `${getMonthLabel(month)} · no expenses in the previous month`
-    : "Unable to load expenses.";
-  const categories = Array.isArray(report?.categories) ? report.categories : [];
-  document.getElementById("expensesBreakdown").innerHTML = categories
-    .map((item) => {
-      const amount = Number(item.amount || 0);
-      const percent = total > 0 ? (amount / total) * 100 : 0;
-      const color = EXPENSE_COLORS[item.key] || EXPENSE_COLORS.other;
-      return `<div class="breakdown-row"><span class="breakdown-name"><span class="expense-color" style="background:${color}"></span>${escapeHtml(item.label)}</span><div class="breakdown-bar-bg"><div class="breakdown-bar" style="width:${percent}%;background:${color}"></div></div><span class="breakdown-amount">${formatMoney(amount)}</span></div>`;
-    })
-    .join("");
-  const canEdit = Boolean(report?.can_edit);
-  document
-    .getElementById("expenseAddSection")
-    ?.classList.toggle("hidden", !canEdit);
-  const entries = Array.isArray(report?.manual_entries)
-    ? report.manual_entries
-    : [];
-  document.getElementById("overviewOtherTotal").textContent =
-    formatMoney(total);
-  document.getElementById("overviewOtherCount").textContent = entries.length
-    ? `${entries.length} entr${entries.length === 1 ? "y" : "ies"}`
-    : "No entries";
-  document.getElementById("manualExpenseList").innerHTML = entries.length
-    ? entries
-        .map(
-          (entry) =>
-            `<div class="expense-entry"><div class="expense-entry-info"><strong>${escapeHtml(entry.category_label)}${entry.description ? ` · ${escapeHtml(entry.description)}` : ""}</strong><span>${escapeHtml(formatLongDate(entry.expense_date))}</span></div><div class="expense-entry-right">${formatMoney(entry.amount)}${canEdit ? `<button type="button" class="expense-delete" title="Delete" data-uid="${escapeHtml(entry.expense_uid)}"><i class="fa-solid fa-trash-can"></i></button>` : ""}</div></div>`,
-        )
-        .join("")
-    : '<div class="expense-empty">No other expenses recorded this month.</div>';
-  document.querySelectorAll(".expense-delete").forEach((button) => {
-    button.addEventListener("click", () =>
-      deleteManualExpense(button.dataset.uid),
-    );
-  });
-}
-async function refreshAfterExpenseChange() {
-  const month =
-    document.getElementById("expensesMonthSelect")?.value || getMonthKey();
-  await Promise.all([
-    loadExpenseReport(),
-    loadAuditTrail(),
-    loadExpensesModal(month),
-  ]);
-  renderFinance();
-}
-async function addManualExpense() {
-  const category = document.getElementById("expenseCategory")?.value || "";
-  const description = (
-    document.getElementById("expenseDescription")?.value || ""
-  ).trim();
-  const amount = Number(document.getElementById("expenseAmount")?.value) || 0;
-  const date = document.getElementById("expenseDate")?.value || "";
-  if (amount <= 0) {
-    alert("Please enter a valid amount.");
-    return;
-  }
-  if (!date) {
-    alert("Please select the expense date.");
-    return;
-  }
-  const button = document.getElementById("addExpenseButton");
-  try {
-    if (button) {
-      button.disabled = true;
-    }
-    const response = await fetch(EXPENSES_API, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ category, description, amount, date }),
-    });
-    const result = await response.json();
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Unable to save expense.");
-    }
-    document.getElementById("expenseDescription").value = "";
-    document.getElementById("expenseAmount").value = "";
-    const select = document.getElementById("expensesMonthSelect");
-    if (
-      select &&
-      Array.from(select.options).some((o) => o.value === date.slice(0, 7))
-    ) {
-      select.value = date.slice(0, 7);
-    }
-    await refreshAfterExpenseChange();
-  } catch (error) {
-    console.error("Unable to save expense:", error);
-    alert(error.message || "Unable to save expense.");
-  } finally {
-    if (button) {
-      button.disabled = false;
-    }
-  }
-}
-async function deleteManualExpense(uid) {
-  if (!uid || !confirm("Delete this expense?")) {
-    return;
-  }
-  try {
-    const response = await fetch(
-      `${EXPENSES_API}?expense_uid=${encodeURIComponent(uid)}`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: { Accept: "application/json" },
-      },
-    );
-    const result = await response.json();
-    if (!response.ok || !result.success) {
-      throw new Error(result.message || "Unable to delete expense.");
-    }
-    await refreshAfterExpenseChange();
-  } catch (error) {
-    console.error("Unable to delete expense:", error);
-    alert(error.message || "Unable to delete expense.");
-  }
 }
 function openPaymentModal() {
   const modal = document.getElementById("paymentModal");

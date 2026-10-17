@@ -1,4 +1,7 @@
 "use strict";
+// Staff can only VIEW patient records. Clinical editing (medical form, dental chart,
+// treatments, clinical images) is doctor-only.
+const STAFF_RECORD_READ_ONLY = true;
 const PATIENT_RECORD_API = "../../api/patient_records.php";
 const APPOINTMENTS_API = "../../api/appointments.php";
 const CLINICAL_IMAGES_API = "../../api/clinical_images";
@@ -1018,7 +1021,7 @@ function createPatientRow(patient) {
   const medicalForm = patient.medicalForm || null;
   const hasMedicalForm = !!medicalForm && medicalForm.completed !== false;
   const medicalButtonClass = hasMedicalForm ? "completed" : "pending";
-  const medicalButtonText = hasMedicalForm ? "View Form" : "Fill Form";
+  const medicalButtonText = hasMedicalForm ? "View Form" : "No Form";
   const nextAppointment = getNextAppointment(patient);
   return `
       <td>
@@ -1354,11 +1357,7 @@ document.addEventListener("click", (event) => {
     if (!patient) {
       return;
     }
-    if (patient.medicalForm) {
-      openMedicalForm(patient, 5);
-    } else {
-      openMedicalForm(patient, 1);
-    }
+    openMedicalResult(patient);
     return;
   }
   const actionTrigger = event.target.closest("[data-action-trigger]");
@@ -1437,9 +1436,6 @@ function handlePatientAction(action, patientId) {
       break;
     case "edit":
       openEditPatientModal(patientId);
-      break;
-    case "delete":
-      deletePatient(patientId);
       break;
   }
 }
@@ -1535,6 +1531,7 @@ function openPatientRecordPage(patient) {
   bindTreatmentWorkspace(patient);
   $("patientPageAppointments").innerHTML = buildStaffAppointments(appointments);
   bindStaffPatientRecordTabs();
+  applyStaffReadOnlyRecord();
   document
     .querySelectorAll("#patientRecordPage [data-patient-page-tab]")
     .forEach((tab) => {
@@ -3772,7 +3769,7 @@ function bindTreatmentWorkspace(patient) {
     }
   });
   const historyList = document.querySelector(".treatment-history-list");
-  historyList?.addEventListener("click", (event) => {
+  historyList?.addEventListener("click", async (event) => {
     const editButton = event.target.closest("[data-treatment-edit]");
     if (editButton) {
       const treatmentId = editButton.dataset.treatmentEdit || "";
@@ -3810,9 +3807,12 @@ function bindTreatmentWorkspace(patient) {
       const treatment = targetPatient.treatments[treatmentIndex];
       const procedure =
         treatment.procedure || treatment.treatment || "this treatment";
-      const confirmed = window.confirm(
-        `Are you sure you want to delete "${procedure}"?`,
-      );
+      const confirmed = await window.appNotify.confirm({
+        title: "Delete treatment?",
+        message: `Are you sure you want to delete "${procedure}"? This cannot be undone.`,
+        confirmText: "Delete",
+        danger: true,
+      });
       if (!confirmed) {
         return;
       }
@@ -4482,9 +4482,13 @@ function bindClinicalImagesWorkspace(patient) {
     if (!image) {
       return;
     }
-    const confirmed = window.confirm(
-      "Delete this before and after clinical image record?",
-    );
+    const confirmed = await window.appNotify.confirm({
+      title: "Delete clinical images?",
+      message:
+        "This will permanently remove this before and after image record.",
+      confirmText: "Delete",
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }
@@ -4746,7 +4750,7 @@ function bindStaffPatientRecordTabs() {
     .querySelectorAll("#patientRecordPage [data-staff-medical-edit]")
     .forEach((button) => {
       button.onclick = () => {
-        if (!currentPatientRecord) {
+        if (STAFF_RECORD_READ_ONLY || !currentPatientRecord) {
           return;
         }
         openMedicalForm(
@@ -4788,6 +4792,9 @@ function bindMedicalFormEvents() {
   $("medConsent")?.addEventListener("change", updateSubmitButton);
 }
 function openMedicalForm(patient, step = 1) {
+  if (STAFF_RECORD_READ_ONLY) {
+    return;
+  }
   currentMedicalPatientId = patient.id || patient.patientId;
   currentMedicalStep = Math.min(Math.max(step, 1), 5);
   resetMedicalForm();
@@ -5032,6 +5039,10 @@ function collectMedicalFormData(includeConsent = true) {
   };
 }
 async function saveMedicalForm(event) {
+  if (STAFF_RECORD_READ_ONLY) {
+    event?.preventDefault?.();
+    return;
+  }
   event.preventDefault();
   const submitButton = $("medformSubmitBtn");
   if (submitButton?.disabled) {
@@ -5123,7 +5134,6 @@ function openMedicalResult(patient) {
           </div>
         </div>
       `;
-    $("editMedicalResultBtn").textContent = "Fill Out Medical Form";
     $("editMedicalResultBtn").dataset.mode = "fill";
   } else {
     $("medicalResultUpdated").textContent = medical.updatedAt
@@ -5134,6 +5144,9 @@ function openMedicalResult(patient) {
     $("editMedicalResultBtn").dataset.mode = "edit";
   }
   $("editMedicalResultBtn").dataset.patientId = patient.id || patient.patientId;
+  if (STAFF_RECORD_READ_ONLY) {
+    $("editMedicalResultBtn").style.display = "none";
+  }
   $("medicalResultModalBackdrop").classList.add("open");
   $("medicalResultModalBackdrop").setAttribute("aria-hidden", "false");
 }
@@ -5291,6 +5304,9 @@ $("medicalResultModalBackdrop")?.addEventListener("click", (event) => {
 $("editMedicalResultBtn")?.addEventListener("click", () => {
   const patientId = $("editMedicalResultBtn").dataset.patientId;
   const mode = $("editMedicalResultBtn").dataset.mode;
+  if (STAFF_RECORD_READ_ONLY) {
+    return;
+  }
   const patient = findPatient(patientId);
   if (!patient) {
     return;
@@ -5304,15 +5320,18 @@ function closeMedicalResult() {
   $("medicalResultModalBackdrop")?.classList.remove("open");
   $("medicalResultModalBackdrop")?.setAttribute("aria-hidden", "true");
 }
-function deletePatient(patientId) {
+async function deletePatient(patientId) {
   const patient = findPatient(patientId);
   if (!patient) {
     return;
   }
   const name = getFullName(patient) || "this patient";
-  const confirmed = window.confirm(
-    `Delete ${name}?\n\nThis will remove the patient record and saved medical form from this browser.`,
-  );
+  const confirmed = await window.appNotify.confirm({
+    title: "Delete patient?",
+    message: `${name} and the saved medical form will be removed. This cannot be undone.`,
+    confirmText: "Delete",
+    danger: true,
+  });
   if (!confirmed) {
     return;
   }
@@ -5367,3 +5386,47 @@ document.addEventListener("keydown", (event) => {
   }
   closeActionMenu();
 });
+
+function applyStaffReadOnlyRecord() {
+  if (!STAFF_RECORD_READ_ONLY) {
+    return;
+  }
+  const page = document.getElementById("patientRecordPage");
+  if (!page) {
+    return;
+  }
+  // Medical record: no edit / fill buttons
+  page
+    .querySelectorAll("[data-staff-medical-edit], .staff-medical-edit-bar")
+    .forEach((el) => el.remove());
+  // Treatments: no add / edit / delete, and no entry form
+  page
+    .querySelectorAll(
+      "#addTreatmentBtn, [data-treatment-edit], [data-treatment-delete]",
+    )
+    .forEach((el) => el.remove());
+  page.querySelector("#treatmentWorkspace")?.remove();
+  // Clinical images: view only (no upload form, no delete)
+  page
+    .querySelectorAll(
+      "#addClinicalImageBtn, #clinicalImagesForm, [data-clinical-delete]",
+    )
+    .forEach((el) => el.remove());
+  // Dental chart: teeth stay clickable to see the history, but no editing
+  page
+    .querySelectorAll(
+      "#dentalProcedureInput, #dentalProcedureSuggestions, #dentalProcedureNote, #saveDentalToothBtn, #clearDentalToothBtn",
+    )
+    .forEach((el) => {
+      const field = el.closest(".dental-tooth-editor-field");
+      (field || el).style.display = "none";
+    });
+  const dentalCancel = page.querySelector("#cancelDentalToothBtn");
+  if (dentalCancel) {
+    dentalCancel.textContent = "Close";
+  }
+  const dentalEyebrow = page.querySelector(".dental-tooth-editor-eyebrow");
+  if (dentalEyebrow) {
+    dentalEyebrow.textContent = "TOOTH RECORD (VIEW ONLY)";
+  }
+}

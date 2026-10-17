@@ -1715,19 +1715,19 @@ button {
   top: 22px;
   right: 24px;
   z-index: 3000;
-  min-width: 250px;
-  max-width: 380px;
-  min-height: 46px;
+  min-width: 340px;
+  max-width: min(540px, calc(100vw - 32px));
+  min-height: 72px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 14px;
+  padding: 20px 28px;
   border: 1px solid #d7e8dc;
-  border-radius: 10px;
+  border-radius: 14px;
   background: #fff;
   color: #435149;
-  box-shadow: 0 12px 30px rgba(20, 32, 26, 0.12);
-  font-size: 0.6rem;
+  box-shadow: 0 16px 40px rgba(20, 32, 26, 0.16);
+  font-size: 16px;
   font-weight: 500;
   opacity: 0;
   visibility: hidden;
@@ -1746,7 +1746,8 @@ button {
 }
 .inventory-toast > i {
   color: #2c9554;
-  font-size: 0.78rem;
+  font-size: 24px;
+  flex-shrink: 0;
 }
 .inventory-toast.error {
   border-color: #f0d7d7;

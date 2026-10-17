@@ -583,11 +583,12 @@ document.addEventListener("DOMContentLoaded", function () {
         paymentSource:
           payment.payment_source || payment.paymentSource || "staff",
         status: payment.status || payment.payment_status || "",
-        date:
+        date: String(
           payment.paid_at ||
-          payment.created_at ||
-          transaction.created_at ||
-          getTodayString(),
+            payment.created_at ||
+            transaction.created_at ||
+            getTodayString(),
+        ).slice(0, 10),
         referenceNumber: payment.reference_number || "",
         xenditReferenceId: payment.xendit_reference_id || "",
         xenditPaymentRequestId: payment.xendit_payment_request_id || "",
@@ -2167,13 +2168,6 @@ document.addEventListener("DOMContentLoaded", function () {
       "overviewTodayTransactions",
       totals.Cash.count + totals.GCash.count + totals["Bank Transfer"].count,
     );
-    const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const from = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, "0")}-01`;
-    const to = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
-    const monthly = getCollectionTotals(from, to);
-    setText("overviewMonthlyCollection", formatCurrency(monthly.total));
     const outstanding = transactions.reduce(function (sum, transaction) {
       return sum + getTransactionBalance(transaction);
     }, 0);

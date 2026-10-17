@@ -1817,11 +1817,13 @@ button {
   right: 25px;
   bottom: 25px;
   z-index: 10000;
-  padding: 11px 14px;
-  border-radius: 10px;
+  min-width: 300px;
+  min-height: 62px;
+  padding: 20px 28px;
+  border-radius: 14px;
   background: #1f2b24;
   color: var(--white);
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 600;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   opacity: 0;
@@ -2061,6 +2063,7 @@ button {
     right: 15px;
     bottom: 15px;
     left: 15px;
+    min-width: 0;
     text-align: center;
   }
   .custom-range-inputs {
@@ -2715,7 +2718,7 @@ button {
 }
 .finance-overview-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 .finance-overview-card {

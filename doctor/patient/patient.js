@@ -796,7 +796,11 @@ function closePatientModal() {
   $("patientModalBackdrop")?.setAttribute("aria-hidden", "true");
   currentPatientId = null;
 }
-
+function getPatientIdNumber(patient) {
+  const rawId = String(patient.patientId || patient.id || "");
+  const match = rawId.match(/(\d+)\s*$/);
+  return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
+}
 function renderPatients() {
   if (!patientTableBody) {
     return;
@@ -824,7 +828,7 @@ function renderPatients() {
     });
   }
 
-  const sort = sortPatients?.value || "newest";
+  const sort = sortPatients?.value || "oldest";
 
   filteredPatients.sort((a, b) => {
     if (sort === "nameAsc" || sort === "nameDesc") {
@@ -836,10 +840,10 @@ function renderPatients() {
         : nameB.localeCompare(nameA);
     }
 
-    const dateA = new Date(a.createdAt || a.updatedAt || 0).getTime();
-    const dateB = new Date(b.createdAt || b.updatedAt || 0).getTime();
+    const idA = getPatientIdNumber(a);
+    const idB = getPatientIdNumber(b);
 
-    return sort === "oldest" ? dateA - dateB : dateB - dateA;
+    return sort === "oldest" ? idA - idB : idB - idA;
   });
 
   patientTableBody.innerHTML = "";
@@ -1499,9 +1503,6 @@ function handlePatientAction(action, patientId) {
       break;
     case "edit":
       openEditPatientModal(patientId);
-      break;
-    case "delete":
-      deletePatient(patientId);
       break;
   }
 }
@@ -3086,13 +3087,11 @@ function bindTreatmentWorkspace(patient) {
     closeForm();
   });
   appointmentInput.addEventListener("change", () => {
+    // Selecting a scheduled appointment only links the treatment to that visit
+    // (and syncs the treatment date). Tooth number, procedure, clinical note and
+    // items to consume are NOT auto-filled; the doctor enters them manually.
     const selectedAppointmentId = String(appointmentInput.value || "").trim();
     if (!selectedAppointmentId) {
-      toothInput.value = "";
-      procedureInput.value = "";
-      noteInput.value = "";
-      renderMaterials([]);
-      closeProcedureSuggestions();
       return;
     }
     const appointment = patientAppointments.find(
@@ -3110,45 +3109,6 @@ function bindTreatmentWorkspace(patient) {
     if (appointmentDate) {
       dateInput.value = appointmentDate;
     }
-    const chartEntries = getDentalChartEntriesForAppointment(
-      patient,
-      appointment,
-    );
-    if (chartEntries.length) {
-      toothInput.value = [
-        ...new Set(
-          chartEntries
-            .map((entry) => String(entry.toothNumber || "").trim())
-            .filter(Boolean),
-        ),
-      ].join(", ");
-      const chartProcedures = getUniqueDentalChartProcedures(chartEntries);
-      procedureInput.value = chartProcedures.length
-        ? chartProcedures.join(" + ")
-        : getTreatmentProcedureFromAppointment(appointment);
-      noteInput.value = [
-        ...new Set(
-          chartEntries
-            .map((entry) => String(entry.note || "").trim())
-            .filter(Boolean),
-        ),
-      ].join("\n");
-      if (chartProcedures.length) {
-        loadMaterialsForProcedures(chartProcedures);
-      } else {
-        loadMaterialsForProcedure(procedureInput.value);
-      }
-    } else {
-      const procedure = getTreatmentProcedureFromAppointment(appointment);
-      toothInput.value = "";
-      procedureInput.value = procedure;
-      noteInput.value = "";
-      loadMaterialsForProcedure(procedure);
-    }
-    closeProcedureSuggestions();
-    if (procedureInput.value.trim()) {
-      showSuggestions(procedureInput.value);
-    }
   });
   suggestions.addEventListener("click", (event) => {
     const button = event.target.closest("[data-treatment-procedure]");
@@ -3157,7 +3117,6 @@ function bindTreatmentWorkspace(patient) {
     }
     procedureInput.value = button.dataset.treatmentProcedure || "";
     closeProcedureSuggestions();
-    loadMaterialsForProcedure(procedureInput.value);
   });
   addMaterialButton.addEventListener("click", () => {
     const currentMaterials = getMaterialRows();
@@ -3187,7 +3146,7 @@ function bindTreatmentWorkspace(patient) {
     }
   });
   const historyList = document.querySelector(".treatment-history-list");
-  historyList?.addEventListener("click", (event) => {
+  historyList?.addEventListener("click", async (event) => {
     const editButton = event.target.closest("[data-treatment-edit]");
     if (editButton) {
       const treatmentId = editButton.dataset.treatmentEdit || "";
@@ -3225,9 +3184,12 @@ function bindTreatmentWorkspace(patient) {
       const treatment = targetPatient.treatments[treatmentIndex];
       const procedure =
         treatment.procedure || treatment.treatment || "this treatment";
-      const confirmed = window.confirm(
-        `Are you sure you want to delete "${procedure}"?`,
-      );
+      const confirmed = await window.appNotify.confirm({
+        title: "Delete treatment?",
+        message: `Are you sure you want to delete "${procedure}"? This cannot be undone.`,
+        confirmText: "Delete",
+        danger: true,
+      });
       if (!confirmed) {
         return;
       }
@@ -4556,9 +4518,13 @@ function bindClinicalImagesWorkspace(patient) {
     if (!image) {
       return;
     }
-    const confirmed = window.confirm(
-      "Delete this before and after clinical image record?",
-    );
+    const confirmed = await window.appNotify.confirm({
+      title: "Delete clinical images?",
+      message:
+        "This will permanently remove this before and after image record.",
+      confirmText: "Delete",
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }
@@ -5188,15 +5154,18 @@ function closeMedicalResult() {
   $("medicalResultModalBackdrop")?.classList.remove("open");
   $("medicalResultModalBackdrop")?.setAttribute("aria-hidden", "true");
 }
-function deletePatient(patientId) {
+async function deletePatient(patientId) {
   const patient = findPatient(patientId);
   if (!patient) {
     return;
   }
   const name = getFullName(patient) || "this patient";
-  const confirmed = window.confirm(
-    `Delete ${name}?\n\nThis will remove the patient record and saved medical form from this browser.`,
-  );
+  const confirmed = await window.appNotify.confirm({
+    title: "Delete patient?",
+    message: `${name} and the saved medical form will be removed. This cannot be undone.`,
+    confirmText: "Delete",
+    danger: true,
+  });
   if (!confirmed) {
     return;
   }

@@ -566,15 +566,25 @@ function patientPayload(mysqli $conn, string $patientId): ?array
         ];
     }
     $stmt->close();
-    $stmt = $conn->prepare('SELECT * FROM tbl_dental_chart WHERE patient_id = ? ORDER BY recorded_at DESC, dental_chart_id DESC');
+    $stmt = $conn->prepare('SELECT * FROM tbl_dental_chart WHERE patient_id = ? ORDER BY recorded_at ASC, dental_chart_id ASC');
     $stmt->bind_param('s', $patientId);
     $stmt->execute();
     $chart = $stmt->get_result();
     while ($row = $chart->fetch_assoc()) {
         $toothNumber = (string) $row['tooth_number'];
-        $patient['dentalChart']['teeth'][$toothNumber]['procedure'] = $row['procedure_name'];
-        $patient['dentalChart']['teeth'][$toothNumber]['note'] = $row['notes'];
-        $patient['dentalChart']['teeth'][$toothNumber]['updatedAt'] = $row['recorded_at'];
+        $entry = [
+            'procedure' => $row['procedure_name'],
+            'note' => $row['notes'],
+            'updatedAt' => $row['recorded_at'],
+        ];
+        if (!isset($patient['dentalChart']['teeth'][$toothNumber])) {
+            $patient['dentalChart']['teeth'][$toothNumber] = ['history' => []];
+        }
+        $patient['dentalChart']['teeth'][$toothNumber]['history'][] = $entry;
+        // Rows are oldest -> newest, so the last row becomes the current record.
+        $patient['dentalChart']['teeth'][$toothNumber]['procedure'] = $entry['procedure'];
+        $patient['dentalChart']['teeth'][$toothNumber]['note'] = $entry['note'];
+        $patient['dentalChart']['teeth'][$toothNumber]['updatedAt'] = $entry['updatedAt'];
     }
     $stmt->close();
     $clinicalImagesBasePath = rtrim(str_replace('\\\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/api/patient_records.php'))), '/');
@@ -710,6 +720,13 @@ if ($role === 'doctor') {
 }
 $patient = $input['patient'] ?? $input;
 $medical = $input['medicalForm'] ?? null;
+if ($role === 'staff') {
+    // Staff are view-only for clinical data: only the basic patient profile may be saved.
+    $medical = null;
+    if (is_array($patient)) {
+        unset($patient['treatments'], $patient['dentalChart']);
+    }
+}
 ensureInventorySchema($conn);
 reconcileInventoryBatches($conn);
 $conn->begin_transaction();
@@ -815,6 +832,84 @@ try {
             }
             $stmt->close();
         }
+    }
+    if (
+        in_array($role, ['doctor', 'staff'], true)
+        && is_array($patient)
+        && isset($patient['dentalChart']['teeth'])
+        && is_array($patient['dentalChart']['teeth'])
+    ) {
+        // Doctors are recorded as the author; staff entries keep doctor_id NULL.
+        $chartDoctorId = $role === 'doctor' ? $userId : null;
+        $incomingChart = [];
+        foreach ($patient['dentalChart']['teeth'] as $chartTooth => $chartRecord) {
+            if (!is_array($chartRecord)) {
+                continue;
+            }
+            $chartEntries = (!empty($chartRecord['history']) && is_array($chartRecord['history'])) ? $chartRecord['history'] : [$chartRecord];
+            foreach ($chartEntries as $chartEntry) {
+                if (!is_array($chartEntry)) {
+                    continue;
+                }
+                $chartProcedure = trim((string) ($chartEntry['procedure'] ?? ''));
+                if ($chartProcedure === '') {
+                    continue;
+                }
+                $chartNote = (string) ($chartEntry['note'] ?? '');
+                $chartTimestamp = strtotime((string) ($chartEntry['updatedAt'] ?? ''));
+                $chartRecordedAt = date('Y-m-d H:i:s', $chartTimestamp ?: time());
+                $chartToothNumber = (string) $chartTooth;
+                $chartKey = $chartToothNumber . '|' . $chartRecordedAt . '|' . $chartProcedure . '|' . $chartNote;
+                $incomingChart[$chartKey] = [$chartToothNumber, $chartProcedure, $chartNote, $chartRecordedAt];
+            }
+        }
+        $existingChart = [];
+        $selStmt = $conn->prepare('SELECT dental_chart_id, tooth_number, procedure_name, notes, recorded_at FROM tbl_dental_chart WHERE patient_id = ?');
+        if (!$selStmt) {
+            throw new RuntimeException('Unable to prepare dental chart lookup.');
+        }
+        $selStmt->bind_param('s', $patientId);
+        if (!$selStmt->execute()) {
+            $selStmt->close();
+            throw new RuntimeException('Unable to read dental chart.');
+        }
+        $selResult = $selStmt->get_result();
+        while ($chartRow = $selResult->fetch_assoc()) {
+            $existingKey = (string) $chartRow['tooth_number'] . '|' . (string) $chartRow['recorded_at'] . '|' . (string) ($chartRow['procedure_name'] ?? '') . '|' . (string) ($chartRow['notes'] ?? '');
+            $existingChart[$existingKey] = (int) $chartRow['dental_chart_id'];
+        }
+        $selStmt->close();
+        $delStmt = $conn->prepare('DELETE FROM tbl_dental_chart WHERE dental_chart_id = ? AND patient_id = ?');
+        if (!$delStmt) {
+            throw new RuntimeException('Unable to prepare dental chart cleanup.');
+        }
+        foreach ($existingChart as $existingKey => $existingRowId) {
+            if (isset($incomingChart[$existingKey])) {
+                continue;
+            }
+            $delStmt->bind_param('is', $existingRowId, $patientId);
+            if (!$delStmt->execute()) {
+                $delStmt->close();
+                throw new RuntimeException('Unable to remove dental chart record.');
+            }
+        }
+        $delStmt->close();
+        $chartStmt = $conn->prepare('INSERT INTO tbl_dental_chart (patient_id, doctor_id, tooth_number, procedure_name, notes, recorded_at) VALUES (?, ?, ?, ?, ?, ?)');
+        if (!$chartStmt) {
+            throw new RuntimeException('Unable to prepare dental chart save.');
+        }
+        foreach ($incomingChart as $chartKey => $chartRow) {
+            if (isset($existingChart[$chartKey])) {
+                continue;
+            }
+            [$chartToothNumber, $chartProcedure, $chartNote, $chartRecordedAt] = $chartRow;
+            $chartStmt->bind_param('sissss', $patientId, $chartDoctorId, $chartToothNumber, $chartProcedure, $chartNote, $chartRecordedAt);
+            if (!$chartStmt->execute()) {
+                $chartStmt->close();
+                throw new RuntimeException('Unable to save dental chart.');
+            }
+        }
+        $chartStmt->close();
     }
     $conn->commit();
 } catch (Throwable $exception) {
