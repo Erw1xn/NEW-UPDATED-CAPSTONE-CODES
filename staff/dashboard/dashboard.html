@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="../profile/profile.css?v=20261015" />
     <link rel="stylesheet" href="../../navigation_bar/sidebar.css" />
-    <link rel="stylesheet" href="dashboard.css?v=3" />
+    <link rel="stylesheet" href="dashboard.css?v=4" />
     <link rel="stylesheet" href="todays_appointment.css" />
   </head>
   <body>
@@ -98,32 +98,38 @@
             </div>
           </div>
           <div
-            class="stat-card"
-            title="Total payment transactions recorded today"
+            class="stat-card stat-card-link"
+            id="statInventoryCard"
+            role="link"
+            tabindex="0"
+            title="Items that are low, critical, or out of stock"
           >
-            <div class="stat-icon stat-icon-today-revenue">
-              <i class="fa-solid fa-wallet"></i>
+            <div class="stat-icon stat-icon-inventory">
+              <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div class="stat-body">
-              <span class="stat-label">Today's Revenue</span>
-              <span class="stat-value" id="statTodayRevenue">₱0.00</span>
-              <span class="stat-trend up" id="statTodayRevenueTrend"
-                >Today's collection</span
+              <span class="stat-label">Inventory</span>
+              <span class="stat-value" id="statInventoryAlerts">0</span>
+              <span class="stat-trend up" id="statInventoryTrend"
+                >All items well stocked</span
               >
             </div>
           </div>
           <div
-            class="stat-card"
-            title="Total accumulated revenue generated this month"
+            class="stat-card stat-card-link"
+            id="statSmsCard"
+            role="link"
+            tabindex="0"
+            title="SMS notifications waiting to be sent"
           >
-            <div class="stat-icon stat-icon-monthly-revenue">
-              <i class="fa-solid fa-chart-line"></i>
+            <div class="stat-icon stat-icon-sms">
+              <i class="fa-solid fa-comment-sms"></i>
             </div>
             <div class="stat-body">
-              <span class="stat-label">Monthly Revenue</span>
-              <span class="stat-value" id="statMonthlyRevenue">₱0.00</span>
-              <span class="stat-trend up" id="statMonthlyRevenueTrend"
-                >Monthly collection</span
+              <span class="stat-label">SMS</span>
+              <span class="stat-value" id="statSmsPending">0</span>
+              <span class="stat-trend up" id="statSmsTrend"
+                >No pending SMS</span
               >
             </div>
           </div>

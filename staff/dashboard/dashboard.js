@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const APPOINTMENTS_API = "../../api/appointments.php";
 const PATIENT_RECORD_API = "../../api/patient_records.php";
 const DOCTORS_API = "../../api/doctors.php";
-const FINANCE_API = "../../api/finance/transactions.php";
+const SMS_API = "../sms_notifications/sms_notifications.php?action=fetch";
 const INVENTORY_API = "../../api/inventory.php?action=list";
 let dashboardLoaded = false;
 async function initializeDashboard() {
@@ -16,6 +16,7 @@ async function initializeDashboard() {
   await renderDashboard();
   setupRefreshButton();
   setupQuickActions();
+  setupStatCardLinks();
   setupInventoryInteractions();
   setupDentistInteractions();
   window.addEventListener("focus", () => {
@@ -48,7 +49,7 @@ const dashboardData = {
   appointments: [],
   dentists: [],
   inventory: [],
-  transactions: [],
+  sms: [],
 };
 async function loadDashboardData() {
   const responses = await Promise.all([
@@ -58,7 +59,6 @@ async function loadDashboardData() {
       cache: "no-store",
     }),
     fetch(DOCTORS_API, { credentials: "same-origin", cache: "no-store" }),
-    fetch(FINANCE_API, { credentials: "same-origin", cache: "no-store" }),
     fetch(INVENTORY_API, { credentials: "same-origin", cache: "no-store" }),
   ]);
   responses.forEach((response, index) => {
@@ -79,13 +79,29 @@ async function loadDashboardData() {
   dashboardData.dentists = removeDuplicateDentists(
     doctorRecords.map(normalizeDashboardDentist),
   );
-  dashboardData.transactions = Array.isArray(results[3].data)
-    ? results[3].data
+  dashboardData.inventory = Array.isArray(results[3].data?.items)
+    ? results[3].data.items
     : [];
-  dashboardData.inventory = Array.isArray(results[4].data?.items)
-    ? results[4].data.items
-    : [];
+  await loadDashboardSMS();
   dashboardLoaded = true;
+}
+async function loadDashboardSMS() {
+  try {
+    const response = await fetch(SMS_API, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("SMS request failed.");
+    const result = await response.json();
+    dashboardData.sms = Array.isArray(result.data)
+      ? result.data.filter(
+          (item) => String(item.channel || "").toLowerCase() === "sms",
+        )
+      : [];
+  } catch (error) {
+    console.error("Unable to load SMS summary:", error);
+    dashboardData.sms = [];
+  }
 }
 function getStoredAppointments() {
   return dashboardData.appointments;
@@ -686,9 +702,6 @@ function getPatientIdentity(patient) {
 function getStoredInventory() {
   return dashboardData.inventory;
 }
-function getStoredTransactions() {
-  return dashboardData.transactions;
-}
 async function renderDashboard() {
   await loadDashboardData();
   updateSummaryCards();
@@ -707,8 +720,8 @@ function updateSummaryCards() {
   );
   updatePatientTrend();
   updateClinicSummary();
-  updateTodayRevenueTrend();
-  updateMonthlyRevenueTrend();
+  updateInventoryCard();
+  updateSmsCard();
   updateAppointmentTrend(todayAppointments);
 }
 function updateClinicSummary() {
@@ -1013,40 +1026,58 @@ function getDashboardPaymentHistory(transaction) {
   ];
 }
 
-function getTodayPaidTransactions() {
-  const today = getTodayDate();
-
-  return getStoredTransactions()
-    .flatMap((transaction) => getDashboardPaymentHistory(transaction))
-    .filter((payment) => payment.date === today && payment.status === "paid");
-}
-
-function getTodayRevenue() {
-  return getTodayPaidTransactions().reduce(
-    (total, payment) => total + payment.amount,
-    0,
+function updateInventoryCard() {
+  const items = getStoredInventory();
+  const counts = { out: 0, critical: 0, low: 0 };
+  items.forEach((item) => {
+    const status = getInventoryStatus(item);
+    if (counts[status] !== undefined) counts[status] += 1;
+  });
+  const total = counts.out + counts.critical + counts.low;
+  setText("statInventoryAlerts", formatNumber(total));
+  const parts = [];
+  if (counts.out) parts.push(`${formatNumber(counts.out)} out of stock`);
+  if (counts.critical) parts.push(`${formatNumber(counts.critical)} critical`);
+  if (counts.low) parts.push(`${formatNumber(counts.low)} low`);
+  setText(
+    "statInventoryTrend",
+    parts.length ? parts.join(" · ") : "All items well stocked",
   );
 }
-
-function getMonthlyRevenue() {
-  const currentMonth = getCurrentMonth();
-
-  return getStoredTransactions()
-    .flatMap((transaction) => getDashboardPaymentHistory(transaction))
-    .filter(
-      (payment) =>
-        payment.date.slice(0, 7) === currentMonth && payment.status === "paid",
-    )
-    .reduce((total, payment) => total + payment.amount, 0);
+function updateSmsCard() {
+  const sms = dashboardData.sms;
+  const countBy = (status) =>
+    sms.filter((item) => String(item.status || "").toLowerCase() === status)
+      .length;
+  const pending = countBy("pending") + countBy("processing");
+  const sent = countBy("sent");
+  const failed = countBy("failed");
+  setText("statSmsPending", formatNumber(pending));
+  setText(
+    "statSmsTrend",
+    sms.length
+      ? `${formatNumber(sent)} sent · ${formatNumber(failed)} failed`
+      : "No SMS yet",
+  );
 }
-
-function updateTodayRevenueTrend() {
-  setText("statTodayRevenue", formatCurrency(getTodayRevenue()));
-  setText("statTodayRevenueTrend", "Today's collection");
-}
-function updateMonthlyRevenueTrend() {
-  setText("statMonthlyRevenue", formatCurrency(getMonthlyRevenue()));
-  setText("statMonthlyRevenueTrend", "Monthly collection");
+function setupStatCardLinks() {
+  const links = {
+    statInventoryCard: "../inventory/inventory.html",
+    statSmsCard: "../sms_notifications/sms_notifications.html",
+  };
+  Object.entries(links).forEach(([id, url]) => {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.addEventListener("click", () => {
+      window.location.href = url;
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        window.location.href = url;
+      }
+    });
+  });
 }
 function updateAppointmentTrend(todayAppointments) {
   const activeCount = todayAppointments.filter(
@@ -1302,8 +1333,6 @@ window.DentalClinicDashboard = {
     renderDashboard();
   },
   getTodayAppointments,
-  getTodayRevenue,
-  getMonthlyRevenue,
   getTotalPatients,
   updateClinicSummary,
 };

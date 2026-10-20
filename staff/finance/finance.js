@@ -77,51 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const nextPageBtn = document.getElementById("nextPageBtn");
   const paginationInfo = document.getElementById("paginationInfo");
   const paginationBar = document.getElementById("paginationBar");
-  const openCollectionDrawerBtn = document.getElementById(
-    "openCollectionDrawerBtn",
-  );
-  const closeCollectionDrawerBtn = document.getElementById(
-    "closeCollectionDrawerBtn",
-  );
-  const collectionDrawer = document.getElementById("collectionDrawer");
-  const collectionDrawerOverlay = document.getElementById(
-    "collectionDrawerOverlay",
-  );
-  const showTodayCollectionBtn = document.getElementById(
-    "showTodayCollectionBtn",
-  );
-  const showMonthlyCollectionBtn = document.getElementById(
-    "showMonthlyCollectionBtn",
-  );
-  const showCustomCollectionBtnToday = document.getElementById(
-    "showCustomCollectionBtnToday",
-  );
-  const showCustomCollectionBtnMonthly = document.getElementById(
-    "showCustomCollectionBtnMonthly",
-  );
-  const backToTodayFromCustomBtn = document.getElementById(
-    "backToTodayFromCustomBtn",
-  );
-  const backToMonthlyFromCustomBtn = document.getElementById(
-    "backToMonthlyFromCustomBtn",
-  );
-  const applyCustomRangeBtn = document.getElementById("applyCustomRangeBtn");
-  const todayCollectionPage = document.getElementById("todayCollectionPage");
-  const monthlyCollectionPage = document.getElementById(
-    "monthlyCollectionPage",
-  );
-  const customCollectionPage = document.getElementById("customCollectionPage");
-  const customDateFrom = document.getElementById("customDateFrom");
-  const customDateTo = document.getElementById("customDateTo");
-  const todayCollectionDescription = document.getElementById(
-    "todayCollectionDescription",
-  );
-  const monthlyCollectionDescription = document.getElementById(
-    "monthlyCollectionDescription",
-  );
-  const customCollectionDescription = document.getElementById(
-    "customCollectionDescription",
-  );
   const detailsModal = document.getElementById("detailsModal");
   const closeDetailsBtn = document.getElementById("closeDetailsBtn");
   const detailsCloseButton = document.getElementById("detailsCloseButton");
@@ -768,8 +723,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderCollections() {
-    renderTodayCollection();
-    renderMonthlyCollection();
     renderCollectionsSummary();
   }
 
@@ -800,44 +753,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
     return totals;
-  }
-
-  function renderTodayCollection() {
-    const today = getTodayKey();
-    const totals = getCollectionTotals(today, today);
-    setText("todayCashAmount", formatCurrency(totals.Cash.amount));
-    setText("todayGcashAmount", formatCurrency(totals.GCash.amount));
-    setText("todayBankAmount", formatCurrency(totals["Bank Transfer"].amount));
-    setText("todayCashCount", transactionText(totals.Cash.count));
-    setText("todayGcashCount", transactionText(totals.GCash.count));
-    setText("todayBankCount", transactionText(totals["Bank Transfer"].count));
-    setText("todayPaymentMethodTotal", formatCurrency(totals.total));
-    if (todayCollectionDescription) {
-      todayCollectionDescription.textContent = `Payment collection for ${formatDate(today)}.`;
-    }
-  }
-
-  function renderMonthlyCollection() {
-    const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const from = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, "0")}-${String(firstDay.getDate()).padStart(2, "0")}`;
-    const to = `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
-    const totals = getCollectionTotals(from, to);
-    setText("monthlyCashAmount", formatCurrency(totals.Cash.amount));
-    setText("monthlyGcashAmount", formatCurrency(totals.GCash.amount));
-    setText(
-      "monthlyBankAmount",
-      formatCurrency(totals["Bank Transfer"].amount),
-    );
-    setText("monthlyCashCount", transactionText(totals.Cash.count));
-    setText("monthlyGcashCount", transactionText(totals.GCash.count));
-    setText("monthlyBankCount", transactionText(totals["Bank Transfer"].count));
-    setText("monthlyPaymentMethodTotal", formatCurrency(totals.total));
-  }
-
-  function calculateCollectionTotals(from, to) {
-    return getCollectionTotals(from, to);
   }
 
   function loadAppointmentPaymentFromURL() {
@@ -2003,28 +1918,6 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTransactions();
       }
     });
-    openCollectionDrawerBtn.addEventListener("click", function () {
-      collectionDrawer.classList.add("active");
-      collectionDrawerOverlay.classList.add("active");
-    });
-    closeCollectionDrawerBtn.addEventListener("click", closeCollectionDrawer);
-    collectionDrawerOverlay.addEventListener("click", closeCollectionDrawer);
-    showTodayCollectionBtn.addEventListener("click", showTodayCollection);
-    showMonthlyCollectionBtn.addEventListener("click", showMonthlyCollection);
-    showCustomCollectionBtnToday?.addEventListener(
-      "click",
-      showCustomCollection,
-    );
-    showCustomCollectionBtnMonthly?.addEventListener(
-      "click",
-      showCustomCollection,
-    );
-    backToTodayFromCustomBtn?.addEventListener("click", showTodayCollection);
-    backToMonthlyFromCustomBtn?.addEventListener(
-      "click",
-      showMonthlyCollection,
-    );
-    applyCustomRangeBtn?.addEventListener("click", applyCustomCollection);
     closeDetailsBtn?.addEventListener("click", closeDetails);
     detailsCloseButton?.addEventListener("click", closeDetails);
     printReceiptBtn?.addEventListener("click", printReceipt);
@@ -2056,82 +1949,13 @@ document.addEventListener("DOMContentLoaded", function () {
       if (event.key === "Escape") {
         closePaymentModal();
         closeDetails();
-        closeCollectionDrawer();
       }
     });
-  }
-
-  function closeCollectionDrawer() {
-    collectionDrawer.classList.remove("active");
-    collectionDrawerOverlay.classList.remove("active");
-  }
-
-  function showTodayCollection() {
-    todayCollectionPage.classList.add("active");
-    monthlyCollectionPage.classList.remove("active");
-    customCollectionPage.classList.remove("active");
-  }
-
-  function showMonthlyCollection() {
-    todayCollectionPage.classList.remove("active");
-    monthlyCollectionPage.classList.add("active");
-    customCollectionPage.classList.remove("active");
-  }
-
-  function showCustomCollection() {
-    todayCollectionPage.classList.remove("active");
-    monthlyCollectionPage.classList.remove("active");
-    customCollectionPage.classList.add("active");
-  }
-
-  function applyCustomCollection() {
-    const from = customDateFrom.value;
-    const to = customDateTo.value;
-    if (!from || !to) {
-      showToast("Please select both dates.");
-      return;
-    }
-    if (from > to) {
-      showToast("The From date must be before the To date.");
-      return;
-    }
-    const totals = calculateCollectionTotals(from, to);
-    setText("customCashAmount", formatCurrency(totals.Cash.amount));
-    setText("customGcashAmount", formatCurrency(totals.GCash.amount));
-    setText("customBankAmount", formatCurrency(totals["Bank Transfer"].amount));
-    setText("customCashCount", transactionText(totals.Cash.count));
-    setText("customGcashCount", transactionText(totals.GCash.count));
-    setText("customBankCount", transactionText(totals["Bank Transfer"].count));
-    setText("customPaymentMethodTotal", formatCurrency(totals.total));
-    if (customCollectionDescription) {
-      customCollectionDescription.textContent = `Payment collection from ${formatDate(from)} to ${formatDate(to)}.`;
-    }
   }
 
   function setupDate() {
     const today = getTodayString();
     paymentDateInput.value = today;
-    if (customDateFrom) {
-      customDateFrom.value = today;
-    }
-    if (customDateTo) {
-      customDateTo.value = today;
-    }
-    if (customDateFrom && customDateTo) {
-      customDateFrom.max = today;
-      customDateTo.max = today;
-    }
-    if (todayCollectionDescription) {
-      todayCollectionDescription.textContent = `Payment collection for ${formatDate(today)}.`;
-    }
-    if (monthlyCollectionDescription) {
-      monthlyCollectionDescription.textContent =
-        "Payment collection for the current month.";
-    }
-    if (customCollectionDescription) {
-      customCollectionDescription.textContent =
-        "Select a date range to view payment collection.";
-    }
   }
 
   function setText(id, value) {

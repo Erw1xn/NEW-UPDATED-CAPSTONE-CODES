@@ -208,57 +208,6 @@ button {
   width: 12px;
   height: 12px;
 }
-.collection-header-button {
-  height: 36px;
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  padding: 4px 8px 4px 14px;
-  border: 1px solid #dce7e1;
-  border-radius: 9px;
-  background: #fff;
-  color: #3f4d45;
-  font-size: 9.5px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease;
-}
-.collection-header-button:hover {
-  border-color: #c7ddd0;
-  background: #f8fbf9;
-  color: var(--primary-green);
-}
-.collection-header-button:active {
-  background: #f3f8f5;
-}
-.collection-button-text {
-  line-height: 1;
-  color: #3b4841;
-}
-.collection-button-arrow {
-  width: 27px;
-  height: 25px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 10px;
-  border-left: 1px solid #edf1ee;
-  color: #8a9790;
-}
-.collection-button-arrow svg {
-  width: 12px;
-  height: 12px;
-  transition: transform 0.2s ease;
-}
-.collection-header-button:hover .collection-button-arrow svg {
-  transform: translateX(1px);
-  color: var(--primary-green);
-}
 .secondary-button {
   min-height: 39px;
   display: inline-flex;
@@ -675,299 +624,6 @@ button {
   font-size: 9.5px;
   font-weight: 700;
 }
-.collection-drawer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9997;
-  background: rgba(20, 31, 25, 0.38);
-  backdrop-filter: blur(5px);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity 0.25s ease,
-    visibility 0.25s ease;
-}
-.collection-drawer {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  right: auto;
-  z-index: 9998;
-  width: min(555px, calc(100vw - 34px));
-  height: auto;
-  max-height: min(700px, calc(100vh - 55px));
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #e2e9e5;
-  border-radius: 20px;
-  background: var(--white);
-  box-shadow: var(--shadow-modal);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translate(-50%, -47%) scale(0.97);
-  transition:
-    opacity 0.25s ease,
-    visibility 0.25s ease,
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.collection-drawer.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translate(-50%, -50%) scale(1);
-}
-.collection-drawer-overlay.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-.collection-drawer-header {
-  min-height: 82px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 21px;
-  border-bottom: 1px solid var(--border);
-  background: var(--white);
-}
-.collection-drawer-label {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--primary-green);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
-}
-.collection-drawer-header h2 {
-  margin: 0;
-  color: #1e2922;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.25px;
-}
-.collection-drawer-header p {
-  margin: 4px 0 0;
-  color: #919a95;
-  font-size: 9.5px;
-}
-.collection-drawer-close {
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e1e7e3;
-  border-radius: 10px;
-  background: #f8faf9;
-  color: #78837c;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
-}
-.collection-drawer-close:hover {
-  border-color: #d6e2db;
-  background: #eef5f1;
-  color: #2d3932;
-  transform: rotate(3deg);
-}
-.collection-drawer-close svg {
-  width: 16px;
-  height: 16px;
-}
-.collection-drawer-content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 15px;
-  background: #f7faf8;
-}
-.payment-method-page {
-  display: none;
-  min-height: 100%;
-}
-.payment-method-page.active {
-  display: block;
-}
-.collection-period-header {
-  min-height: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px 14px;
-  border: 1px solid #e1e9e4;
-  border-radius: 13px;
-  background: var(--white);
-  box-shadow: 0 2px 7px rgba(25, 50, 36, 0.022);
-}
-.collection-title-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.collection-period-icon {
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 9px;
-  background: var(--light-green);
-  color: var(--primary-green);
-}
-.collection-period-icon svg {
-  width: 16px;
-  height: 16px;
-}
-.collection-period-header h3 {
-  margin: 0;
-  color: #29342e;
-  font-size: 12px;
-  font-weight: 800;
-}
-.collection-period-header p {
-  margin: 3px 0 0;
-  color: #9aa39e;
-  font-size: 8.5px;
-}
-.collection-period-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.collection-page-button {
-  min-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  flex-shrink: 0;
-  padding: 6px 10px;
-  border: 1px solid #d9e7df;
-  border-radius: 8px;
-  background: #f5faf7;
-  color: var(--primary-green);
-  font-size: 8.5px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
-}
-.collection-page-button:hover {
-  border-color: #c6ded0;
-  background: var(--light-green);
-  color: var(--dark-green);
-}
-.collection-page-button svg {
-  width: 12px;
-  height: 12px;
-}
-.collection-total-card {
-  min-height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  margin-top: 10px;
-  padding: 15px 17px;
-  border: 1px solid #d4e9dc;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #eef9f3 0%, #f9fcfa 100%);
-}
-.collection-total-card span {
-  display: block;
-  margin-bottom: 4px;
-  color: #718079;
-  font-size: 8.5px;
-  font-weight: 600;
-}
-.collection-total-card strong {
-  display: block;
-  color: var(--primary-green);
-  font-family: "Poppins", sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-.collection-total-icon {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #dceee3;
-  border-radius: 11px;
-  background: var(--white);
-  color: var(--primary-green);
-}
-.collection-total-icon svg {
-  width: 18px;
-  height: 18px;
-}
-.collection-section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 15px 2px 7px;
-}
-.collection-section-heading h4 {
-  margin: 0;
-  color: #303b34;
-  font-size: 10px;
-  font-weight: 800;
-}
-.collection-section-heading p {
-  margin: 2px 0 0;
-  color: #9aa39e;
-  font-size: 8px;
-}
-.payment-method-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 0;
-}
-.payment-method-item {
-  min-height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px;
-  border: 1px solid #e1e8e4;
-  border-radius: 12px;
-  background: var(--white);
-  box-shadow: 0 2px 7px rgba(25, 50, 36, 0.022);
-  transition:
-    border-color 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
-.payment-method-item:hover {
-  border-color: #d2e2d9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 11px rgba(25, 50, 36, 0.045);
-}
-.method-left {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
 .method-icon {
   width: 33px;
   height: 33px;
@@ -992,60 +648,6 @@ button {
 .method-icon.bank {
   background: var(--purple-bg);
   color: #8061bd;
-}
-.method-left strong {
-  display: block;
-  color: #343e38;
-  font-size: 9.5px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.method-left span {
-  display: block;
-  margin-top: 2px;
-  color: #a0a8a3;
-  font-size: 7.8px;
-  white-space: nowrap;
-}
-.payment-method-item > strong {
-  color: #28332c;
-  font-family: "Poppins", sans-serif;
-  font-size: 9.5px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.custom-range-inputs {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  margin-top: 10px;
-}
-.custom-range-field {
-  flex: 1;
-  min-width: 0;
-}
-.custom-range-field label {
-  display: block;
-  margin-bottom: 5px;
-  color: #718079;
-  font-size: 8.5px;
-  font-weight: 700;
-}
-.custom-range-field input {
-  width: 100%;
-  height: 36px;
-  padding: 0 9px;
-  border: 1px solid #dfe6e2;
-  border-radius: 8px;
-  outline: none;
-  background: var(--white);
-  color: #333c36;
-  font-size: 9.5px;
-}
-.custom-range-inputs .primary-button {
-  min-height: 36px;
-  padding: 0 14px;
-  font-size: 9px;
 }
 .modal-overlay {
   position: fixed;
@@ -1856,9 +1458,6 @@ button {
   .filters {
     grid-template-columns: minmax(180px, 1fr) 170px 130px;
   }
-  .payment-method-list {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 @media (max-width: 900px) {
   .finance-page {
@@ -1941,20 +1540,6 @@ button {
     padding: 0 9px;
     font-size: 8.5px;
   }
-  .collection-header-button {
-    height: 32px;
-    min-height: 32px;
-    padding: 3px 6px 3px 11px;
-    font-size: 8.5px;
-  }
-  .collection-button-arrow {
-    height: 24px;
-    margin-left: 8px;
-  }
-  .collection-button-arrow svg {
-    width: 11px;
-    height: 11px;
-  }
   .record-payment-header-button {
     min-height: 30px;
     height: 30px;
@@ -1980,48 +1565,6 @@ button {
   }
   .pagination-bar {
     border-radius: 0 0 15px 15px;
-  }
-  .collection-drawer {
-    width: calc(100vw - 24px);
-    max-height: calc(100vh - 30px);
-    border-radius: 17px;
-  }
-  .collection-drawer-header {
-    min-height: 77px;
-    padding: 16px 17px;
-  }
-  .collection-drawer-header h2 {
-    font-size: 16px;
-  }
-  .collection-drawer-content {
-    padding: 12px;
-  }
-  .collection-period-header {
-    flex-wrap: wrap;
-    padding: 12px;
-  }
-  .collection-period-actions {
-    flex-wrap: wrap;
-  }
-  .collection-period-icon {
-    width: 33px;
-    height: 33px;
-  }
-  .collection-period-header h3 {
-    font-size: 10.5px;
-  }
-  .collection-total-card {
-    min-height: 84px;
-    padding: 14px;
-  }
-  .collection-total-card strong {
-    font-size: 18px;
-  }
-  .payment-method-list {
-    grid-template-columns: 1fr;
-  }
-  .payment-method-item {
-    min-height: 69px;
   }
   .form-grid {
     grid-template-columns: 1fr;
@@ -2065,10 +1608,6 @@ button {
     left: 15px;
     min-width: 0;
     text-align: center;
-  }
-  .custom-range-inputs {
-    flex-direction: column;
-    align-items: stretch;
   }
   .payment-history-header {
     align-items: flex-start;
@@ -2123,15 +1662,8 @@ button {
     order: 3;
     width: 100%;
   }
-  .collection-header-button,
   .record-payment-header-button {
     flex: 1;
-  }
-  .collection-period-header {
-    align-items: flex-start;
-  }
-  .collection-page-button {
-    margin-top: 1px;
   }
   .payment-history-header {
     flex-direction: column;
@@ -3421,8 +2953,7 @@ button {
     font-size: 9.5px;
   }
   .primary-button,
-  .secondary-button,
-  .collection-header-button {
+  .secondary-button {
     min-height: 39px;
     font-size: 10px;
   }
@@ -3691,66 +3222,6 @@ button {
   .modal-overlay .details-modal .details-actions {
     padding: 14px 24px;
   }
-  .collection-drawer {
-    width: min(470px, 100%);
-  }
-  .collection-drawer-header {
-    padding: 22px 24px 18px;
-  }
-  .collection-drawer-label {
-    font-size: 8.5px;
-  }
-  .collection-drawer-header h2 {
-    font-size: 18px;
-  }
-  .collection-drawer-header p {
-    font-size: 10px;
-  }
-  .collection-drawer-content {
-    padding: 18px 20px 24px;
-  }
-  .collection-period-header {
-    gap: 14px;
-  }
-  .collection-period-header h3 {
-    font-size: 12px;
-  }
-  .collection-period-header p,
-  .collection-section-heading p {
-    font-size: 8.5px;
-  }
-  .collection-page-button {
-    min-height: 34px;
-    padding: 0 10px;
-    font-size: 9px;
-  }
-  .collection-total-card {
-    min-height: 92px;
-    padding: 16px 18px;
-  }
-  .collection-total-card span {
-    font-size: 9px;
-  }
-  .collection-total-card strong {
-    font-size: 22px;
-  }
-  .collection-section-heading h4 {
-    font-size: 11px;
-  }
-  .payment-method-list {
-    gap: 9px;
-  }
-  .payment-method-item {
-    min-height: 76px;
-    padding: 12px;
-  }
-  .method-left strong,
-  .payment-method-item > strong {
-    font-size: 10px;
-  }
-  .method-left span {
-    font-size: 8px;
-  }
 }
 
 @media (min-width: 1201px) {
@@ -3842,63 +3313,6 @@ button {
   }
   .modal-overlay .details-modal .payment-history-item-info span,
   .modal-overlay .details-modal .payment-history-item-right span {
-    font-size: 9px;
-  }
-  .collection-drawer {
-    width: min(560px, calc(100vw - 48px));
-  }
-  .collection-drawer-header {
-    padding: 25px 30px 21px;
-  }
-  .collection-drawer-label {
-    font-size: 10px;
-  }
-  .collection-drawer-header h2 {
-    font-size: 21px;
-  }
-  .collection-drawer-header p {
-    font-size: 11.5px;
-  }
-  .collection-drawer-content {
-    padding: 22px 24px 28px;
-  }
-  .collection-period-header h3 {
-    font-size: 14px;
-  }
-  .collection-period-header p,
-  .collection-section-heading p {
-    font-size: 10px;
-  }
-  .collection-page-button {
-    min-height: 40px;
-    padding: 0 12px;
-    font-size: 10px;
-  }
-  .collection-total-card {
-    min-height: 106px;
-    padding: 19px 22px;
-  }
-  .collection-total-card span {
-    font-size: 10px;
-  }
-  .collection-total-card strong {
-    font-size: 25px;
-  }
-  .collection-section-heading h4 {
-    font-size: 12px;
-  }
-  .payment-method-list {
-    gap: 12px;
-  }
-  .payment-method-item {
-    min-height: 88px;
-    padding: 15px;
-  }
-  .method-left strong,
-  .payment-method-item > strong {
-    font-size: 11.5px;
-  }
-  .method-left span {
     font-size: 9px;
   }
 }

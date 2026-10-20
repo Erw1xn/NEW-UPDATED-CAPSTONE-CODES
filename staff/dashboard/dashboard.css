@@ -255,6 +255,9 @@ a:focus-visible {
   border-radius: var(--radius-md);
   font-size: 15px;
 }
+.stat-card-link {
+  cursor: pointer;
+}
 .stat-icon-patients {
   background: var(--green-100);
   color: var(--green-700);
@@ -263,11 +266,11 @@ a:focus-visible {
   background: var(--blue-100);
   color: var(--blue-500);
 }
-.stat-icon-today-revenue {
+.stat-icon-inventory {
   background: var(--amber-100);
   color: var(--amber-500);
 }
-.stat-icon-monthly-revenue {
+.stat-icon-sms {
   background: var(--purple-100);
   color: var(--purple-500);
 }
@@ -299,8 +302,8 @@ a:focus-visible {
 .stat-trend.down,
 #statPatientsTrend,
 #statAppointmentsTrend,
-#statTodayRevenueTrend,
-#statMonthlyRevenueTrend {
+#statInventoryTrend,
+#statSmsTrend {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -310,7 +313,7 @@ a:focus-visible {
   font-weight: 500;
   color: var(--green-700) !important;
 }
-#statMonthlyRevenueTrend i {
+#statSmsTrend i {
   display: none;
 }
 .two-col-grid {
@@ -846,8 +849,8 @@ a:focus-visible {
   .stat-trend.down,
   #statPatientsTrend,
   #statAppointmentsTrend,
-  #statTodayRevenueTrend,
-  #statMonthlyRevenueTrend {
+  #statInventoryTrend,
+  #statSmsTrend {
     font-size: 9px;
   }
   .panel-header {
@@ -966,8 +969,8 @@ a:focus-visible {
   .stat-trend.down,
   #statPatientsTrend,
   #statAppointmentsTrend,
-  #statTodayRevenueTrend,
-  #statMonthlyRevenueTrend {
+  #statInventoryTrend,
+  #statSmsTrend {
     font-size: 11px;
   }
   .two-col-grid {
@@ -1601,8 +1604,8 @@ body {
   .stat-trend.down,
   #statPatientsTrend,
   #statAppointmentsTrend,
-  #statTodayRevenueTrend,
-  #statMonthlyRevenueTrend {
+  #statInventoryTrend,
+  #statSmsTrend {
     font-size: 0.68rem;
   }
 
